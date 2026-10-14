@@ -160,7 +160,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   ollamaBaseUrl: 'http://localhost:11434/v1',
   exerciseMode: 'translation',
   jlptLevel: 'N5',
-  instructionLanguage: 'id',
+  instructionLanguage: 'en',
   questionCount: 5,
   maxAttempts: 3,
   hintsEnabled: true,
