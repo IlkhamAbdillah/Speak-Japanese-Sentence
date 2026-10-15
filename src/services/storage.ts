@@ -1,5 +1,5 @@
 import type { UserSettings, Session, SessionSummary } from '../types';
-import { DEFAULT_SETTINGS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODE_LABELS } from '../types';
 
 const KEYS = {
   settings: 'sjp_settings',
@@ -45,7 +45,10 @@ function ensureSchema(): void {
 export function loadSettings(): UserSettings {
   ensureSchema();
   const stored = safeGet<Partial<UserSettings>>(KEYS.settings, {});
-  return { ...DEFAULT_SETTINGS, ...stored };
+  const settings = { ...DEFAULT_SETTINGS, ...stored };
+  // 'japanese-response' was replaced by conversation practice
+  if (!(settings.exerciseMode in EXERCISE_MODE_LABELS)) settings.exerciseMode = 'conversation';
+  return settings;
 }
 
 export function saveSettings(settings: UserSettings): boolean {
@@ -109,9 +112,11 @@ export function sessionToSummary(session: Session): SessionSummary {
     startedAt: session.startedAt,
     endedAt: session.endedAt,
     status: session.status,
+    appMode: session.appMode,
     mode: session.mode,
     jlptLevel: session.jlptLevel,
     questionCount: session.questionCount,
+    messageCount: session.conversation?.messages.filter((m) => m.role === 'user').length,
     correctCount,
     accuracy: answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0,
     durationMs,
@@ -131,9 +136,11 @@ export interface LearningStats {
 export function getLearningStats(): LearningStats {
   const summaries = getSessionSummaries();
   const completed = summaries.filter((s) => s.status === 'completed');
+  // Conversations have no questions, so they only count toward the session total
+  const graded = completed.filter((s) => s.messageCount === undefined);
 
-  const totalQuestions = completed.reduce((sum, s) => sum + s.questionCount, 0);
-  const totalCorrect = completed.reduce((sum, s) => sum + s.correctCount, 0);
+  const totalQuestions = graded.reduce((sum, s) => sum + s.questionCount, 0);
+  const totalCorrect = graded.reduce((sum, s) => sum + s.correctCount, 0);
 
   return {
     totalSessions: completed.length,

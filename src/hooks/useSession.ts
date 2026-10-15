@@ -8,7 +8,8 @@ import type {
   EvaluationResponse,
 } from '../types';
 import { saveSession } from '../services/storage';
-import { generateQuestions, evaluateAnswer } from '../services/ai';
+import { generateQuestions, evaluateAnswer, aiConfigFromSettings } from '../services/ai';
+import type { QuestionSetKind } from '../services/ai';
 import {
   startRecognition,
   stopRecognition,
@@ -38,6 +39,11 @@ interface UseSessionReturn {
   resumeSession: () => void;
   endSession: () => void;
   isPaused: boolean;
+}
+
+/** Attempts allowed per question — an exam only gets one. */
+export function getMaxAttempts(settings: UserSettings): number {
+  return settings.appMode === 'exam' ? 1 : settings.maxAttempts;
 }
 
 export function useSession(): UseSessionReturn {
@@ -104,15 +110,17 @@ export function useSession(): UseSessionReturn {
       setGenerationError(null);
 
       try {
+        const kind: QuestionSetKind =
+          settings.appMode === 'practice'
+            ? (settings.exerciseMode === 'situation' ? 'situation' : 'translation')
+            : settings.appMode;
+
         const questions = await generateQuestions(
-          settings.aiProvider,
-          settings.apiKey,
-          settings.aiModel,
-          settings.exerciseMode,
+          aiConfigFromSettings(settings),
+          kind,
           settings.jlptLevel,
           settings.instructionLanguage,
-          settings.questionCount,
-          settings.ollamaBaseUrl
+          settings.questionCount
         );
 
         const newSession: Session = {
@@ -120,6 +128,7 @@ export function useSession(): UseSessionReturn {
           startedAt: Date.now(),
           endedAt: null,
           status: 'in-progress',
+          appMode: settings.appMode,
           mode: settings.exerciseMode,
           jlptLevel: settings.jlptLevel,
           instructionLanguage: settings.instructionLanguage,
@@ -211,15 +220,13 @@ export function useSession(): UseSessionReturn {
         const attemptNumber = currentAttempts.length + 1;
 
         const result = await evaluateAnswer(
-          settings.aiProvider,
-          settings.apiKey,
-          settings.aiModel,
+          aiConfigFromSettings(settings),
           question,
           transcript,
           currentAttempts,
           attemptNumber,
-          settings.maxAttempts,
-          settings.ollamaBaseUrl
+          getMaxAttempts(settings),
+          settings.appMode === 'exam'
         );
 
         setLastEvaluation(result);

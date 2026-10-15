@@ -16,8 +16,8 @@ import {
   Send,
 } from 'lucide-react';
 import type { UserSettings } from '../types';
-import { useSession } from '../hooks/useSession';
-import { EXERCISE_MODE_LABELS } from '../types';
+import { useSession, getMaxAttempts } from '../hooks/useSession';
+import { EXERCISE_MODE_LABELS, getSessionModeLabel } from '../types';
 import { isSpeechRecognitionSupported } from '../services/speech';
 
 interface PracticePageProps {
@@ -57,6 +57,17 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [isEditingTranscript, setIsEditingTranscript] = useState(false);
 
   const lang = settings.instructionLanguage;
+  const isExam = settings.appMode === 'exam';
+  const isKanji = settings.appMode === 'kanji';
+  const maxAttempts = getMaxAttempts(settings);
+
+  // Clear per-question UI state whenever we move on
+  const goToNextQuestion = useCallback(() => {
+    setShowAnswer(false);
+    setEditedTranscript('');
+    setIsEditingTranscript(false);
+    nextQuestion();
+  }, [nextQuestion]);
 
   // Start session on mount
   useEffect(() => {
@@ -72,15 +83,15 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     }
   }, [finalTranscript, speechState, submitTranscript]);
 
-  // Auto-advance on correct (if enabled)
+  // Auto-advance on correct (if enabled). Exams always wait so the explanation can be read.
   useEffect(() => {
-    if (settings.autoAdvance && speechState === 'correct' && lastEvaluation?.correct) {
+    if (settings.autoAdvance && !isExam && speechState === 'correct' && lastEvaluation?.correct) {
       const timer = setTimeout(() => {
-        nextQuestion();
+        goToNextQuestion();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [settings.autoAdvance, speechState, lastEvaluation, nextQuestion]);
+  }, [settings.autoAdvance, isExam, speechState, lastEvaluation, goToNextQuestion]);
 
   // Check session completion
   useEffect(() => {
@@ -164,6 +175,15 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
 
   const speechSupported = isSpeechRecognitionSupported();
 
+  // Explanations are always shown once the answer is correct or revealed (and
+  // always in an exam); on a wrong practice answer they count as hints and
+  // follow the hints setting.
+  const showExplanations =
+    !!lastEvaluation && (lastEvaluation.correct || isExam || settings.hintsEnabled || showAnswer);
+  // The exam shows the answer right away; kanji shows reading & meaning once solved
+  const answerVisible =
+    !!lastEvaluation && (showAnswer || isExam || (isKanji && lastEvaluation.correct));
+
   const getSpeechStateLabel = () => {
     const labels: Record<string, { en: string; id: string }> = {
       idle: { en: 'Tap to speak', id: 'Ketuk untuk berbicara' },
@@ -171,7 +191,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
       processing: { en: 'Processing...', id: 'Memproses...' },
       evaluating: { en: 'Evaluating...', id: 'Mengevaluasi...' },
       correct: { en: 'Correct!', id: 'Benar!' },
-      retry: { en: 'Try again', id: 'Coba lagi' },
+      retry: isExam ? { en: 'Answered', id: 'Sudah dijawab' } : { en: 'Try again', id: 'Coba lagi' },
       error: { en: 'Error occurred', id: 'Terjadi kesalahan' },
       unsupported: { en: 'Not supported', id: 'Tidak didukung' },
     };
@@ -185,7 +205,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="session-info">
           <span className="badge badge-accent">{session.jlptLevel}</span>
           <span className="badge badge-info">
-            {EXERCISE_MODE_LABELS[session.mode][lang]}
+            {getSessionModeLabel(session.appMode, session.mode, lang)}
           </span>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             {lang === 'id' ? `Soal ${questionNum} dari ${session.questionCount}` : `Question ${questionNum} of ${session.questionCount}`}
@@ -230,13 +250,31 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="game-area animate-in">
           {/* Question Card */}
           <div className="question-card">
-            <p className="question-prompt">{currentQuestion.prompt}</p>
-            {currentQuestion.context && (
-              <p className="question-context">{currentQuestion.context}</p>
+            {isKanji ? (
+              <>
+                <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
+                  {lang === 'id'
+                    ? 'Bagaimana cara membaca kata ini? Tulis dalam hiragana atau ucapkan.'
+                    : 'How is this word read? Type it in hiragana or say it.'}
+                </p>
+                <p className="kanji-display">{currentQuestion.prompt}</p>
+              </>
+            ) : (
+              <>
+                {isExam && (currentQuestion.mode === 'translation' || currentQuestion.mode === 'situation') && (
+                  <span className="badge badge-info" style={{ marginBottom: 'var(--space-sm)' }}>
+                    {EXERCISE_MODE_LABELS[currentQuestion.mode][lang]}
+                  </span>
+                )}
+                <p className="question-prompt">{currentQuestion.prompt}</p>
+                {currentQuestion.context && (
+                  <p className="question-context">{currentQuestion.context}</p>
+                )}
+              </>
             )}
-            {currentAttempts.length > 0 && (
+            {currentAttempts.length > 0 && maxAttempts > 1 && (
               <span className="badge badge-warning" style={{ marginTop: 'var(--space-sm)' }}>
-                {lang === 'id' ? `Percobaan ${currentAttempts.length}/${settings.maxAttempts}` : `Attempt ${currentAttempts.length}/${settings.maxAttempts}`}
+                {lang === 'id' ? `Percobaan ${currentAttempts.length}/${maxAttempts}` : `Attempt ${currentAttempts.length}/${maxAttempts}`}
               </span>
             )}
           </div>
@@ -260,7 +298,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   <input
                     className="form-input"
                     style={{ fontFamily: 'var(--font-jp)' }}
-                    placeholder={lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang...' : 'Type answer in Japanese...'}
+                    placeholder={isKanji
+                      ? (lang === 'id' ? 'Ketik cara baca dalam hiragana...' : 'Type the reading in hiragana...')
+                      : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang...' : 'Type answer in Japanese...')}
                     value={editedTranscript}
                     onChange={(e) => setEditedTranscript(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
@@ -332,13 +372,15 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   {lastEvaluation.correct ? (
                     <><Check size={20} /> {lang === 'id' ? 'Benar! 🎉' : 'Correct! 🎉'}</>
                   ) : (
-                    <><RotateCcw size={20} /> {lang === 'id' ? 'Belum tepat' : 'Not quite right'}</>
+                    <><RotateCcw size={20} /> {isExam
+                      ? (lang === 'id' ? 'Salah' : 'Incorrect')
+                      : (lang === 'id' ? 'Belum tepat' : 'Not quite right')}</>
                   )}
                 </div>
                 <p className="feedback-text">{lastEvaluation.feedback}</p>
 
-                {/* Grammar/Vocab Notes */}
-                {(lastEvaluation.grammarNotes.length > 0 || lastEvaluation.vocabularyNotes.length > 0) && (
+                {/* Grammar/Vocab Notes — these explain the fix, so treat them as hints on wrong answers */}
+                {showExplanations && (lastEvaluation.grammarNotes.length > 0 || lastEvaluation.vocabularyNotes.length > 0) && (
                   <div className="feedback-notes">
                     {lastEvaluation.grammarNotes.map((note, i) => (
                       <div key={`g-${i}`} className="feedback-note">
@@ -354,7 +396,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 )}
 
                 {/* Hint */}
-                {lastEvaluation.hint && !lastEvaluation.correct && settings.hintsEnabled && (
+                {lastEvaluation.hint && !lastEvaluation.correct && settings.hintsEnabled && !answerVisible && (
                   <div className="hint-box">
                     <Lightbulb size={14} style={{ display: 'inline', marginRight: 4 }} />
                     {lastEvaluation.hint}
@@ -363,19 +405,42 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
               </div>
 
               {/* Reveal Answer */}
-              {showAnswer && (
+              {answerVisible && (
                 <div className="answer-reveal">
                   <div className="answer-reveal-label">
-                    {lang === 'id' ? 'Jawaban yang diharapkan' : 'Expected answer'}
+                    {isKanji
+                      ? (lang === 'id' ? 'Cara baca' : 'Reading')
+                      : (lang === 'id' ? 'Jawaban yang diharapkan' : 'Expected answer')}
                   </div>
-                  <div className="answer-reveal-text">{currentQuestion.expectedAnswer}</div>
+                  <div className="answer-reveal-text">
+                    {isKanji ? `${currentQuestion.prompt}（${currentQuestion.expectedAnswer}）` : currentQuestion.expectedAnswer}
+                  </div>
+                  {isKanji && (
+                    <>
+                      {currentQuestion.alternativeAnswers && currentQuestion.alternativeAnswers.length > 0 && (
+                        <div className="answer-reveal-extra">
+                          {lang === 'id' ? 'Bacaan lain: ' : 'Also read: '}
+                          <span className="jp-text">{currentQuestion.alternativeAnswers.join('、')}</span>
+                        </div>
+                      )}
+                      <div className="answer-reveal-extra">
+                        {lang === 'id' ? 'Arti: ' : 'Meaning: '}{currentQuestion.intendedMeaning}
+                      </div>
+                      {currentQuestion.example && (
+                        <div className="answer-reveal-extra">
+                          <div className="jp-text">{currentQuestion.example.japanese}</div>
+                          <div>{currentQuestion.example.translation}</div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
                 {lastEvaluation.correct ? (
-                  <button className="btn btn-success btn-lg" onClick={nextQuestion}>
+                  <button className="btn btn-success btn-lg" onClick={goToNextQuestion}>
                     <SkipForward size={16} />
                     {questionNum >= session.questionCount
                       ? (lang === 'id' ? 'Selesai!' : 'Finish!')
@@ -383,7 +448,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   </button>
                 ) : (
                   <>
-                    {currentAttempts.length < settings.maxAttempts ? (
+                    {currentAttempts.length < maxAttempts ? (
                       <button className="btn btn-primary btn-lg" onClick={() => {
                         retryQuestion();
                         setEditedTranscript('');
@@ -393,14 +458,14 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                         <RotateCcw size={16} /> {lang === 'id' ? 'Coba Lagi' : 'Try Again'}
                       </button>
                     ) : (
-                      <button className="btn btn-primary btn-lg" onClick={nextQuestion}>
+                      <button className="btn btn-primary btn-lg" onClick={goToNextQuestion}>
                         <SkipForward size={16} />
                         {questionNum >= session.questionCount
                           ? (lang === 'id' ? 'Selesai!' : 'Finish!')
                           : (lang === 'id' ? 'Soal Berikutnya' : 'Next Question')}
                       </button>
                     )}
-                    {!showAnswer && (
+                    {!answerVisible && (
                       <button className="btn btn-ghost" onClick={() => setShowAnswer(true)}>
                         <Eye size={16} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
                       </button>

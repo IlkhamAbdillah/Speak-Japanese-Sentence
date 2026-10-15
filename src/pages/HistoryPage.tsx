@@ -7,7 +7,7 @@ import {
   History as HistoryIcon,
 } from 'lucide-react';
 import type { SessionSummary, InstructionLanguage } from '../types';
-import { EXERCISE_MODE_LABELS } from '../types';
+import { getSessionModeLabel } from '../types';
 import { getSessionSummaries, deleteSession, clearAllSessions } from '../services/storage';
 
 interface HistoryPageProps {
@@ -88,10 +88,12 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
               </span>
               <span className="badge badge-accent">{s.jlptLevel}</span>
               <span className="badge badge-info">
-                {EXERCISE_MODE_LABELS[s.mode][lang]}
+                {getSessionModeLabel(s.appMode, s.mode, lang)}
               </span>
               <span className="history-meta-item">
-                {s.correctCount}/{s.questionCount} ({s.accuracy}%)
+                {s.messageCount !== undefined
+                  ? `💬 ${s.messageCount} ${lang === 'id' ? 'pesan' : 'messages'}`
+                  : `${s.correctCount}/${s.questionCount} (${s.accuracy}%)`}
               </span>
               <span className="history-meta-item">
                 {formatDuration(s.durationMs)}

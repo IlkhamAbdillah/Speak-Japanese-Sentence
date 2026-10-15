@@ -12,9 +12,12 @@ import {
   History,
   Check,
   X,
+  MessageCircle,
+  PencilLine,
 } from 'lucide-react';
 import type { Session, InstructionLanguage } from '../types';
-import { EXERCISE_MODE_LABELS } from '../types';
+import { getSessionModeLabel } from '../types';
+import ChatBubble from '../components/ChatBubble';
 import { getSessionById } from '../services/storage';
 
 interface RecapPageProps {
@@ -51,6 +54,16 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
           </button>
         </div>
       </div>
+    );
+  }
+
+  if (session.conversation) {
+    return (
+      <ConversationRecap
+        session={session}
+        lang={lang}
+        onPracticeAgain={onPracticeAgain}
+      />
     );
   }
 
@@ -140,7 +153,7 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       <div className="card animate-in" style={{ marginBottom: 'var(--space-xl)', animationDelay: '150ms' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-md)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
           <span><strong>{lang === 'id' ? 'Level:' : 'Level:'}</strong> {session.jlptLevel}</span>
-          <span><strong>{lang === 'id' ? 'Mode:' : 'Mode:'}</strong> {EXERCISE_MODE_LABELS[session.mode][lang]}</span>
+          <span><strong>{lang === 'id' ? 'Mode:' : 'Mode:'}</strong> {getSessionModeLabel(session.appMode, session.mode, lang)}</span>
           <span><strong>{lang === 'id' ? 'Durasi:' : 'Duration:'}</strong> {formatDuration(totalTimeMs)}</span>
           <span><strong>{lang === 'id' ? 'Tanggal:' : 'Date:'}</strong> {new Date(session.startedAt).toLocaleString()}</span>
         </div>
@@ -196,6 +209,13 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
                 </div>
               </div>
 
+              {result.question.mode === 'kanji' && (
+                <div className="review-detail">
+                  <div className="review-detail-label">{lang === 'id' ? 'Arti' : 'Meaning'}</div>
+                  <div className="review-detail-value">{result.question.intendedMeaning}</div>
+                </div>
+              )}
+
               {result.attempts.length > 0 && (
                 <div className="review-detail">
                   <div className="review-detail-label">{lang === 'id' ? 'Feedback' : 'Feedback'}</div>
@@ -235,6 +255,87 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
         <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
           <RotateCcw size={16} /> {lang === 'id' ? 'Latihan Lagi' : 'Practice Again'}
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate('/history')}>
+          <History size={16} /> {lang === 'id' ? 'Riwayat Sesi' : 'Session History'}
+        </button>
+        <button className="btn btn-ghost" onClick={() => navigate('/')}>
+          <Home size={16} /> {lang === 'id' ? 'Beranda' : 'Home'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Conversation recap ─────────────────────────────────
+
+function ConversationRecap({ session, lang, onPracticeAgain }: {
+  session: Session;
+  lang: InstructionLanguage;
+  onPracticeAgain: () => void;
+}) {
+  const navigate = useNavigate();
+  const messages = session.conversation?.messages ?? [];
+  const userMessages = messages.filter((m) => m.role === 'user');
+  const corrected = userMessages.filter((m) => m.correction).length;
+  // Unfinished conversations have no end time; fall back to the last message
+  const endedAt = session.endedAt ?? messages[messages.length - 1]?.timestamp ?? session.startedAt;
+  const durationMs = endedAt - session.startedAt;
+  const minutes = Math.max(1, Math.round(durationMs / 60000));
+
+  return (
+    <div className="app-main" style={{ maxWidth: 800, margin: '0 auto' }}>
+      <div className="recap-header animate-in">
+        <h1 className="recap-title">
+          {lang === 'id' ? 'Rekap Percakapan' : 'Conversation Recap'}
+        </h1>
+        <p className="recap-subtitle">
+          {session.conversation?.topic || (lang === 'id' ? 'Topik acak' : 'Random topic')}
+        </p>
+      </div>
+
+      <div className="stats-grid animate-in" style={{ marginBottom: 'var(--space-2xl)', animationDelay: '100ms' }}>
+        <div className="stat-card">
+          <div className="stat-value">{userMessages.length}</div>
+          <div className="stat-label">
+            <MessageCircle size={12} style={{ display: 'inline', marginRight: 4 }} />
+            {lang === 'id' ? 'Pesan Terkirim' : 'Messages Sent'}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value" style={{ color: corrected === 0 ? 'var(--color-success)' : 'var(--color-warning)' }}>
+            {corrected}
+          </div>
+          <div className="stat-label">
+            <PencilLine size={12} style={{ display: 'inline', marginRight: 4 }} />
+            {lang === 'id' ? 'Koreksi' : 'Corrections'}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{session.jlptLevel}</div>
+          <div className="stat-label">Level</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{minutes}m</div>
+          <div className="stat-label">
+            <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
+            {lang === 'id' ? 'Durasi' : 'Duration'}
+          </div>
+        </div>
+      </div>
+
+      <h3 className="card-title" style={{ marginBottom: 'var(--space-md)' }}>
+        {lang === 'id' ? 'Riwayat Chat' : 'Chat Transcript'}
+      </h3>
+      <div className="chat-messages chat-messages-static">
+        {messages.map((m) => (
+          <ChatBubble key={m.id} message={m} lang={lang} expandCorrection />
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
+        <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
+          <RotateCcw size={16} /> {lang === 'id' ? 'Ngobrol Lagi' : 'Chat Again'}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate('/history')}>
           <History size={16} /> {lang === 'id' ? 'Riwayat Sesi' : 'Session History'}

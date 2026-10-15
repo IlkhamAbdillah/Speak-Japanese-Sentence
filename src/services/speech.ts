@@ -168,3 +168,24 @@ export function stopRecognition(): void {
 export function getIsListening(): boolean {
   return isListening;
 }
+
+// ─── Text to Speech ─────────────────────────────────────
+
+export function isSpeechSynthesisSupported(): boolean {
+  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+}
+
+/** Read Japanese text aloud with the browser's built-in voice. */
+export function speakJapanese(text: string): void {
+  if (!isSpeechSynthesisSupported()) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ja-JP';
+  const voice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith('ja'));
+  if (voice) utterance.voice = voice;
+  window.speechSynthesis.speak(utterance);
+}
+
+export function stopSpeaking(): void {
+  if (isSpeechSynthesisSupported()) window.speechSynthesis.cancel();
+}

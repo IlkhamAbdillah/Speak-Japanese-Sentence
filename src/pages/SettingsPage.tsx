@@ -10,16 +10,15 @@ import {
   Trash2,
   RefreshCw,
 } from 'lucide-react';
-import type { UserSettings, AIProvider, ExerciseMode, JLPTLevel, InstructionLanguage } from '../types';
+import type { UserSettings, AIProvider, JLPTLevel, InstructionLanguage } from '../types';
 import {
   AI_PROVIDER_LABELS,
   AI_PROVIDER_MODELS,
-  EXERCISE_MODE_LABELS,
-  EXERCISE_MODE_DESCRIPTIONS,
   JLPT_DESCRIPTIONS,
 } from '../types';
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
+import ModePicker from '../components/ModePicker';
 
 interface SettingsPageProps {
   settings: UserSettings;
@@ -37,6 +36,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [manualModelInput, setManualModelInput] = useState(false);
 
   const lang = settings.instructionLanguage;
+  const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
 
   const update = (partial: Partial<UserSettings>) => {
     const next = { ...settings, ...partial };
@@ -355,27 +355,17 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         </div>
       </div>
 
-      {/* Exercise Mode */}
+      {/* Mode */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Mode Latihan' : 'Exercise Mode'}
+          {lang === 'id' ? 'Mode' : 'Mode'}
         </h2>
-        <div className="mode-cards">
-          {(Object.keys(EXERCISE_MODE_LABELS) as ExerciseMode[]).map((mode) => (
-            <div
-              key={mode}
-              className={`mode-card ${settings.exerciseMode === mode ? 'active' : ''}`}
-              onClick={() => update({ exerciseMode: mode })}
-            >
-              <div className="mode-card-title">
-                {EXERCISE_MODE_LABELS[mode][lang]}
-              </div>
-              <div className="mode-card-desc">
-                {EXERCISE_MODE_DESCRIPTIONS[mode][lang]}
-              </div>
-            </div>
-          ))}
-        </div>
+        <ModePicker
+          appMode={settings.appMode}
+          exerciseMode={settings.exerciseMode}
+          lang={lang}
+          onChange={update}
+        />
       </div>
 
       {/* JLPT Level */}
@@ -400,23 +390,25 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         </p>
       </div>
 
-      {/* Question Count */}
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          {lang === 'id' ? 'Jumlah Soal' : 'Question Count'}
-        </h2>
-        <div className="option-group">
-          {[5, 10, 15, 20].map((n) => (
-            <button
-              key={n}
-              className={`option-pill ${settings.questionCount === n ? 'active' : ''}`}
-              onClick={() => update({ questionCount: n })}
-            >
-              {n} {lang === 'id' ? 'soal' : 'questions'}
-            </button>
-          ))}
+      {/* Question Count — conversations have no fixed number of questions */}
+      {!isConversation && (
+        <div className="settings-section">
+          <h2 className="settings-section-title">
+            {lang === 'id' ? 'Jumlah Soal' : 'Question Count'}
+          </h2>
+          <div className="option-group">
+            {[5, 10, 15, 20].map((n) => (
+              <button
+                key={n}
+                className={`option-pill ${settings.questionCount === n ? 'active' : ''}`}
+                onClick={() => update({ questionCount: n })}
+              >
+                {n} {lang === 'id' ? 'soal' : 'questions'}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Instruction Language */}
       <div className="settings-section">
@@ -451,11 +443,17 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
             className="form-select"
             value={settings.maxAttempts}
             onChange={(e) => update({ maxAttempts: Number(e.target.value) })}
+            disabled={settings.appMode === 'exam'}
           >
             {[2, 3, 5, 10].map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
+          {settings.appMode === 'exam' && (
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-xs)' }}>
+              {lang === 'id' ? 'Mode ujian selalu hanya 1 kali jawab.' : 'Exam mode always allows only 1 attempt.'}
+            </p>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 'var(--space-xl)', flexWrap: 'wrap' }}>

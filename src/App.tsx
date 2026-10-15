@@ -6,6 +6,7 @@ import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
 import PracticePage from './pages/PracticePage';
+import ConversationPage from './pages/ConversationPage';
 import RecapPage from './pages/RecapPage';
 import HistoryPage from './pages/HistoryPage';
 
@@ -47,13 +48,22 @@ function AppInner() {
 
   // While practice is active, show the practice page full-screen (no nav)
   if (practiceActive) {
+    const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
     return (
       <div className="app-layout">
-        <PracticePage
-          settings={settings}
-          onFinish={handleFinishPractice}
-          onExit={handleExitPractice}
-        />
+        {isConversation ? (
+          <ConversationPage
+            settings={settings}
+            onFinish={handleFinishPractice}
+            onExit={handleExitPractice}
+          />
+        ) : (
+          <PracticePage
+            settings={settings}
+            onFinish={handleFinishPractice}
+            onExit={handleExitPractice}
+          />
+        )}
       </div>
     );
   }
@@ -69,6 +79,7 @@ function AppInner() {
               settings={settings}
               micPermission={micPermission}
               onMicPermissionChange={setMicPermission}
+              onSettingsChange={handleSettingsChange}
               onStartPractice={handleStartPractice}
             />
           }

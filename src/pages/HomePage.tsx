@@ -9,10 +9,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { UserSettings, MicPermission } from '../types';
-import {
-  EXERCISE_MODE_LABELS,
-  JLPT_DESCRIPTIONS,
-} from '../types';
+import { JLPT_DESCRIPTIONS } from '../types';
+import ModePicker from '../components/ModePicker';
 import { getLearningStats } from '../services/storage';
 import type { LearningStats } from '../services/storage';
 import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
@@ -22,6 +20,7 @@ interface HomePageProps {
   settings: UserSettings;
   micPermission: MicPermission;
   onMicPermissionChange: (perm: MicPermission) => void;
+  onSettingsChange: (settings: UserSettings) => void;
   onStartPractice: () => void;
 }
 
@@ -29,6 +28,7 @@ export default function HomePage({
   settings,
   micPermission,
   onMicPermissionChange,
+  onSettingsChange,
   onStartPractice,
 }: HomePageProps) {
   const navigate = useNavigate();
@@ -50,6 +50,15 @@ export default function HomePage({
     isSpeechRecognitionSupported();
 
   const lang = settings.instructionLanguage;
+  const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
+
+  const startLabel = isConversation
+    ? (lang === 'id' ? 'Mulai Percakapan' : 'Start Conversation')
+    : settings.appMode === 'exam'
+      ? (lang === 'id' ? 'Mulai Ujian' : 'Start Exam')
+      : settings.appMode === 'kanji'
+        ? (lang === 'id' ? 'Mulai Kanji' : 'Start Kanji')
+        : (lang === 'id' ? 'Mulai Latihan' : 'Start Practice');
 
   return (
     <div className="app-main">
@@ -105,16 +114,28 @@ export default function HomePage({
             : 'Practice your Japanese speaking skills with AI evaluation.'}
         </p>
 
+        <ModePicker
+          variant="pills"
+          appMode={settings.appMode}
+          exerciseMode={settings.exerciseMode}
+          lang={lang}
+          onChange={(partial) => onSettingsChange({ ...settings, ...partial })}
+        />
+
         <div className="start-card-config">
           <span className="badge badge-accent">
             {settings.jlptLevel}
           </span>
-          <span className="badge badge-info">
-            {EXERCISE_MODE_LABELS[settings.exerciseMode][lang]}
-          </span>
-          <span className="badge badge-info">
-            {settings.questionCount} {lang === 'id' ? 'soal' : 'questions'}
-          </span>
+          {!isConversation && (
+            <span className="badge badge-info">
+              {settings.questionCount} {lang === 'id' ? 'soal' : 'questions'}
+            </span>
+          )}
+          {settings.appMode === 'exam' && (
+            <span className="badge badge-warning">
+              {lang === 'id' ? '1 kali jawab' : '1 attempt'}
+            </span>
+          )}
         </div>
 
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--space-md)' }}>
@@ -144,7 +165,7 @@ export default function HomePage({
             onClick={onStartPractice}
           >
             <Play size={18} />
-            {lang === 'id' ? 'Mulai Latihan' : 'Start Practice'}
+            {startLabel}
           </button>
           <button
             className="btn btn-secondary"
@@ -231,7 +252,9 @@ export default function HomePage({
                         </span>
                         <span className="badge badge-accent">{s.jlptLevel}</span>
                         <span className="history-meta-item">
-                          {s.correctCount}/{s.questionCount} ({s.accuracy}%)
+                          {s.messageCount !== undefined
+                            ? `💬 ${s.messageCount} ${lang === 'id' ? 'pesan' : 'messages'}`
+                            : `${s.correctCount}/${s.questionCount} (${s.accuracy}%)`}
                         </span>
                       </div>
                       <span className={`badge ${s.status === 'completed' ? 'badge-success' : 'badge-warning'}`}>
