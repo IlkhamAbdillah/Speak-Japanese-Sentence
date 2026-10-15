@@ -15,6 +15,8 @@ import {
   AI_PROVIDER_LABELS,
   AI_PROVIDER_MODELS,
   JLPT_DESCRIPTIONS,
+  isConversationMode,
+  isExamMode,
 } from '../types';
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
@@ -36,7 +38,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [manualModelInput, setManualModelInput] = useState(false);
 
   const lang = settings.instructionLanguage;
-  const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
+  const isConversation = isConversationMode(settings);
 
   const update = (partial: Partial<UserSettings>) => {
     const next = { ...settings, ...partial };
@@ -363,6 +365,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         <ModePicker
           appMode={settings.appMode}
           exerciseMode={settings.exerciseMode}
+          examMode={settings.examMode}
           lang={lang}
           onChange={update}
         />
@@ -443,13 +446,13 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
             className="form-select"
             value={settings.maxAttempts}
             onChange={(e) => update({ maxAttempts: Number(e.target.value) })}
-            disabled={settings.appMode === 'exam'}
+            disabled={isExamMode(settings)}
           >
             {[2, 3, 5, 10].map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
-          {settings.appMode === 'exam' && (
+          {isExamMode(settings) && (
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-xs)' }}>
               {lang === 'id' ? 'Mode ujian selalu hanya 1 kali jawab.' : 'Exam mode always allows only 1 attempt.'}
             </p>
@@ -464,15 +467,6 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               onChange={(e) => update({ hintsEnabled: e.target.checked })}
             />
             {lang === 'id' ? 'Aktifkan petunjuk' : 'Enable hints'}
-          </label>
-
-          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            <input
-              type="checkbox"
-              checked={settings.autoAdvance}
-              onChange={(e) => update({ autoAdvance: e.target.checked })}
-            />
-            {lang === 'id' ? 'Lanjut otomatis jika benar' : 'Auto-advance on correct'}
           </label>
         </div>
       </div>

@@ -4,11 +4,13 @@ import {
   APP_MODE_DESCRIPTIONS,
   EXERCISE_MODE_LABELS,
   EXERCISE_MODE_DESCRIPTIONS,
+  isConversationMode,
 } from '../types';
 
 interface ModePickerProps {
   appMode: AppMode;
   exerciseMode: ExerciseMode;
+  examMode: boolean;
   lang: InstructionLanguage;
   onChange: (partial: Partial<UserSettings>) => void;
   /** 'cards' shows descriptions (settings page); 'pills' is compact (home page) */
@@ -18,7 +20,25 @@ interface ModePickerProps {
 const APP_MODES = Object.keys(APP_MODE_LABELS) as AppMode[];
 const EXERCISE_MODES = Object.keys(EXERCISE_MODE_LABELS) as ExerciseMode[];
 
-export default function ModePicker({ appMode, exerciseMode, lang, onChange, variant = 'cards' }: ModePickerProps) {
+export default function ModePicker({ appMode, exerciseMode, examMode, lang, onChange, variant = 'cards' }: ModePickerProps) {
+  // Conversation has no questions to grade, so it can't be an exam
+  const examToggle = !isConversationMode({ appMode, exerciseMode }) && (
+    <label className="exam-toggle">
+      <input
+        type="checkbox"
+        checked={examMode}
+        onChange={(e) => onChange({ examMode: e.target.checked })}
+      />
+      <span>
+        <strong>{lang === 'id' ? 'Mode Ujian' : 'Exam mode'}</strong>
+        {' — '}
+        {lang === 'id'
+          ? 'hanya 1 kali jawab per soal, penjelasan langsung muncul setelah menjawab'
+          : 'only 1 attempt per question; the explanation appears right after you answer'}
+      </span>
+    </label>
+  );
+
   if (variant === 'pills') {
     return (
       <div className="mode-picker">
@@ -53,6 +73,7 @@ export default function ModePicker({ appMode, exerciseMode, lang, onChange, vari
             ? EXERCISE_MODE_DESCRIPTIONS[exerciseMode][lang]
             : APP_MODE_DESCRIPTIONS[appMode][lang]}
         </p>
+        {examToggle}
       </div>
     );
   }
@@ -91,6 +112,8 @@ export default function ModePicker({ appMode, exerciseMode, lang, onChange, vari
           </div>
         </>
       )}
+
+      {examToggle}
     </div>
   );
 }

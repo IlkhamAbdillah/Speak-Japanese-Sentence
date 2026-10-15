@@ -24,6 +24,7 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
   const [isListening, setIsListening] = useState(false);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const draftBeforeListening = useRef('');
 
   // Keep the newest message in view
   useEffect(() => {
@@ -43,15 +44,21 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
 
   const toggleListening = () => {
     if (isListening) {
+      // Cancel: drop what was heard and restore the message as it was before speaking
       stopRecognition();
       setIsListening(false);
+      setDraft(draftBeforeListening.current);
       return;
     }
     // Spoken text is appended to whatever is already typed, so it can be checked before sending
+    draftBeforeListening.current = draft;
     const base = draft ? `${draft} ` : '';
     const started = startRecognition({
       onInterimResult: (t) => setDraft(base + t),
-      onFinalResult: (t) => setDraft(base + t),
+      onFinalResult: (t) => {
+        setDraft(base + t);
+        setIsListening(false);
+      },
       onError: () => setIsListening(false),
       onEnd: () => setIsListening(false),
     });
@@ -176,7 +183,7 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
           <button
             className={`chat-composer-btn ${isListening ? 'listening' : ''}`}
             onClick={toggleListening}
-            title={isListening ? 'Stop' : (lang === 'id' ? 'Bicara' : 'Speak')}
+            title={isListening ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording') : (lang === 'id' ? 'Bicara' : 'Speak')}
           >
             {isListening ? <Square size={18} /> : <Mic size={18} />}
           </button>

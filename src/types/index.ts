@@ -1,29 +1,26 @@
 // ─── App Modes ──────────────────────────────────────────
-// practice: free practice with retries (translation / situation / conversation)
-// exam:     one attempt per question, explanation shown after answering
+// practice: translation / situation / conversation practice
 // kanji:    read a kanji word and answer with its reading
-export type AppMode = 'practice' | 'exam' | 'kanji';
+// Either can be played as an exam (see UserSettings.examMode), except conversation.
+export type AppMode = 'practice' | 'kanji';
 
 export const APP_MODE_LABELS: Record<AppMode, { en: string; id: string }> = {
   practice: { en: 'Practice', id: 'Latihan' },
-  exam: { en: 'Exam', id: 'Ujian' },
   kanji: { en: 'Kanji Recognition', id: 'Mengenal Kanji' },
 };
 
 export const APP_MODE_DESCRIPTIONS: Record<AppMode, { en: string; id: string }> = {
   practice: {
-    en: 'Practice with retries, hints, and feedback',
-    id: 'Latihan dengan pengulangan, petunjuk, dan umpan balik',
-  },
-  exam: {
-    en: 'One attempt per question — the explanation appears after you answer',
-    id: 'Satu kali jawab per soal — penjelasan muncul setelah menjawab',
+    en: 'Translate sentences, respond to situations, or chat with AI',
+    id: 'Terjemahkan kalimat, tanggapi situasi, atau mengobrol dengan AI',
   },
   kanji: {
     en: 'See a kanji word and write or say how it is read',
     id: 'Lihat kata kanji lalu tulis atau ucapkan cara membacanya',
   },
 };
+
+export const EXAM_MODE_LABEL = { en: 'Exam', id: 'Ujian' } as const;
 
 // ─── Exercise Modes (Practice types) ────────────────────
 export type ExerciseMode = 'translation' | 'situation' | 'conversation';
@@ -51,13 +48,27 @@ export const EXERCISE_MODE_DESCRIPTIONS: Record<ExerciseMode, { en: string; id: 
 
 /** Label for a session, tolerating sessions saved before modes changed. */
 export function getSessionModeLabel(
-  appMode: AppMode | undefined,
-  mode: string,
+  session: { appMode?: AppMode | 'exam'; examMode?: boolean; mode: string },
   lang: InstructionLanguage
 ): string {
-  if (appMode === 'exam' || appMode === 'kanji') return APP_MODE_LABELS[appMode][lang];
-  if (mode in EXERCISE_MODE_LABELS) return EXERCISE_MODE_LABELS[mode as ExerciseMode][lang];
-  return lang === 'id' ? 'Respons Bahasa Jepang' : 'Japanese Response';
+  // Sessions saved when "exam" was its own mode
+  if (session.appMode === 'exam') return EXAM_MODE_LABEL[lang];
+
+  const base = session.appMode === 'kanji'
+    ? APP_MODE_LABELS.kanji[lang]
+    : session.mode in EXERCISE_MODE_LABELS
+      ? EXERCISE_MODE_LABELS[session.mode as ExerciseMode][lang]
+      : (lang === 'id' ? 'Respons Bahasa Jepang' : 'Japanese Response');
+  return session.examMode ? `${base} · ${EXAM_MODE_LABEL[lang]}` : base;
+}
+
+export function isConversationMode(settings: Pick<UserSettings, 'appMode' | 'exerciseMode'>): boolean {
+  return settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
+}
+
+/** Exam = one attempt per question with the explanation shown right away. Not available for conversation. */
+export function isExamMode(settings: Pick<UserSettings, 'appMode' | 'exerciseMode' | 'examMode'>): boolean {
+  return settings.examMode && !isConversationMode(settings);
 }
 
 // ─── JLPT Levels ────────────────────────────────────────
@@ -104,6 +115,8 @@ export interface Question {
   acceptableAnswerGuidelines: string;
   /** Other correct answers (kanji mode: other valid readings in hiragana) */
   alternativeAnswers?: string[];
+  /** Other spellings with the same sound, accepted because speech recognition may produce them (kanji mode) */
+  acceptedSpellings?: string[];
   /** Example usage (kanji mode) */
   example?: { japanese: string; translation: string };
   relevantVocabulary: string[];
@@ -165,8 +178,9 @@ export interface Session {
   startedAt: number;
   endedAt: number | null;
   status: SessionStatus;
-  /** Missing on sessions saved before app modes existed (treated as 'practice') */
-  appMode?: AppMode;
+  /** Missing on sessions saved before app modes existed (treated as 'practice'); 'exam' on older exam sessions */
+  appMode?: AppMode | 'exam';
+  examMode?: boolean;
   mode: ExerciseMode;
   jlptLevel: JLPTLevel;
   instructionLanguage: InstructionLanguage;
@@ -183,7 +197,8 @@ export interface SessionSummary {
   startedAt: number;
   endedAt: number | null;
   status: SessionStatus;
-  appMode?: AppMode;
+  appMode?: AppMode | 'exam';
+  examMode?: boolean;
   mode: ExerciseMode;
   jlptLevel: JLPTLevel;
   questionCount: number;
@@ -219,12 +234,13 @@ export interface UserSettings {
   ollamaBaseUrl?: string;
   appMode: AppMode;
   exerciseMode: ExerciseMode;
+  /** One attempt per question (practice types except conversation, and kanji) */
+  examMode: boolean;
   jlptLevel: JLPTLevel;
   instructionLanguage: InstructionLanguage;
   questionCount: number;
   maxAttempts: number;
   hintsEnabled: boolean;
-  autoAdvance: boolean;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -234,12 +250,12 @@ export const DEFAULT_SETTINGS: UserSettings = {
   ollamaBaseUrl: 'http://localhost:11434/v1',
   appMode: 'practice',
   exerciseMode: 'translation',
+  examMode: false,
   jlptLevel: 'N5',
   instructionLanguage: 'en',
   questionCount: 5,
   maxAttempts: 3,
   hintsEnabled: true,
-  autoAdvance: false,
 };
 
 // ─── AI Evaluation Response ─────────────────────────────

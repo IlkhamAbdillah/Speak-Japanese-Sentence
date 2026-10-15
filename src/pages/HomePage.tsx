@@ -9,7 +9,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { UserSettings, MicPermission } from '../types';
-import { JLPT_DESCRIPTIONS } from '../types';
+import { JLPT_DESCRIPTIONS, isConversationMode, isExamMode } from '../types';
 import ModePicker from '../components/ModePicker';
 import { getLearningStats } from '../services/storage';
 import type { LearningStats } from '../services/storage';
@@ -50,11 +50,12 @@ export default function HomePage({
     isSpeechRecognitionSupported();
 
   const lang = settings.instructionLanguage;
-  const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
+  const isConversation = isConversationMode(settings);
+  const isExam = isExamMode(settings);
 
   const startLabel = isConversation
     ? (lang === 'id' ? 'Mulai Percakapan' : 'Start Conversation')
-    : settings.appMode === 'exam'
+    : isExam
       ? (lang === 'id' ? 'Mulai Ujian' : 'Start Exam')
       : settings.appMode === 'kanji'
         ? (lang === 'id' ? 'Mulai Kanji' : 'Start Kanji')
@@ -118,6 +119,7 @@ export default function HomePage({
           variant="pills"
           appMode={settings.appMode}
           exerciseMode={settings.exerciseMode}
+          examMode={settings.examMode}
           lang={lang}
           onChange={(partial) => onSettingsChange({ ...settings, ...partial })}
         />
@@ -131,9 +133,9 @@ export default function HomePage({
               {settings.questionCount} {lang === 'id' ? 'soal' : 'questions'}
             </span>
           )}
-          {settings.appMode === 'exam' && (
+          {isExam && (
             <span className="badge badge-warning">
-              {lang === 'id' ? '1 kali jawab' : '1 attempt'}
+              {lang === 'id' ? 'Ujian · 1 kali jawab' : 'Exam · 1 attempt'}
             </span>
           )}
         </div>

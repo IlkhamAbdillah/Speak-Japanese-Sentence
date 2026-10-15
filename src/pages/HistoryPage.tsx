@@ -88,7 +88,7 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
               </span>
               <span className="badge badge-accent">{s.jlptLevel}</span>
               <span className="badge badge-info">
-                {getSessionModeLabel(s.appMode, s.mode, lang)}
+                {getSessionModeLabel(s, lang)}
               </span>
               <span className="history-meta-item">
                 {s.messageCount !== undefined

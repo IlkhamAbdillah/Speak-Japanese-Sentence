@@ -153,7 +153,7 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       <div className="card animate-in" style={{ marginBottom: 'var(--space-xl)', animationDelay: '150ms' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-md)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
           <span><strong>{lang === 'id' ? 'Level:' : 'Level:'}</strong> {session.jlptLevel}</span>
-          <span><strong>{lang === 'id' ? 'Mode:' : 'Mode:'}</strong> {getSessionModeLabel(session.appMode, session.mode, lang)}</span>
+          <span><strong>{lang === 'id' ? 'Mode:' : 'Mode:'}</strong> {getSessionModeLabel(session, lang)}</span>
           <span><strong>{lang === 'id' ? 'Durasi:' : 'Duration:'}</strong> {formatDuration(totalTimeMs)}</span>
           <span><strong>{lang === 'id' ? 'Tanggal:' : 'Date:'}</strong> {new Date(session.startedAt).toLocaleString()}</span>
         </div>

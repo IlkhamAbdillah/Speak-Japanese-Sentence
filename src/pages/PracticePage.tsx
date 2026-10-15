@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import {
   Mic,
   MicOff,
@@ -17,14 +17,17 @@ import {
 } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useSession, getMaxAttempts } from '../hooks/useSession';
-import { EXERCISE_MODE_LABELS, getSessionModeLabel } from '../types';
-import { isSpeechRecognitionSupported } from '../services/speech';
+import { getSessionModeLabel, isExamMode } from '../types';
+import { isSpeechRecognitionSupported, SILENCE_SUBMIT_MS } from '../services/speech';
 
 interface PracticePageProps {
   settings: UserSettings;
   onFinish: (sessionId: string) => void;
   onExit: () => void;
 }
+
+/** How long "Correct!" stays on screen before the next question appears. */
+const CORRECT_ADVANCE_MS = 1200;
 
 export default function PracticePage({ settings, onFinish, onExit }: PracticePageProps) {
   const {
@@ -45,6 +48,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     submitTranscript,
     nextQuestion,
     retryQuestion,
+    revealAnswer,
     pauseSession,
     resumeSession,
     endSession,
@@ -54,10 +58,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [editedTranscript, setEditedTranscript] = useState('');
-  const [isEditingTranscript, setIsEditingTranscript] = useState(false);
 
   const lang = settings.instructionLanguage;
-  const isExam = settings.appMode === 'exam';
+  const isExam = isExamMode(settings);
   const isKanji = settings.appMode === 'kanji';
   const maxAttempts = getMaxAttempts(settings);
 
@@ -65,7 +68,6 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const goToNextQuestion = useCallback(() => {
     setShowAnswer(false);
     setEditedTranscript('');
-    setIsEditingTranscript(false);
     nextQuestion();
   }, [nextQuestion]);
 
@@ -83,15 +85,20 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     }
   }, [finalTranscript, speechState, submitTranscript]);
 
-  // Auto-advance on correct (if enabled). Exams always wait so the explanation can be read.
+  // A correct answer needs no explanation: flash "Correct!" and move straight on.
+  // goToNextQuestion changes identity every timer tick, so read it through a ref
+  // instead of restarting the delay each time.
+  const goToNextQuestionRef = useRef(goToNextQuestion);
   useEffect(() => {
-    if (settings.autoAdvance && !isExam && speechState === 'correct' && lastEvaluation?.correct) {
-      const timer = setTimeout(() => {
-        goToNextQuestion();
-      }, 2000);
+    goToNextQuestionRef.current = goToNextQuestion;
+  }, [goToNextQuestion]);
+
+  useEffect(() => {
+    if (lastEvaluation?.correct) {
+      const timer = setTimeout(() => goToNextQuestionRef.current(), CORRECT_ADVANCE_MS);
       return () => clearTimeout(timer);
     }
-  }, [settings.autoAdvance, isExam, speechState, lastEvaluation, goToNextQuestion]);
+  }, [lastEvaluation]);
 
   // Check session completion
   useEffect(() => {
@@ -108,6 +115,11 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
       onExit();
     }
   }, [endSession, session, onFinish, onExit]);
+
+  const handleRevealAnswer = () => {
+    revealAnswer();
+    setShowAnswer(true);
+  };
 
   const handleManualSubmit = () => {
     if (editedTranscript.trim()) {
@@ -175,19 +187,23 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
 
   const speechSupported = isSpeechRecognitionSupported();
 
-  // Explanations are always shown once the answer is correct or revealed (and
-  // always in an exam); on a wrong practice answer they count as hints and
+  // Explanations are only shown for wrong answers: always once the answer is
+  // revealed (and always in an exam); otherwise they count as hints and
   // follow the hints setting.
   const showExplanations =
-    !!lastEvaluation && (lastEvaluation.correct || isExam || settings.hintsEnabled || showAnswer);
-  // The exam shows the answer right away; kanji shows reading & meaning once solved
-  const answerVisible =
-    !!lastEvaluation && (showAnswer || isExam || (isKanji && lastEvaluation.correct));
+    !!lastEvaluation && (isExam || settings.hintsEnabled || showAnswer);
+  // The exam shows the answer right away after a wrong answer
+  const answerVisible = !!lastEvaluation && (showAnswer || isExam);
 
   const getSpeechStateLabel = () => {
     const labels: Record<string, { en: string; id: string }> = {
       idle: { en: 'Tap to speak', id: 'Ketuk untuk berbicara' },
-      listening: { en: 'Listening...', id: 'Mendengarkan...' },
+      listening: isKanji
+        ? { en: 'Listening... tap ■ to cancel', id: 'Mendengarkan... ketuk ■ untuk batal' }
+        : {
+            en: `Listening... submits ${SILENCE_SUBMIT_MS / 1000}s after you stop talking · tap ■ to cancel`,
+            id: `Mendengarkan... terkirim ${SILENCE_SUBMIT_MS / 1000} detik setelah berhenti bicara · ketuk ■ untuk batal`,
+          },
       processing: { en: 'Processing...', id: 'Memproses...' },
       evaluating: { en: 'Evaluating...', id: 'Mengevaluasi...' },
       correct: { en: 'Correct!', id: 'Benar!' },
@@ -205,7 +221,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="session-info">
           <span className="badge badge-accent">{session.jlptLevel}</span>
           <span className="badge badge-info">
-            {getSessionModeLabel(session.appMode, session.mode, lang)}
+            {getSessionModeLabel(session, lang)}
           </span>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             {lang === 'id' ? `Soal ${questionNum} dari ${session.questionCount}` : `Question ${questionNum} of ${session.questionCount}`}
@@ -261,11 +277,6 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
               </>
             ) : (
               <>
-                {isExam && (currentQuestion.mode === 'translation' || currentQuestion.mode === 'situation') && (
-                  <span className="badge badge-info" style={{ marginBottom: 'var(--space-sm)' }}>
-                    {EXERCISE_MODE_LABELS[currentQuestion.mode][lang]}
-                  </span>
-                )}
                 <p className="question-prompt">{currentQuestion.prompt}</p>
                 {currentQuestion.context && (
                   <p className="question-context">{currentQuestion.context}</p>
@@ -279,50 +290,45 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             )}
           </div>
 
-          {/* Transcript Display */}
-          <div className={`transcript-display ${interimTranscript && !finalTranscript ? 'interim' : ''} ${!interimTranscript && !finalTranscript && !editedTranscript ? 'empty' : ''}`}>
-            {speechState === 'listening' && interimTranscript
-              ? interimTranscript
-              : editedTranscript || finalTranscript
-                ? editedTranscript || finalTranscript
-                : lang === 'id'
-                  ? 'Jawaban Anda akan muncul di sini...'
-                  : 'Your answer will appear here...'}
-          </div>
-
-          {/* Manual Edit */}
-          {(speechState === 'idle' || speechState === 'retry' || speechState === 'error') && !lastEvaluation && (
-            <div style={{ width: '100%', maxWidth: 500 }}>
-              {isEditingTranscript ? (
-                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                  <input
-                    className="form-input"
-                    style={{ fontFamily: 'var(--font-jp)' }}
-                    placeholder={isKanji
-                      ? (lang === 'id' ? 'Ketik cara baca dalam hiragana...' : 'Type the reading in hiragana...')
-                      : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang...' : 'Type answer in Japanese...')}
-                    value={editedTranscript}
-                    onChange={(e) => setEditedTranscript(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
-                  />
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleManualSubmit}
-                    disabled={!editedTranscript.trim()}
-                  >
-                    <Send size={16} />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => setIsEditingTranscript(true)}
-                  style={{ margin: '0 auto', display: 'flex' }}
-                >
-                  {lang === 'id' ? '⌨️ Atau ketik jawaban' : '⌨️ Or type your answer'}
-                </button>
-              )}
+          {/* Answer: type right away, or use the mic below */}
+          {!lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' ? (
+            <div className="answer-input-row">
+              <input
+                className={`form-input answer-input ${speechState === 'listening' ? 'listening' : ''}`}
+                autoFocus
+                placeholder={speechState === 'listening'
+                  ? (lang === 'id' ? 'Mendengarkan...' : 'Listening...')
+                  : isKanji
+                    ? (lang === 'id' ? 'Ketik cara baca dalam hiragana, atau tekan mikrofon...' : 'Type the reading in hiragana, or tap the mic...')
+                    : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang, atau tekan mikrofon...' : 'Type your answer in Japanese, or tap the mic...')}
+                value={speechState === 'listening' ? interimTranscript : editedTranscript}
+                readOnly={speechState === 'listening'}
+                onChange={(e) => setEditedTranscript(e.target.value)}
+                onKeyDown={(e) => {
+                  // Don't submit while an IME (kana → kanji) conversion is in progress
+                  if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleManualSubmit();
+                }}
+              />
+              <button
+                className="btn btn-primary"
+                onClick={handleManualSubmit}
+                disabled={!editedTranscript.trim() || speechState === 'listening'}
+                title={lang === 'id' ? 'Kirim' : 'Submit'}
+              >
+                <Send size={16} />
+              </button>
             </div>
+          ) : (
+            <div className="transcript-display">
+              {editedTranscript || finalTranscript || (lang === 'id' ? '(tidak ada jawaban)' : '(no answer)')}
+            </div>
+          )}
+
+          {/* Kanji: give up and see the answer without guessing */}
+          {isKanji && !lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' && (
+            <button className="btn btn-ghost btn-sm" onClick={handleRevealAnswer}>
+              <Eye size={14} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
+            </button>
           )}
 
           {/* Mic Controls */}
@@ -331,6 +337,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
               <button
                 className={`mic-button ${speechState === 'listening' ? 'listening' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
                 onClick={speechState === 'listening' ? stopListening : startListening}
+                title={speechState === 'listening'
+                  ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording')
+                  : (lang === 'id' ? 'Bicara' : 'Speak')}
                 disabled={
                   speechState === 'evaluating' ||
                   speechState === 'processing' ||
@@ -364,20 +373,28 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             </div>
           )}
 
-          {/* Evaluation Feedback */}
-          {lastEvaluation && (
+          {/* Correct: brief confirmation, then auto-advance (see effect above) */}
+          {lastEvaluation?.correct && (
+            <div className="correct-flash animate-in">
+              <Check size={20} />
+              {questionNum >= session.questionCount
+                ? (lang === 'id' ? 'Benar! 🎉 Selesai!' : 'Correct! 🎉 All done!')
+                : (lang === 'id' ? 'Benar! 🎉 Lanjut ke soal berikutnya...' : 'Correct! 🎉 Next question...')}
+            </div>
+          )}
+
+          {/* Wrong answer feedback */}
+          {lastEvaluation && !lastEvaluation.correct && (
             <div style={{ width: '100%', maxWidth: 600 }} className="animate-in">
-              <div className={`feedback-panel ${lastEvaluation.correct ? 'feedback-correct' : 'feedback-incorrect'}`}>
+              <div className="feedback-panel feedback-incorrect">
                 <div className="feedback-title">
-                  {lastEvaluation.correct ? (
-                    <><Check size={20} /> {lang === 'id' ? 'Benar! 🎉' : 'Correct! 🎉'}</>
-                  ) : (
-                    <><RotateCcw size={20} /> {isExam
+                  <RotateCcw size={20} /> {currentAttempts.length === 0
+                    ? (lang === 'id' ? 'Jawaban ditampilkan' : 'Answer revealed')
+                    : isExam
                       ? (lang === 'id' ? 'Salah' : 'Incorrect')
-                      : (lang === 'id' ? 'Belum tepat' : 'Not quite right')}</>
-                  )}
+                      : (lang === 'id' ? 'Belum tepat' : 'Not quite right')}
                 </div>
-                <p className="feedback-text">{lastEvaluation.feedback}</p>
+                {lastEvaluation.feedback && <p className="feedback-text">{lastEvaluation.feedback}</p>}
 
                 {/* Grammar/Vocab Notes — these explain the fix, so treat them as hints on wrong answers */}
                 {showExplanations && (lastEvaluation.grammarNotes.length > 0 || lastEvaluation.vocabularyNotes.length > 0) && (
@@ -396,7 +413,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 )}
 
                 {/* Hint */}
-                {lastEvaluation.hint && !lastEvaluation.correct && settings.hintsEnabled && !answerVisible && (
+                {lastEvaluation.hint && settings.hintsEnabled && !answerVisible && (
                   <div className="hint-box">
                     <Lightbulb size={14} style={{ display: 'inline', marginRight: 4 }} />
                     {lastEvaluation.hint}
@@ -439,38 +456,27 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
 
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
-                {lastEvaluation.correct ? (
-                  <button className="btn btn-success btn-lg" onClick={goToNextQuestion}>
+                {lastEvaluation.nextAction === 'retry' ? (
+                  <button className="btn btn-primary btn-lg" onClick={() => {
+                    retryQuestion();
+                    setEditedTranscript('');
+                    setShowAnswer(false);
+                  }}>
+                    <RotateCcw size={16} /> {lang === 'id' ? 'Coba Lagi' : 'Try Again'}
+                  </button>
+                ) : (
+                  <button className="btn btn-primary btn-lg" onClick={goToNextQuestion}>
                     <SkipForward size={16} />
                     {questionNum >= session.questionCount
                       ? (lang === 'id' ? 'Selesai!' : 'Finish!')
                       : (lang === 'id' ? 'Soal Berikutnya' : 'Next Question')}
                   </button>
-                ) : (
-                  <>
-                    {currentAttempts.length < maxAttempts ? (
-                      <button className="btn btn-primary btn-lg" onClick={() => {
-                        retryQuestion();
-                        setEditedTranscript('');
-                        setIsEditingTranscript(false);
-                        setShowAnswer(false);
-                      }}>
-                        <RotateCcw size={16} /> {lang === 'id' ? 'Coba Lagi' : 'Try Again'}
-                      </button>
-                    ) : (
-                      <button className="btn btn-primary btn-lg" onClick={goToNextQuestion}>
-                        <SkipForward size={16} />
-                        {questionNum >= session.questionCount
-                          ? (lang === 'id' ? 'Selesai!' : 'Finish!')
-                          : (lang === 'id' ? 'Soal Berikutnya' : 'Next Question')}
-                      </button>
-                    )}
-                    {!answerVisible && (
-                      <button className="btn btn-ghost" onClick={() => setShowAnswer(true)}>
-                        <Eye size={16} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
-                      </button>
-                    )}
-                  </>
+                )}
+                {!answerVisible && (
+                  // In kanji mode showing the answer means giving up on the question
+                  <button className="btn btn-ghost" onClick={isKanji ? handleRevealAnswer : () => setShowAnswer(true)}>
+                    <Eye size={16} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
+                  </button>
                 )}
               </div>
             </div>

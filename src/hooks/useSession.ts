@@ -7,6 +7,7 @@ import type {
   UserSettings,
   EvaluationResponse,
 } from '../types';
+import { isExamMode } from '../types';
 import { saveSession } from '../services/storage';
 import { generateQuestions, evaluateAnswer, aiConfigFromSettings } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
@@ -35,6 +36,7 @@ interface UseSessionReturn {
   submitTranscript: (transcript: string) => Promise<void>;
   nextQuestion: () => void;
   retryQuestion: () => void;
+  revealAnswer: () => void;
   pauseSession: () => void;
   resumeSession: () => void;
   endSession: () => void;
@@ -43,7 +45,7 @@ interface UseSessionReturn {
 
 /** Attempts allowed per question — an exam only gets one. */
 export function getMaxAttempts(settings: UserSettings): number {
-  return settings.appMode === 'exam' ? 1 : settings.maxAttempts;
+  return isExamMode(settings) ? 1 : settings.maxAttempts;
 }
 
 export function useSession(): UseSessionReturn {
@@ -111,9 +113,9 @@ export function useSession(): UseSessionReturn {
 
       try {
         const kind: QuestionSetKind =
-          settings.appMode === 'practice'
-            ? (settings.exerciseMode === 'situation' ? 'situation' : 'translation')
-            : settings.appMode;
+          settings.appMode === 'kanji'
+            ? 'kanji'
+            : (settings.exerciseMode === 'situation' ? 'situation' : 'translation');
 
         const questions = await generateQuestions(
           aiConfigFromSettings(settings),
@@ -129,6 +131,7 @@ export function useSession(): UseSessionReturn {
           endedAt: null,
           status: 'in-progress',
           appMode: settings.appMode,
+          examMode: isExamMode(settings),
           mode: settings.exerciseMode,
           jlptLevel: settings.jlptLevel,
           instructionLanguage: settings.instructionLanguage,
@@ -190,6 +193,9 @@ export function useSession(): UseSessionReturn {
           prev === 'listening' ? 'idle' : prev
         );
       },
+    }, {
+      // A kanji reading is a single word: submit as soon as it's recognised
+      waitForSilence: settingsRef.current?.appMode !== 'kanji',
     });
 
     if (!started) {
@@ -198,8 +204,10 @@ export function useSession(): UseSessionReturn {
     }
   }, []);
 
+  // Stop button: cancel the recording and discard what was heard
   const stopListeningFn = useCallback(() => {
     stopRecognition();
+    setInterimTranscript('');
     setSpeechState((prev) => (prev === 'listening' ? 'idle' : prev));
   }, []);
 
@@ -226,7 +234,7 @@ export function useSession(): UseSessionReturn {
           currentAttempts,
           attemptNumber,
           getMaxAttempts(settings),
-          settings.appMode === 'exam'
+          isExamMode(settings)
         );
 
         setLastEvaluation(result);
@@ -267,7 +275,8 @@ export function useSession(): UseSessionReturn {
       attempts: currentAttempts,
       isCorrect: currentAttempts.some((a) => a.isCorrect),
       totalTimeMs: elapsedMs,
-      finalTranscript: finalTranscript,
+      // Typed answers never set finalTranscript, so prefer the last attempt
+      finalTranscript: currentAttempts[currentAttempts.length - 1]?.transcript ?? finalTranscript,
       revealedAnswer: lastEvaluation?.nextAction === 'reveal_answer',
     };
 
@@ -312,6 +321,24 @@ export function useSession(): UseSessionReturn {
     setLastEvaluation(null);
     setEvaluationError(null);
     setSpeechState('idle');
+  }, []);
+
+  // Give up on the question: show the answer and only allow moving on
+  const revealAnswer = useCallback(() => {
+    stopRecognition();
+    setInterimTranscript('');
+    setSpeechState('idle');
+    setLastEvaluation((prev) => prev
+      ? { ...prev, nextAction: 'reveal_answer', hint: null }
+      : {
+          correct: false,
+          transcript: '',
+          feedback: '',
+          grammarNotes: [],
+          vocabularyNotes: [],
+          hint: null,
+          nextAction: 'reveal_answer',
+        });
   }, []);
 
   // Pause / Resume
@@ -366,6 +393,7 @@ export function useSession(): UseSessionReturn {
     submitTranscript,
     nextQuestion,
     retryQuestion,
+    revealAnswer,
     pauseSession,
     resumeSession,
     endSession,

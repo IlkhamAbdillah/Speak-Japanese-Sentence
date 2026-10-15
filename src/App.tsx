@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import type { UserSettings, MicPermission } from './types';
+import { isConversationMode } from './types';
 import { loadSettings, saveSettings } from './services/storage';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
@@ -48,7 +49,7 @@ function AppInner() {
 
   // While practice is active, show the practice page full-screen (no nav)
   if (practiceActive) {
-    const isConversation = settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
+    const isConversation = isConversationMode(settings);
     return (
       <div className="app-layout">
         {isConversation ? (

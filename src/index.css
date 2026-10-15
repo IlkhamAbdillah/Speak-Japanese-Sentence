@@ -1651,3 +1651,57 @@ a:hover {
     max-width: 85%;
   }
 }
+
+.exam-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.exam-toggle input {
+  margin-top: 2px;
+  accent-color: var(--accent-primary);
+}
+
+.exam-toggle strong {
+  color: var(--text-primary);
+}
+
+/* ─── Answer input ───────────────────────────────────── */
+
+.answer-input-row {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 560px;
+}
+
+.answer-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--text-lg);
+}
+
+.answer-input.listening {
+  border-color: var(--color-error);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.correct-flash {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-muted);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  color: var(--color-success);
+  font-weight: 600;
+}

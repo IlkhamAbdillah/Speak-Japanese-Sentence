@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 idea.md
+fix.md
 
 # Editor directories and files
 .vscode/*

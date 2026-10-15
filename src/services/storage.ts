@@ -48,6 +48,12 @@ export function loadSettings(): UserSettings {
   const settings = { ...DEFAULT_SETTINGS, ...stored };
   // 'japanese-response' was replaced by conversation practice
   if (!(settings.exerciseMode in EXERCISE_MODE_LABELS)) settings.exerciseMode = 'conversation';
+  // 'exam' used to be its own mode; it's now a toggle on the other modes
+  if ((settings.appMode as string) === 'exam') {
+    settings.appMode = 'practice';
+    settings.examMode = true;
+    if (settings.exerciseMode === 'conversation') settings.exerciseMode = 'translation';
+  }
   return settings;
 }
 
@@ -113,6 +119,7 @@ export function sessionToSummary(session: Session): SessionSummary {
     endedAt: session.endedAt,
     status: session.status,
     appMode: session.appMode,
+    examMode: session.examMode,
     mode: session.mode,
     jlptLevel: session.jlptLevel,
     questionCount: session.questionCount,

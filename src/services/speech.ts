@@ -88,43 +88,89 @@ export async function requestMicPermission(): Promise<MicPermission> {
   }
 }
 
-export function startRecognition(callbacks: SpeechCallbacks): boolean {
+/** How long the user may pause before their answer is submitted automatically. */
+export const SILENCE_SUBMIT_MS = 3000;
+
+export interface RecognitionOptions {
+  /**
+   * true (default): listen continuously and deliver the whole utterance once the
+   * user has been silent for SILENCE_SUBMIT_MS, so a pause mid-sentence doesn't
+   * submit a half-finished answer.
+   * false: deliver the first final result right away — best for single words.
+   */
+  waitForSilence?: boolean;
+}
+
+/** Start listening. Interim results carry the full text heard so far. */
+export function startRecognition(
+  callbacks: SpeechCallbacks,
+  { waitForSilence = true }: RecognitionOptions = {}
+): boolean {
   const SpeechRecognitionClass = getSpeechRecognitionClass();
   if (!SpeechRecognitionClass) return false;
 
   stopRecognition();
 
-  recognition = new SpeechRecognitionClass();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.lang = 'ja-JP';
+  const rec = new SpeechRecognitionClass();
+  recognition = rec;
+  rec.continuous = waitForSilence;
+  rec.interimResults = true;
+  rec.lang = 'ja-JP';
 
-  recognition.onstart = () => {
+  let heard = '';
+  let finished = false;
+  let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const clearSilenceTimer = () => {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = null;
+  };
+
+  // Deliver what was heard (if anything) exactly once, then shut down
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    clearSilenceTimer();
+    // Cancelled (or replaced by a new session) in the meantime: deliver nothing
+    if (recognition !== rec) return;
+    const text = heard.trim();
+    stopRecognition();
+    if (text) callbacks.onFinalResult?.(text);
+    else callbacks.onEnd?.();
+  };
+
+  rec.onstart = () => {
     isListening = true;
     callbacks.onStart?.();
   };
 
-  recognition.onresult = (event: SpeechRecognitionEvent) => {
-    let interimTranscript = '';
-    let finalTranscript = '';
-
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i];
-      if (result.isFinal) {
-        finalTranscript += result[0].transcript;
-      } else {
-        interimTranscript += result[0].transcript;
-      }
+  rec.onresult = (event: SpeechRecognitionEvent) => {
+    // In continuous mode event.results holds the whole session, so rebuild from the start
+    let text = '';
+    let hasFinal = false;
+    for (let i = 0; i < event.results.length; i++) {
+      text += event.results[i][0].transcript;
+      hasFinal ||= event.results[i].isFinal;
     }
+    heard = text;
+    callbacks.onInterimResult?.(text);
 
-    if (finalTranscript) {
-      callbacks.onFinalResult?.(finalTranscript);
-    } else if (interimTranscript) {
-      callbacks.onInterimResult?.(interimTranscript);
+    if (!waitForSilence) {
+      if (hasFinal) finish();
+      return;
     }
+    clearSilenceTimer();
+    silenceTimer = setTimeout(finish, SILENCE_SUBMIT_MS);
   };
 
-  recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+  rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+    // If we already heard something, submit it instead of failing
+    if (heard.trim()) {
+      finish();
+      return;
+    }
+    finished = true;
+    clearSilenceTimer();
     isListening = false;
     const errorMap: Record<string, string> = {
       'no-speech': 'No speech detected. Please try again.',
@@ -136,31 +182,34 @@ export function startRecognition(callbacks: SpeechCallbacks): boolean {
     callbacks.onError?.(errorMap[event.error] ?? `Recognition error: ${event.error}`);
   };
 
-  recognition.onend = () => {
+  // The browser can end the session on its own (e.g. long silence); submit what we have
+  rec.onend = () => {
     isListening = false;
-    callbacks.onEnd?.();
+    finish();
   };
 
   try {
-    recognition.start();
+    rec.start();
     return true;
   } catch {
     return false;
   }
 }
 
+/** Stop listening and throw away anything heard (the "cancel" button). */
 export function stopRecognition(): void {
   if (recognition) {
+    const rec = recognition;
+    recognition = null;
+    rec.onresult = null;
+    rec.onerror = null;
+    rec.onend = null;
+    rec.onstart = null;
     try {
-      recognition.abort();
+      rec.abort();
     } catch {
       // ignore
     }
-    recognition.onresult = null;
-    recognition.onerror = null;
-    recognition.onend = null;
-    recognition.onstart = null;
-    recognition = null;
     isListening = false;
   }
 }
