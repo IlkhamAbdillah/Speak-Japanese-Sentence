@@ -1705,3 +1705,100 @@ a:hover {
   color: var(--color-success);
   font-weight: 600;
 }
+
+/* ─── JLPT Mock Test (multiple choice) ───────────────── */
+
+.reading-passage {
+  font-family: var(--font-jp);
+  font-size: var(--text-base);
+  line-height: 1.9;
+  color: var(--text-primary);
+  text-align: left;
+  white-space: pre-wrap;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 600px;
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--surface-1);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.choice-item:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.choice-item:disabled {
+  cursor: default;
+}
+
+.choice-mark {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--text-secondary);
+}
+
+.choice-text {
+  flex: 1;
+}
+
+.choice-item.selected {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-muted);
+}
+
+.choice-item.selected .choice-mark {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.choice-item.correct {
+  border-color: var(--color-success);
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.choice-item.wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+
+.choice-item.dimmed {
+  opacity: 0.5;
+}

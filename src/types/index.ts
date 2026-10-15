@@ -1,12 +1,16 @@
 // ─── App Modes ──────────────────────────────────────────
 // practice: translation / situation / conversation practice
-// kanji:    read a kanji word and answer with its reading
-// Either can be played as an exam (see UserSettings.examMode), except conversation.
-export type AppMode = 'practice' | 'kanji';
+// jlpt:     JLPT mock test — kanji reading or reading comprehension
+// Practice (except conversation) and the kanji section can be played as an exam
+// (see UserSettings.examMode); reading is always one attempt.
+export type AppMode = 'practice' | 'jlpt';
+
+/** Older sessions may carry modes that no longer exist. */
+export type StoredAppMode = AppMode | 'exam' | 'kanji';
 
 export const APP_MODE_LABELS: Record<AppMode, { en: string; id: string }> = {
   practice: { en: 'Practice', id: 'Latihan' },
-  kanji: { en: 'Kanji Recognition', id: 'Mengenal Kanji' },
+  jlpt: { en: 'JLPT Mock Test', id: 'Simulasi JLPT' },
 };
 
 export const APP_MODE_DESCRIPTIONS: Record<AppMode, { en: string; id: string }> = {
@@ -14,11 +18,33 @@ export const APP_MODE_DESCRIPTIONS: Record<AppMode, { en: string; id: string }> 
     en: 'Translate sentences, respond to situations, or chat with AI',
     id: 'Terjemahkan kalimat, tanggapi situasi, atau mengobrol dengan AI',
   },
-  kanji: {
-    en: 'See a kanji word and write or say how it is read',
-    id: 'Lihat kata kanji lalu tulis atau ucapkan cara membacanya',
+  jlpt: {
+    en: 'JLPT-style questions: kanji and reading',
+    id: 'Soal bergaya JLPT: kanji dan membaca',
   },
 };
+
+// ─── JLPT Mock Test Sections ────────────────────────────
+export type JLPTSection = 'kanji' | 'reading';
+
+export const JLPT_SECTION_LABELS: Record<JLPTSection, { en: string; id: string }> = {
+  kanji: { en: 'Kanji', id: 'Kanji' },
+  reading: { en: 'Reading', id: 'Membaca' },
+};
+
+export const JLPT_SECTION_DESCRIPTIONS: Record<JLPTSection, { en: string; id: string }> = {
+  kanji: {
+    en: 'See a kanji word and type or say how it is read',
+    id: 'Lihat kata kanji lalu ketik atau ucapkan cara membacanya',
+  },
+  reading: {
+    en: 'Read a short Japanese text and answer 3 multiple-choice questions',
+    id: 'Baca teks bahasa Jepang singkat dan jawab 3 soal pilihan ganda',
+  },
+};
+
+/** Reading tests always have one passage with this many questions. */
+export const READING_QUESTION_COUNT = 3;
 
 export const EXAM_MODE_LABEL = { en: 'Exam', id: 'Ujian' } as const;
 
@@ -48,27 +74,44 @@ export const EXERCISE_MODE_DESCRIPTIONS: Record<ExerciseMode, { en: string; id: 
 
 /** Label for a session, tolerating sessions saved before modes changed. */
 export function getSessionModeLabel(
-  session: { appMode?: AppMode | 'exam'; examMode?: boolean; mode: string },
+  session: { appMode?: StoredAppMode; jlptSection?: JLPTSection; examMode?: boolean; mode: string },
   lang: InstructionLanguage
 ): string {
   // Sessions saved when "exam" was its own mode
   if (session.appMode === 'exam') return EXAM_MODE_LABEL[lang];
 
-  const base = session.appMode === 'kanji'
-    ? APP_MODE_LABELS.kanji[lang]
+  const jlptSection = session.appMode === 'kanji' ? 'kanji' : session.jlptSection;
+  const base = jlptSection
+    ? `JLPT · ${JLPT_SECTION_LABELS[jlptSection][lang]}`
     : session.mode in EXERCISE_MODE_LABELS
       ? EXERCISE_MODE_LABELS[session.mode as ExerciseMode][lang]
       : (lang === 'id' ? 'Respons Bahasa Jepang' : 'Japanese Response');
   return session.examMode ? `${base} · ${EXAM_MODE_LABEL[lang]}` : base;
 }
 
-export function isConversationMode(settings: Pick<UserSettings, 'appMode' | 'exerciseMode'>): boolean {
+type ModeSettings = Pick<UserSettings, 'appMode' | 'exerciseMode' | 'jlptSection' | 'examMode'>;
+
+export function isConversationMode(settings: Pick<ModeSettings, 'appMode' | 'exerciseMode'>): boolean {
   return settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
 }
 
-/** Exam = one attempt per question with the explanation shown right away. Not available for conversation. */
-export function isExamMode(settings: Pick<UserSettings, 'appMode' | 'exerciseMode' | 'examMode'>): boolean {
-  return settings.examMode && !isConversationMode(settings);
+export function isKanjiMode(settings: Pick<ModeSettings, 'appMode' | 'jlptSection'>): boolean {
+  return settings.appMode === 'jlpt' && settings.jlptSection === 'kanji';
+}
+
+/** Reading is answered by picking one of four choices. */
+export function isMultipleChoiceMode(settings: Pick<ModeSettings, 'appMode' | 'jlptSection'>): boolean {
+  return settings.appMode === 'jlpt' && settings.jlptSection === 'reading';
+}
+
+/** Whether the "Exam mode" toggle applies: not to conversation, and multiple choice is always one attempt. */
+export function canUseExamMode(settings: Omit<ModeSettings, 'examMode'>): boolean {
+  return !isConversationMode(settings) && !isMultipleChoiceMode(settings);
+}
+
+/** Exam = one attempt per question with the explanation shown right away. */
+export function isExamMode(settings: ModeSettings): boolean {
+  return settings.examMode && canUseExamMode(settings);
 }
 
 // ─── JLPT Levels ────────────────────────────────────────
@@ -101,7 +144,7 @@ export const JLPT_DESCRIPTIONS: Record<JLPTLevel, { en: string; id: string }> = 
 export type InstructionLanguage = 'en' | 'id';
 
 // ─── Question ───────────────────────────────────────────
-export type QuestionMode = 'translation' | 'situation' | 'kanji';
+export type QuestionMode = 'translation' | 'situation' | 'kanji' | 'reading';
 
 export interface Question {
   questionId: string;
@@ -119,6 +162,13 @@ export interface Question {
   acceptedSpellings?: string[];
   /** Example usage (kanji mode) */
   example?: { japanese: string; translation: string };
+  /** Multiple choice (reading): the four options and the index of the right one */
+  choices?: string[];
+  correctChoice?: number;
+  /** Why the right choice is right, in the instruction language (reading) */
+  explanation?: string;
+  /** The text the question is about (reading); shared by every question of the test */
+  passage?: string;
   relevantVocabulary: string[];
   relevantGrammar: string[];
 }
@@ -179,7 +229,8 @@ export interface Session {
   endedAt: number | null;
   status: SessionStatus;
   /** Missing on sessions saved before app modes existed (treated as 'practice'); 'exam' on older exam sessions */
-  appMode?: AppMode | 'exam';
+  appMode?: StoredAppMode;
+  jlptSection?: JLPTSection;
   examMode?: boolean;
   mode: ExerciseMode;
   jlptLevel: JLPTLevel;
@@ -197,7 +248,8 @@ export interface SessionSummary {
   startedAt: number;
   endedAt: number | null;
   status: SessionStatus;
-  appMode?: AppMode | 'exam';
+  appMode?: StoredAppMode;
+  jlptSection?: JLPTSection;
   examMode?: boolean;
   mode: ExerciseMode;
   jlptLevel: JLPTLevel;
@@ -234,6 +286,7 @@ export interface UserSettings {
   ollamaBaseUrl?: string;
   appMode: AppMode;
   exerciseMode: ExerciseMode;
+  jlptSection: JLPTSection;
   /** One attempt per question (practice types except conversation, and kanji) */
   examMode: boolean;
   jlptLevel: JLPTLevel;
@@ -250,6 +303,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   ollamaBaseUrl: 'http://localhost:11434/v1',
   appMode: 'practice',
   exerciseMode: 'translation',
+  jlptSection: 'kanji',
   examMode: false,
   jlptLevel: 'N5',
   instructionLanguage: 'en',

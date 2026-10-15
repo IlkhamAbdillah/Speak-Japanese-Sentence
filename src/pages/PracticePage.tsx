@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useSession, getMaxAttempts } from '../hooks/useSession';
-import { getSessionModeLabel, isExamMode } from '../types';
+import { getSessionModeLabel, isExamMode, isKanjiMode, isMultipleChoiceMode } from '../types';
+import MultipleChoice from '../components/MultipleChoice';
 import { isSpeechRecognitionSupported, SILENCE_SUBMIT_MS } from '../services/speech';
 
 interface PracticePageProps {
@@ -46,6 +47,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     startListening,
     stopListening,
     submitTranscript,
+    submitChoice,
     nextQuestion,
     retryQuestion,
     revealAnswer,
@@ -58,16 +60,19 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [editedTranscript, setEditedTranscript] = useState('');
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
   const lang = settings.instructionLanguage;
   const isExam = isExamMode(settings);
-  const isKanji = settings.appMode === 'kanji';
+  const isKanji = isKanjiMode(settings);
+  const isChoice = isMultipleChoiceMode(settings);
   const maxAttempts = getMaxAttempts(settings);
 
   // Clear per-question UI state whenever we move on
   const goToNextQuestion = useCallback(() => {
     setShowAnswer(false);
     setEditedTranscript('');
+    setSelectedChoice(null);
     nextQuestion();
   }, [nextQuestion]);
 
@@ -192,8 +197,8 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   // follow the hints setting.
   const showExplanations =
     !!lastEvaluation && (isExam || settings.hintsEnabled || showAnswer);
-  // The exam shows the answer right away after a wrong answer
-  const answerVisible = !!lastEvaluation && (showAnswer || isExam);
+  // The exam (and multiple choice) shows the answer right away after a wrong answer
+  const answerVisible = !!lastEvaluation && (showAnswer || isExam || isChoice);
 
   const getSpeechStateLabel = () => {
     const labels: Record<string, { en: string; id: string }> = {
@@ -275,6 +280,16 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 </p>
                 <p className="kanji-display">{currentQuestion.prompt}</p>
               </>
+            ) : isChoice ? (
+              <>
+                {currentQuestion.passage && (
+                  <div className="reading-passage">{currentQuestion.passage}</div>
+                )}
+                <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
+                  {lang === 'id' ? 'Baca teks di atas, lalu pilih jawaban yang paling tepat.' : 'Read the text above, then choose the best answer.'}
+                </p>
+                <p className="question-prompt jp-text">{currentQuestion.prompt}</p>
+              </>
             ) : (
               <>
                 <p className="question-prompt">{currentQuestion.prompt}</p>
@@ -290,80 +305,107 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             )}
           </div>
 
-          {/* Answer: type right away, or use the mic below */}
-          {!lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' ? (
-            <div className="answer-input-row">
-              <input
-                className={`form-input answer-input ${speechState === 'listening' ? 'listening' : ''}`}
-                autoFocus
-                placeholder={speechState === 'listening'
-                  ? (lang === 'id' ? 'Mendengarkan...' : 'Listening...')
-                  : isKanji
-                    ? (lang === 'id' ? 'Ketik cara baca dalam hiragana, atau tekan mikrofon...' : 'Type the reading in hiragana, or tap the mic...')
-                    : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang, atau tekan mikrofon...' : 'Type your answer in Japanese, or tap the mic...')}
-                value={speechState === 'listening' ? interimTranscript : editedTranscript}
-                readOnly={speechState === 'listening'}
-                onChange={(e) => setEditedTranscript(e.target.value)}
-                onKeyDown={(e) => {
-                  // Don't submit while an IME (kana → kanji) conversion is in progress
-                  if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleManualSubmit();
-                }}
+          {/* Multiple choice (reading): pick one, then submit */}
+          {isChoice && currentQuestion.choices && (
+            <>
+              <MultipleChoice
+                choices={currentQuestion.choices}
+                selected={selectedChoice}
+                onSelect={setSelectedChoice}
+                result={lastEvaluation && selectedChoice !== null && currentQuestion.correctChoice !== undefined
+                  ? { chosen: selectedChoice, correct: currentQuestion.correctChoice }
+                  : null}
               />
-              <button
-                className="btn btn-primary"
-                onClick={handleManualSubmit}
-                disabled={!editedTranscript.trim() || speechState === 'listening'}
-                title={lang === 'id' ? 'Kirim' : 'Submit'}
-              >
-                <Send size={16} />
-              </button>
-            </div>
-          ) : (
-            <div className="transcript-display">
-              {editedTranscript || finalTranscript || (lang === 'id' ? '(tidak ada jawaban)' : '(no answer)')}
-            </div>
+              {!lastEvaluation && (
+                <button
+                  className="btn btn-primary btn-lg"
+                  disabled={selectedChoice === null}
+                  onClick={() => selectedChoice !== null && submitChoice(selectedChoice)}
+                >
+                  <Send size={16} /> {lang === 'id' ? 'Kirim Jawaban' : 'Submit'}
+                </button>
+              )}
+            </>
           )}
 
-          {/* Kanji: give up and see the answer without guessing */}
-          {isKanji && !lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' && (
-            <button className="btn btn-ghost btn-sm" onClick={handleRevealAnswer}>
-              <Eye size={14} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
-            </button>
-          )}
-
-          {/* Mic Controls */}
-          <div className="game-controls">
-            {speechSupported ? (
-              <button
-                className={`mic-button ${speechState === 'listening' ? 'listening' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
-                onClick={speechState === 'listening' ? stopListening : startListening}
-                title={speechState === 'listening'
-                  ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording')
-                  : (lang === 'id' ? 'Bicara' : 'Speak')}
-                disabled={
-                  speechState === 'evaluating' ||
-                  speechState === 'processing' ||
-                  isPaused ||
-                  !!lastEvaluation
-                }
-              >
-                {speechState === 'listening' ? (
-                  <Square size={28} />
-                ) : speechState === 'evaluating' || speechState === 'processing' ? (
-                  <Loader2 size={28} style={{ animation: 'spin 0.8s linear infinite' }} />
-                ) : speechState === 'correct' ? (
-                  <Check size={28} />
-                ) : (
-                  <Mic size={28} />
-                )}
-              </button>
+          {!isChoice && (
+            <>
+            {/* Answer: type right away, or use the mic below */}
+            {!lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' ? (
+              <div className="answer-input-row">
+                <input
+                  className={`form-input answer-input ${speechState === 'listening' ? 'listening' : ''}`}
+                  autoFocus
+                  placeholder={speechState === 'listening'
+                    ? (lang === 'id' ? 'Mendengarkan...' : 'Listening...')
+                    : isKanji
+                      ? (lang === 'id' ? 'Ketik cara baca dalam hiragana, atau tekan mikrofon...' : 'Type the reading in hiragana, or tap the mic...')
+                      : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang, atau tekan mikrofon...' : 'Type your answer in Japanese, or tap the mic...')}
+                  value={speechState === 'listening' ? interimTranscript : editedTranscript}
+                  readOnly={speechState === 'listening'}
+                  onChange={(e) => setEditedTranscript(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Don't submit while an IME (kana → kanji) conversion is in progress
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleManualSubmit();
+                  }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handleManualSubmit}
+                  disabled={!editedTranscript.trim() || speechState === 'listening'}
+                  title={lang === 'id' ? 'Kirim' : 'Submit'}
+                >
+                  <Send size={16} />
+                </button>
+              </div>
             ) : (
-              <button className="mic-button" disabled>
-                <MicOff size={28} />
+              <div className="transcript-display">
+                {editedTranscript || finalTranscript || (lang === 'id' ? '(tidak ada jawaban)' : '(no answer)')}
+              </div>
+            )}
+
+            {/* Kanji: give up and see the answer without guessing */}
+            {isKanji && !lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' && (
+              <button className="btn btn-ghost btn-sm" onClick={handleRevealAnswer}>
+                <Eye size={14} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
               </button>
             )}
-            <span className="speech-state-label">{getSpeechStateLabel()}</span>
-          </div>
+
+            {/* Mic Controls */}
+            <div className="game-controls">
+              {speechSupported ? (
+                <button
+                  className={`mic-button ${speechState === 'listening' ? 'listening' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
+                  onClick={speechState === 'listening' ? stopListening : startListening}
+                  title={speechState === 'listening'
+                    ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording')
+                    : (lang === 'id' ? 'Bicara' : 'Speak')}
+                  disabled={
+                    speechState === 'evaluating' ||
+                    speechState === 'processing' ||
+                    isPaused ||
+                    !!lastEvaluation
+                  }
+                >
+                  {speechState === 'listening' ? (
+                    <Square size={28} />
+                  ) : speechState === 'evaluating' || speechState === 'processing' ? (
+                    <Loader2 size={28} style={{ animation: 'spin 0.8s linear infinite' }} />
+                  ) : speechState === 'correct' ? (
+                    <Check size={28} />
+                  ) : (
+                    <Mic size={28} />
+                  )}
+                </button>
+              ) : (
+                <button className="mic-button" disabled>
+                  <MicOff size={28} />
+                </button>
+              )}
+              <span className="speech-state-label">{getSpeechStateLabel()}</span>
+            </div>
+            </>
+          )}
 
           {/* Evaluation Error */}
           {evaluationError && (
@@ -390,7 +432,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 <div className="feedback-title">
                   <RotateCcw size={20} /> {currentAttempts.length === 0
                     ? (lang === 'id' ? 'Jawaban ditampilkan' : 'Answer revealed')
-                    : isExam
+                    : isExam || isChoice
                       ? (lang === 'id' ? 'Salah' : 'Incorrect')
                       : (lang === 'id' ? 'Belum tepat' : 'Not quite right')}
                 </div>
@@ -421,8 +463,8 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 )}
               </div>
 
-              {/* Reveal Answer */}
-              {answerVisible && (
+              {/* Reveal Answer (multiple choice marks the right option in the list instead) */}
+              {answerVisible && !isChoice && (
                 <div className="answer-reveal">
                   <div className="answer-reveal-label">
                     {isKanji

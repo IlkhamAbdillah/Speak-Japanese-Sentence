@@ -1,15 +1,18 @@
-import type { AppMode, ExerciseMode, InstructionLanguage, UserSettings } from '../types';
+import type { AppMode, ExerciseMode, InstructionLanguage, JLPTSection, UserSettings } from '../types';
 import {
   APP_MODE_LABELS,
   APP_MODE_DESCRIPTIONS,
   EXERCISE_MODE_LABELS,
   EXERCISE_MODE_DESCRIPTIONS,
-  isConversationMode,
+  JLPT_SECTION_LABELS,
+  JLPT_SECTION_DESCRIPTIONS,
+  canUseExamMode,
 } from '../types';
 
 interface ModePickerProps {
   appMode: AppMode;
   exerciseMode: ExerciseMode;
+  jlptSection: JLPTSection;
   examMode: boolean;
   lang: InstructionLanguage;
   onChange: (partial: Partial<UserSettings>) => void;
@@ -19,10 +22,48 @@ interface ModePickerProps {
 
 const APP_MODES = Object.keys(APP_MODE_LABELS) as AppMode[];
 const EXERCISE_MODES = Object.keys(EXERCISE_MODE_LABELS) as ExerciseMode[];
+const JLPT_SECTIONS = Object.keys(JLPT_SECTION_LABELS) as JLPTSection[];
 
-export default function ModePicker({ appMode, exerciseMode, examMode, lang, onChange, variant = 'cards' }: ModePickerProps) {
-  // Conversation has no questions to grade, so it can't be an exam
-  const examToggle = !isConversationMode({ appMode, exerciseMode }) && (
+type Option = { key: string; label: string; desc: string; active: boolean; select: () => void };
+
+export default function ModePicker({
+  appMode,
+  exerciseMode,
+  jlptSection,
+  examMode,
+  lang,
+  onChange,
+  variant = 'cards',
+}: ModePickerProps) {
+  const modeOptions: Option[] = APP_MODES.map((mode) => ({
+    key: mode,
+    label: APP_MODE_LABELS[mode][lang],
+    desc: APP_MODE_DESCRIPTIONS[mode][lang],
+    active: appMode === mode,
+    select: () => onChange({ appMode: mode }),
+  }));
+
+  // The second row depends on the mode: practice types, or JLPT test sections
+  const subOptions: Option[] = appMode === 'practice'
+    ? EXERCISE_MODES.map((mode) => ({
+        key: mode,
+        label: EXERCISE_MODE_LABELS[mode][lang],
+        desc: EXERCISE_MODE_DESCRIPTIONS[mode][lang],
+        active: exerciseMode === mode,
+        select: () => onChange({ exerciseMode: mode }),
+      }))
+    : JLPT_SECTIONS.map((section) => ({
+        key: section,
+        label: JLPT_SECTION_LABELS[section][lang],
+        desc: JLPT_SECTION_DESCRIPTIONS[section][lang],
+        active: jlptSection === section,
+        select: () => onChange({ jlptSection: section }),
+      }));
+  const subTitle = appMode === 'practice'
+    ? (lang === 'id' ? 'Jenis Latihan' : 'Practice Type')
+    : (lang === 'id' ? 'Bagian Tes' : 'Test Section');
+
+  const examToggle = canUseExamMode({ appMode, exerciseMode, jlptSection }) && (
     <label className="exam-toggle">
       <input
         type="checkbox"
@@ -43,76 +84,41 @@ export default function ModePicker({ appMode, exerciseMode, examMode, lang, onCh
     return (
       <div className="mode-picker">
         <div className="option-group">
-          {APP_MODES.map((mode) => (
-            <button
-              key={mode}
-              className={`option-pill ${appMode === mode ? 'active' : ''}`}
-              onClick={() => onChange({ appMode: mode })}
-              title={APP_MODE_DESCRIPTIONS[mode][lang]}
-            >
-              {APP_MODE_LABELS[mode][lang]}
+          {modeOptions.map((o) => (
+            <button key={o.key} className={`option-pill ${o.active ? 'active' : ''}`} onClick={o.select} title={o.desc}>
+              {o.label}
             </button>
           ))}
         </div>
-        {appMode === 'practice' && (
-          <div className="option-group mode-picker-sub">
-            {EXERCISE_MODES.map((mode) => (
-              <button
-                key={mode}
-                className={`option-pill option-pill-sm ${exerciseMode === mode ? 'active' : ''}`}
-                onClick={() => onChange({ exerciseMode: mode })}
-                title={EXERCISE_MODE_DESCRIPTIONS[mode][lang]}
-              >
-                {EXERCISE_MODE_LABELS[mode][lang]}
-              </button>
-            ))}
-          </div>
-        )}
-        <p className="mode-picker-desc">
-          {appMode === 'practice'
-            ? EXERCISE_MODE_DESCRIPTIONS[exerciseMode][lang]
-            : APP_MODE_DESCRIPTIONS[appMode][lang]}
-        </p>
+        <div className="option-group mode-picker-sub">
+          {subOptions.map((o) => (
+            <button key={o.key} className={`option-pill option-pill-sm ${o.active ? 'active' : ''}`} onClick={o.select} title={o.desc}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+        <p className="mode-picker-desc">{subOptions.find((o) => o.active)?.desc}</p>
         {examToggle}
       </div>
     );
   }
 
+  const cards = (options: Option[]) => (
+    <div className="mode-cards">
+      {options.map((o) => (
+        <div key={o.key} className={`mode-card ${o.active ? 'active' : ''}`} onClick={o.select}>
+          <div className="mode-card-title">{o.label}</div>
+          <div className="mode-card-desc">{o.desc}</div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="mode-picker">
-      <div className="mode-cards">
-        {APP_MODES.map((mode) => (
-          <div
-            key={mode}
-            className={`mode-card ${appMode === mode ? 'active' : ''}`}
-            onClick={() => onChange({ appMode: mode })}
-          >
-            <div className="mode-card-title">{APP_MODE_LABELS[mode][lang]}</div>
-            <div className="mode-card-desc">{APP_MODE_DESCRIPTIONS[mode][lang]}</div>
-          </div>
-        ))}
-      </div>
-
-      {appMode === 'practice' && (
-        <>
-          <h3 className="mode-picker-subtitle">
-            {lang === 'id' ? 'Jenis Latihan' : 'Practice Type'}
-          </h3>
-          <div className="mode-cards">
-            {EXERCISE_MODES.map((mode) => (
-              <div
-                key={mode}
-                className={`mode-card ${exerciseMode === mode ? 'active' : ''}`}
-                onClick={() => onChange({ exerciseMode: mode })}
-              >
-                <div className="mode-card-title">{EXERCISE_MODE_LABELS[mode][lang]}</div>
-                <div className="mode-card-desc">{EXERCISE_MODE_DESCRIPTIONS[mode][lang]}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
+      {cards(modeOptions)}
+      <h3 className="mode-picker-subtitle">{subTitle}</h3>
+      {cards(subOptions)}
       {examToggle}
     </div>
   );

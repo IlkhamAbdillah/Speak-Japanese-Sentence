@@ -9,8 +9,13 @@ import type {
   ConversationMessage,
   ConversationCorrection,
 } from '../types';
+import { READING_QUESTION_COUNT } from '../types';
 
 // ─── Provider Request Helpers ───────────────────────────
+
+// Reading tests (a long Japanese text plus questions and explanations) need room;
+// Gemini 2.5 models also spend part of this budget on internal reasoning.
+const MAX_OUTPUT_TOKENS = 8192;
 
 interface ChatMessage {
   role: 'system' | 'user';
@@ -48,7 +53,7 @@ async function callOpenAI(
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 2048,
+      max_tokens: MAX_OUTPUT_TOKENS,
     }),
   });
 
@@ -77,7 +82,7 @@ async function callGoogle(
 
   const body: Record<string, unknown> = {
     contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+    generationConfig: { temperature: 0.7, maxOutputTokens: MAX_OUTPUT_TOKENS },
   };
 
   if (systemInstruction) {
@@ -122,7 +127,7 @@ async function callAnthropic(
     },
     body: JSON.stringify({
       model,
-      max_tokens: 2048,
+      max_tokens: MAX_OUTPUT_TOKENS,
       system: systemMsg,
       messages: userMessages,
     }),
@@ -331,22 +336,24 @@ export async function testConnection(
 
 // ─── Prompt Construction ────────────────────────────────
 
-/** What kind of question set to generate: a practice type or kanji. */
-export type QuestionSetKind = 'translation' | 'situation' | 'kanji';
+/** What kind of question set to generate: a practice type or a JLPT mock test section. */
+export type QuestionSetKind = 'translation' | 'situation' | 'kanji' | 'reading';
+
+type PracticeKind = 'translation' | 'situation';
 
 const JLPT_ORDER: JLPTLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
 const langNameOf = (lang: InstructionLanguage) => (lang === 'id' ? 'Indonesian' : 'English');
 
 function buildQuestionGenerationPrompt(
-  kind: Exclude<QuestionSetKind, 'kanji'>,
+  kind: PracticeKind,
   level: JLPTLevel,
   lang: InstructionLanguage,
   count: number
 ): ChatMessage[] {
   const langName = langNameOf(lang);
 
-  const modeInstructions: Record<Exclude<QuestionSetKind, 'kanji'>, string> = {
+  const modeInstructions: Record<PracticeKind, string> = {
     translation: `Create sentences in ${langName} that the user must translate into Japanese. The sentences should match JLPT ${level} vocabulary and grammar.`,
     situation: `Create real-world situations described in ${langName} that the user must respond to in Japanese. The situations should use JLPT ${level} appropriate scenarios.`,
   };
@@ -505,6 +512,50 @@ Evaluate this response. Output pure JSON only.`;
   ];
 }
 
+const READING_LENGTH: Record<JLPTLevel, string> = {
+  N5: '150–250',
+  N4: '250–350',
+  N3: '350–500',
+  N2: '500–700',
+  N1: '600–900',
+};
+
+function buildReadingGenerationPrompt(level: JLPTLevel, lang: InstructionLanguage): ChatMessage[] {
+  const langName = langNameOf(lang);
+
+  const system = `You are a JLPT test writer. Write one JLPT ${level} reading comprehension test (読解) in the style of the real test.
+
+Rules:
+- Write one original Japanese text of about ${READING_LENGTH[level]} characters: a short story, diary, letter, notice, or essay
+- Use only vocabulary, kanji, and grammar appropriate for JLPT ${level}
+- Write exactly ${READING_QUESTION_COUNT} questions about the text, in Japanese, like the real JLPT (e.g. 「〜のはなぜですか。」「この文章の内容と合っているものはどれですか。」)
+- Each question must be answerable only from the text
+- The choices are in Japanese
+- Every question has exactly 4 choices and exactly ONE correct answer; the other 3 must be clearly wrong to someone who understood the text, but plausible to a learner
+- "answerIndex" is the 0-based index of the correct choice
+- "explanation" is in ${langName}: explain why the correct choice is right and briefly why the others are wrong, pointing to the relevant part of the text
+
+Respond ONLY with valid JSON matching this exact schema:
+{
+  "passage": "the Japanese text",
+  "questions": [
+    {
+      "question": "question in Japanese",
+      "choices": ["choice 1", "choice 2", "choice 3", "choice 4"],
+      "answerIndex": 0,
+      "explanation": "explanation in ${langName}"
+    }
+  ]
+}
+
+Output ONLY the JSON, no markdown formatting, no code blocks, no explanation.`;
+
+  return [
+    { role: 'system', content: system },
+    { role: 'user', content: `Write one JLPT ${level} reading test with ${READING_QUESTION_COUNT} questions. Output pure JSON only.` },
+  ];
+}
+
 function buildConversationPrompt(
   level: JLPTLevel,
   lang: InstructionLanguage,
@@ -618,6 +669,61 @@ function isKanjiAnswerCorrect(question: Question, answer: string): boolean {
 
 // ─── Public API ─────────────────────────────────────────
 
+/**
+ * Shuffle the choices so the right answer isn't always where the AI tends to put it
+ * (usually first). Returns null if the AI's item is malformed.
+ */
+function toMultipleChoice(raw: Record<string, unknown>): { choices: string[]; correctChoice: number } | null {
+  const choices = Array.isArray(raw.choices) ? raw.choices.map(String) : [];
+  const answer = Number(raw.answerIndex);
+  if (choices.length < 2 || !Number.isInteger(answer) || answer < 0 || answer >= choices.length) return null;
+
+  const order = choices.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return { choices: order.map((i) => choices[i]), correctChoice: order.indexOf(answer) };
+}
+
+/** One reading text with READING_QUESTION_COUNT multiple-choice questions about it. */
+async function generateReadingQuestions(
+  ai: AIConfig,
+  level: JLPTLevel,
+  lang: InstructionLanguage
+): Promise<Question[]> {
+  const messages = buildReadingGenerationPrompt(level, lang);
+  const raw = await callProvider(ai.provider, ai.apiKey, ai.model, messages, ai.baseUrl);
+  const parsed = JSON.parse(extractJSON(raw));
+
+  const passage = String(parsed?.passage ?? '').trim();
+  const items: Record<string, unknown>[] = Array.isArray(parsed?.questions) ? parsed.questions : [];
+  if (!passage) throw new Error('The AI did not return a reading text.');
+
+  const questions = items.flatMap((q, i): Question[] => {
+    const mc = toMultipleChoice(q);
+    if (!mc) return [];
+    return [{
+      questionId: `q-${Date.now()}-${i}`,
+      mode: 'reading',
+      jlptLevel: level,
+      instructionLanguage: lang,
+      prompt: String(q.question ?? ''),
+      passage,
+      intendedMeaning: '',
+      expectedAnswer: mc.choices[mc.correctChoice],
+      acceptableAnswerGuidelines: '',
+      ...mc,
+      explanation: String(q.explanation ?? ''),
+      relevantVocabulary: [],
+      relevantGrammar: [],
+    }];
+  });
+
+  if (questions.length === 0) throw new Error('The AI returned no usable questions. Please try again.');
+  return questions.slice(0, READING_QUESTION_COUNT);
+}
+
 export async function generateQuestions(
   ai: AIConfig,
   kind: QuestionSetKind,
@@ -625,6 +731,8 @@ export async function generateQuestions(
   lang: InstructionLanguage,
   count: number
 ): Promise<Question[]> {
+  if (kind === 'reading') return generateReadingQuestions(ai, level, lang);
+
   // For kanji, ask for a few extra so words from lower levels can be dropped
   const requested = kind === 'kanji' ? count + 5 : count;
   const messages = kind === 'kanji'

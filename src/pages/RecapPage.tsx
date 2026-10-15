@@ -190,6 +190,13 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
 
           {expandedQ.has(idx) && (
             <div className="review-item-body">
+              {result.question.passage && (
+                <div className="review-detail">
+                  <div className="review-detail-label">{lang === 'id' ? 'Teks Bacaan' : 'Reading Text'}</div>
+                  <div className="reading-passage">{result.question.passage}</div>
+                </div>
+              )}
+
               <div className="review-detail">
                 <div className="review-detail-label">{lang === 'id' ? 'Soal' : 'Prompt'}</div>
                 <div className="review-detail-value">{result.question.prompt}</div>

@@ -7,7 +7,7 @@ import type {
   UserSettings,
   EvaluationResponse,
 } from '../types';
-import { isExamMode } from '../types';
+import { isExamMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import { saveSession } from '../services/storage';
 import { generateQuestions, evaluateAnswer, aiConfigFromSettings } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
@@ -34,6 +34,8 @@ interface UseSessionReturn {
   startListening: () => void;
   stopListening: () => void;
   submitTranscript: (transcript: string) => Promise<void>;
+  /** Answer a multiple-choice question with the index of the chosen option */
+  submitChoice: (choiceIndex: number) => void;
   nextQuestion: () => void;
   retryQuestion: () => void;
   revealAnswer: () => void;
@@ -43,9 +45,9 @@ interface UseSessionReturn {
   isPaused: boolean;
 }
 
-/** Attempts allowed per question — an exam only gets one. */
+/** Attempts allowed per question — an exam or a multiple-choice question only gets one. */
 export function getMaxAttempts(settings: UserSettings): number {
-  return isExamMode(settings) ? 1 : settings.maxAttempts;
+  return isExamMode(settings) || isMultipleChoiceMode(settings) ? 1 : settings.maxAttempts;
 }
 
 export function useSession(): UseSessionReturn {
@@ -113,8 +115,8 @@ export function useSession(): UseSessionReturn {
 
       try {
         const kind: QuestionSetKind =
-          settings.appMode === 'kanji'
-            ? 'kanji'
+          settings.appMode === 'jlpt'
+            ? settings.jlptSection
             : (settings.exerciseMode === 'situation' ? 'situation' : 'translation');
 
         const questions = await generateQuestions(
@@ -131,11 +133,13 @@ export function useSession(): UseSessionReturn {
           endedAt: null,
           status: 'in-progress',
           appMode: settings.appMode,
+          jlptSection: settings.appMode === 'jlpt' ? settings.jlptSection : undefined,
           examMode: isExamMode(settings),
           mode: settings.exerciseMode,
           jlptLevel: settings.jlptLevel,
           instructionLanguage: settings.instructionLanguage,
-          questionCount: settings.questionCount,
+          // Reading always has a fixed number of questions, and the AI may return fewer
+          questionCount: questions.length,
           questions,
           results: [],
           currentQuestionIndex: 0,
@@ -195,7 +199,7 @@ export function useSession(): UseSessionReturn {
       },
     }, {
       // A kanji reading is a single word: submit as soon as it's recognised
-      waitForSilence: settingsRef.current?.appMode !== 'kanji',
+      waitForSilence: !(settingsRef.current && isKanjiMode(settingsRef.current)),
     });
 
     if (!started) {
@@ -323,6 +327,36 @@ export function useSession(): UseSessionReturn {
     setSpeechState('idle');
   }, []);
 
+  // Multiple choice (reading): checked locally, one attempt, no AI call
+  const submitChoice = useCallback((choiceIndex: number) => {
+    const question = sessionRef.current?.questions[sessionRef.current.currentQuestionIndex];
+    if (!question?.choices || lastEvaluation) return;
+
+    const correct = choiceIndex === question.correctChoice;
+    const chosen = question.choices[choiceIndex] ?? '';
+    setLastEvaluation({
+      correct,
+      transcript: chosen,
+      feedback: question.explanation ?? '',
+      grammarNotes: [],
+      vocabularyNotes: [],
+      hint: null,
+      nextAction: correct ? 'next_question' : 'reveal_answer',
+    });
+    setCurrentAttempts([{
+      attemptNumber: 1,
+      transcript: chosen,
+      isCorrect: correct,
+      feedback: question.explanation ?? '',
+      grammarNotes: [],
+      vocabularyNotes: [],
+      hint: null,
+      responseTimeMs: elapsedMs,
+      timestamp: Date.now(),
+    }]);
+    setSpeechState(correct ? 'correct' : 'retry');
+  }, [lastEvaluation, elapsedMs]);
+
   // Give up on the question: show the answer and only allow moving on
   const revealAnswer = useCallback(() => {
     stopRecognition();
@@ -391,6 +425,7 @@ export function useSession(): UseSessionReturn {
     startListening,
     stopListening: stopListeningFn,
     submitTranscript,
+    submitChoice,
     nextQuestion,
     retryQuestion,
     revealAnswer,

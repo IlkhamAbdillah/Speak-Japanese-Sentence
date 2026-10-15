@@ -17,6 +17,7 @@ import {
   JLPT_DESCRIPTIONS,
   isConversationMode,
   isExamMode,
+  isMultipleChoiceMode,
 } from '../types';
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
@@ -38,7 +39,9 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [manualModelInput, setManualModelInput] = useState(false);
 
   const lang = settings.instructionLanguage;
-  const isConversation = isConversationMode(settings);
+  // Conversations have no question count; a reading test always has READING_QUESTION_COUNT
+  const hasQuestionCount = !isConversationMode(settings)
+    && !(settings.appMode === 'jlpt' && settings.jlptSection === 'reading');
 
   const update = (partial: Partial<UserSettings>) => {
     const next = { ...settings, ...partial };
@@ -365,6 +368,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         <ModePicker
           appMode={settings.appMode}
           exerciseMode={settings.exerciseMode}
+          jlptSection={settings.jlptSection}
           examMode={settings.examMode}
           lang={lang}
           onChange={update}
@@ -393,8 +397,8 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         </p>
       </div>
 
-      {/* Question Count — conversations have no fixed number of questions */}
-      {!isConversation && (
+      {/* Question Count */}
+      {hasQuestionCount && (
         <div className="settings-section">
           <h2 className="settings-section-title">
             {lang === 'id' ? 'Jumlah Soal' : 'Question Count'}
@@ -446,15 +450,17 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
             className="form-select"
             value={settings.maxAttempts}
             onChange={(e) => update({ maxAttempts: Number(e.target.value) })}
-            disabled={isExamMode(settings)}
+            disabled={isExamMode(settings) || isMultipleChoiceMode(settings)}
           >
             {[2, 3, 5, 10].map((n) => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
-          {isExamMode(settings) && (
+          {(isExamMode(settings) || isMultipleChoiceMode(settings)) && (
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-xs)' }}>
-              {lang === 'id' ? 'Mode ujian selalu hanya 1 kali jawab.' : 'Exam mode always allows only 1 attempt.'}
+              {isMultipleChoiceMode(settings)
+                ? (lang === 'id' ? 'Soal pilihan ganda selalu hanya 1 kali jawab.' : 'Multiple-choice questions always allow only 1 attempt.')
+                : (lang === 'id' ? 'Mode ujian selalu hanya 1 kali jawab.' : 'Exam mode always allows only 1 attempt.')}
             </p>
           )}
         </div>

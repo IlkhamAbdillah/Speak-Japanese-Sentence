@@ -1,5 +1,5 @@
 import type { UserSettings, Session, SessionSummary } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODE_LABELS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODE_LABELS, JLPT_SECTION_LABELS } from '../types';
 
 const KEYS = {
   settings: 'sjp_settings',
@@ -53,6 +53,13 @@ export function loadSettings(): UserSettings {
     settings.appMode = 'practice';
     settings.examMode = true;
     if (settings.exerciseMode === 'conversation') settings.exerciseMode = 'translation';
+  }
+  // The grammar section was removed
+  if (!(settings.jlptSection in JLPT_SECTION_LABELS)) settings.jlptSection = 'kanji';
+  // Kanji recognition moved into the JLPT mock test
+  if ((settings.appMode as string) === 'kanji') {
+    settings.appMode = 'jlpt';
+    settings.jlptSection = 'kanji';
   }
   return settings;
 }
@@ -119,6 +126,7 @@ export function sessionToSummary(session: Session): SessionSummary {
     endedAt: session.endedAt,
     status: session.status,
     appMode: session.appMode,
+    jlptSection: session.jlptSection,
     examMode: session.examMode,
     mode: session.mode,
     jlptLevel: session.jlptLevel,
