@@ -206,7 +206,8 @@ export interface SessionSummary {
 export type AIProvider = 'openai' | 'google' | 'anthropic' | 'ollama';
 
 export const AI_PROVIDER_LABELS: Record<AIProvider, string> = {
-  ollama: 'Ollama',
+  // Any OpenAI-compatible URL (Ollama, tunnels…); shown translated as settings.ollamaUrl
+  ollama: 'Custom URL',
   openai: 'OpenAI',
   google: 'Google Gemini',
   anthropic: 'Anthropic Claude',

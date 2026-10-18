@@ -159,6 +159,22 @@ export function resolveOllamaUrl(baseUrl?: string): string {
   return `${clean}/v1/chat/completions`;
 }
 
+const PROVIDER_HOSTS: Record<Exclude<AIProvider, 'ollama'>, string> = {
+  openai: 'api.openai.com',
+  google: 'generativelanguage.googleapis.com',
+  anthropic: 'api.anthropic.com',
+};
+
+/** The host the AI requests go to, without scheme, port or path (e.g. "tunnel.example.com"). */
+export function aiHostOf(settings: Pick<UserSettings, 'aiProvider' | 'ollamaBaseUrl'>): string {
+  if (settings.aiProvider !== 'ollama') return PROVIDER_HOSTS[settings.aiProvider];
+  try {
+    return new URL(resolveOllamaUrl(settings.ollamaBaseUrl)).hostname;
+  } catch {
+    return settings.ollamaBaseUrl ?? '';
+  }
+}
+
 export async function fetchOllamaModels(
   baseUrl?: string,
   apiKey?: string

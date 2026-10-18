@@ -126,7 +126,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                 className={`option-pill ${settings.aiProvider === p ? 'active' : ''}`}
                 onClick={() => update({ aiProvider: p, aiModel: AI_PROVIDER_MODELS[p][0] })}
               >
-                {AI_PROVIDER_LABELS[p]}
+                {p === 'ollama' ? t('settings.ollamaUrl') : AI_PROVIDER_LABELS[p]}
               </button>
             ))}
           </div>
@@ -138,7 +138,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
           </div>
         )}
 
-        {/* Ollama URL (shown first for Ollama so user can configure URL before fetching models) */}
+        {/* Custom URL (shown first so the URL can be set before fetching models) */}
         {settings.aiProvider === 'ollama' && (
           <div className="form-group">
             <label className="form-label">

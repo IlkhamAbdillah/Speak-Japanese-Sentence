@@ -15,6 +15,7 @@ import SessionSetupDialog from '../components/SessionSetupDialog';
 import { getLearningStats } from '../services/storage';
 import type { LearningStats } from '../services/storage';
 import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
+import { aiHostOf } from '../services/ai';
 import { useState, useEffect, useCallback } from 'react';
 
 interface HomePageProps {
@@ -119,13 +120,13 @@ export default function HomePage({
 
         {!hasValidAuth && (
           <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)' }}>
-            ⚙️ {t('home.apiKeyMissing')}
+            {t('home.apiKeyMissing')}
           </div>
         )}
 
-        {settings.aiProvider === 'ollama' && (
+        {hasValidAuth && (
           <div className="alert alert-info" style={{ marginBottom: 'var(--space-md)' }}>
-            🦙 {t('home.usingOllama', { model: settings.aiModel, url: settings.ollamaBaseUrl || 'http://localhost:11434/v1' })}
+            {settings.aiModel} · {aiHostOf(settings)}
           </div>
         )}
 
