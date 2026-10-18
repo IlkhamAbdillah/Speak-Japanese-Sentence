@@ -13,6 +13,7 @@ dist-ssr
 *.local
 idea.md
 fix.md
+CLAUDE.md
 
 # Editor directories and files
 .vscode/*
