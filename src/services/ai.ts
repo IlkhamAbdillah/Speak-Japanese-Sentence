@@ -252,6 +252,10 @@ async function callOllama(
       model,
       messages,
       temperature: 0.7,
+      // Stream so bytes keep flowing: proxies like Cloudflare Tunnel cut a
+      // request off with a 524 if no response arrives within 100s, and slow
+      // local models can take longer than that to finish a reading test.
+      stream: true,
     }),
   };
 
@@ -278,8 +282,38 @@ async function callOllama(
     throw new Error(`Ollama API error (${res.status}): ${cleanErr}`);
   }
 
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? '';
+  // Servers that ignore `stream` answer with a plain JSON body.
+  if (!res.body || !(res.headers.get('content-type') ?? '').includes('text/event-stream')) {
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? '';
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let content = '';
+  const handleLine = (line: string) => {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('data:')) return;
+    const payloadText = trimmed.slice(5).trim();
+    if (payloadText === '[DONE]') return;
+    try {
+      const chunk = JSON.parse(payloadText);
+      content += chunk.choices?.[0]?.delta?.content ?? '';
+    } catch {
+      // ignore keep-alive or malformed lines
+    }
+  };
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    lines.forEach(handleLine);
+  }
+  handleLine(buffer + decoder.decode());
+  return content;
 }
 
 // ─── Unified Call ───────────────────────────────────────

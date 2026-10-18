@@ -5,6 +5,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: [
+      '.ilkham.my.id'
+    ],
     proxy: {
       '/ollama-api': {
         target: 'http://localhost:11434',
