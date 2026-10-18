@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, History, Settings, Mic } from 'lucide-react';
 import type { MicPermission } from '../types';
+import { useI18n } from '../i18n';
 
 interface HeaderProps {
   micPermission: MicPermission;
@@ -10,6 +11,7 @@ export default function Header({ micPermission }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname;
+  const { t } = useI18n();
 
   return (
     <header className="header">
@@ -22,7 +24,7 @@ export default function Header({ micPermission }: HeaderProps) {
         {micPermission === 'granted' && (
           <span className="mic-status granted">
             <Mic size={12} />
-            Ready
+            {t('header.micReady')}
           </span>
         )}
 
@@ -31,7 +33,7 @@ export default function Header({ micPermission }: HeaderProps) {
           onClick={() => navigate('/')}
         >
           <Home size={16} />
-          Home
+          {t('header.home')}
         </button>
 
         <button
@@ -39,7 +41,7 @@ export default function Header({ micPermission }: HeaderProps) {
           onClick={() => navigate('/history')}
         >
           <History size={16} />
-          History
+          {t('header.history')}
         </button>
 
         <button
@@ -47,7 +49,7 @@ export default function Header({ micPermission }: HeaderProps) {
           onClick={() => navigate('/settings')}
         >
           <Settings size={16} />
-          Settings
+          {t('header.settings')}
         </button>
       </nav>
     </header>

@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "label": "🇮🇩 Indonesia",
+    "locale": "id-ID",
+    "promptName": "Indonesian"
+  },
+  "common": {
+    "cancel": "Batal",
+    "back": "Kembali",
+    "retry": "Coba lagi",
+    "send": "Kirim",
+    "speak": "Bicara",
+    "cancelRecording": "Batalkan rekaman",
+    "listening": "Mendengarkan…",
+    "noAnswer": "(tidak ada jawaban)",
+    "randomTopic": "Topik acak",
+    "questions": "soal",
+    "messageCount": "💬 {count} pesan",
+    "completed": "Selesai",
+    "incomplete": "Belum Selesai",
+    "sessionHistory": "Riwayat Sesi",
+    "home": "Beranda"
+  },
+  "header": {
+    "micReady": "Siap",
+    "home": "Beranda",
+    "history": "Riwayat",
+    "settings": "Pengaturan"
+  },
+  "modes": {
+    "app": {
+      "practice": {
+        "label": "Latihan",
+        "desc": "Terjemahkan kalimat, tanggapi situasi, atau mengobrol dengan AI"
+      },
+      "jlpt": {
+        "label": "Simulasi JLPT",
+        "desc": "Soal bergaya JLPT: kanji dan membaca"
+      }
+    },
+    "exercise": {
+      "translation": {
+        "label": "Latihan Terjemahan",
+        "desc": "Baca kalimat dan terjemahkan ke bahasa Jepang"
+      },
+      "situation": {
+        "label": "Latihan Situasi",
+        "desc": "Merespons situasi nyata dalam bahasa Jepang"
+      },
+      "conversation": {
+        "label": "Latihan Percakapan",
+        "desc": "Mengobrol bebas dengan AI dalam bahasa Jepang, seperti aplikasi chat"
+      }
+    },
+    "jlptSection": {
+      "kanji": {
+        "label": "Kanji",
+        "desc": "Lihat kata kanji lalu ketik atau ucapkan cara membacanya"
+      },
+      "reading": {
+        "label": "Membaca",
+        "desc": "Baca teks bahasa Jepang singkat dan jawab 3 soal pilihan ganda"
+      }
+    },
+    "exam": "Ujian",
+    "legacyJapaneseResponse": "Respons Bahasa Jepang",
+    "practiceType": "Jenis Latihan",
+    "testSection": "Bagian Tes",
+    "examToggle": "Mode Ujian",
+    "examToggleDesc": "hanya 1 kali jawab per soal, penjelasan langsung muncul setelah menjawab"
+  },
+  "jlptLevels": {
+    "N5": "Ekspresi dasar, perkenalan, kosakata umum",
+    "N4": "Percakapan sehari-hari dan kalimat dasar",
+    "N3": "Komunikasi sehari-hari tingkat menengah",
+    "N2": "Kosakata luas dan ekspresi bernuansa",
+    "N1": "Kosakata tingkat lanjut dan bahasa Jepang alami"
+  },
+  "home": {
+    "startConversation": "Mulai Percakapan",
+    "startExam": "Mulai Ujian",
+    "startMockTest": "Mulai Simulasi",
+    "startPractice": "Mulai Latihan",
+    "welcomeTitle": "Siap Berbicara Bahasa Jepang?",
+    "welcomeSubtitle": "Latihan satu kalimat dalam satu waktu, tingkatkan bahasa Jepang Anda, dan lacak progres belajar.",
+    "speechUnsupported": "Browser Anda tidak mendukung Speech Recognition. Gunakan Chrome atau Edge untuk fitur penuh.",
+    "micDenied": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.",
+    "enableMic": "Aktifkan Mikrofon",
+    "startCardTitle": "Mulai Latihan Berbicara",
+    "startCardSubtitle": "Latih kemampuan berbicara bahasa Jepang dengan evaluasi AI.",
+    "examBadge": "Ujian · 1 kali jawab",
+    "apiKeyMissing": "API key belum dikonfigurasi. Buka Settings untuk mengaturnya.",
+    "usingOllama": "Menggunakan Ollama ({model}) di {url}",
+    "configure": "Konfigurasi",
+    "overview": "Ringkasan Belajar",
+    "noSessionsTitle": "Belum ada sesi latihan",
+    "noSessionsText": "Mulai sesi pertama Anda untuk melihat statistik di sini!",
+    "statSessions": "Sesi",
+    "statQuestions": "Soal",
+    "statAccuracy": "Akurasi",
+    "statCorrect": "Benar",
+    "recentSessions": "Sesi Terakhir",
+    "viewAll": "Lihat Semua"
+  },
+  "settings": {
+    "title": "⚙️ Pengaturan",
+    "aiProvider": "Provider AI",
+    "provider": "Provider",
+    "noModelsFound": "Tidak ada model ditemukan. Pastikan Anda sudah pull model (misal: ollama pull llama3.1).",
+    "modelsFound": "Ditemukan {count} model!",
+    "connectionFailed": "Koneksi gagal",
+    "ollamaInfo": "Mendukung Ollama lokal (http://localhost:11434/v1) maupun (https://example.com/api/v1). Pastikan model sudah di-pull di instance Ollama tersebut.",
+    "ollamaUrl": "Ollama API URL / Tunnel URL",
+    "ollamaUrlPlaceholder": "http://localhost:11434/v1 atau https://tunnel.example.com",
+    "ollamaUrlHelp": "Bisa berupa http://localhost:11434/v1, IP LAN, atau URL (https://example.com/api/v1). Akhiran /v1 akan disesuaikan otomatis.",
+    "model": "Model",
+    "fetching": "Mengambil...",
+    "fetchModels": "Fetch Model",
+    "typeManual": "✏️ Ketik Manual",
+    "modelPlaceholder": "Nama model (misal: llama3.1)",
+    "pickList": "📋 Pilih Daftar",
+    "modelsLoaded": "Model berhasil diambil dari server Ollama.",
+    "fetchModelsHelp": "Klik \"Fetch Model\" untuk melihat model yang terinstall di Ollama Anda, atau ketik manual.",
+    "apiKey": "API Key",
+    "apiKeyOptional": "API Key / Token (Opsional)",
+    "apiKeyOptionalPlaceholder": "Kosongkan jika tanpa password/token...",
+    "apiKeyPlaceholder": "Masukkan API key...",
+    "showApiKey": "Tampilkan API key",
+    "hideApiKey": "Sembunyikan API key",
+    "apiKeyOptionalHelp": "Opsional: isi jika tunnel reverse proxy Anda diproteksi Bearer token.",
+    "apiKeyHelp": "Disimpan di perangkat Anda. Tidak pernah dikirim ke server kami.",
+    "testing": "Menguji...",
+    "testConnection": "Test Koneksi",
+    "clearKey": "Hapus Key",
+    "connected": "Terhubung",
+    "mode": "Mode",
+    "jlptLevel": "Level JLPT",
+    "questionCount": "Jumlah Soal",
+    "instructionLanguage": "Bahasa Instruksi",
+    "additionalOptions": "Opsi Lainnya",
+    "maxAttempts": "Maks. Percobaan per Soal",
+    "maxAttemptsChoice": "Soal pilihan ganda selalu hanya 1 kali jawab.",
+    "maxAttemptsExam": "Mode ujian selalu hanya 1 kali jawab.",
+    "enableHints": "Aktifkan petunjuk",
+    "save": "Simpan Pengaturan"
+  },
+  "practice": {
+    "generatingTitle": "Membuat soal latihan...",
+    "generatingText": "AI sedang menyiapkan soal berdasarkan konfigurasi Anda.",
+    "generationFailed": "Gagal membuat soal",
+    "goBack": "Kembali",
+    "questionOf": "Soal {current} dari {total}",
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "endSession": "Akhiri Sesi",
+    "paused": "Sesi Dijeda",
+    "kanjiInstruction": "Bagaimana cara membaca kata ini? Tulis dalam hiragana atau ucapkan.",
+    "readingInstruction": "Baca teks di atas, lalu pilih jawaban yang paling tepat.",
+    "attempt": "Percobaan {current}/{max}",
+    "submitChoice": "Kirim Jawaban",
+    "kanjiPlaceholder": "Ketik cara baca dalam hiragana, atau tekan mikrofon...",
+    "answerPlaceholder": "Ketik jawaban dalam bahasa Jepang, atau tekan mikrofon...",
+    "submit": "Kirim",
+    "showAnswer": "Lihat Jawaban",
+    "correctDone": "Benar! 🎉 Selesai!",
+    "correctNext": "Benar! 🎉 Lanjut ke soal berikutnya...",
+    "answerRevealed": "Jawaban ditampilkan",
+    "incorrect": "Salah",
+    "notQuite": "Belum tepat",
+    "reading": "Cara baca",
+    "expectedAnswer": "Jawaban yang diharapkan",
+    "alsoRead": "Bacaan lain: ",
+    "meaning": "Arti: ",
+    "tryAgain": "Coba Lagi",
+    "finish": "Selesai!",
+    "nextQuestion": "Soal Berikutnya",
+    "endTitle": "Akhiri Sesi?",
+    "endWithResults": "Anda sudah menyelesaikan {count} soal. Sesi akan disimpan sebagai sesi yang belum selesai.",
+    "endWithoutResults": "Sesi ini belum memiliki soal yang diselesaikan dan akan dihapus.",
+    "endConfirm": "Akhiri",
+    "speech": {
+      "idle": "Ketuk untuk berbicara",
+      "listening": "Mendengarkan... terkirim {seconds} detik setelah berhenti bicara · ketuk ■ untuk batal",
+      "listeningKanji": "Mendengarkan... ketuk ■ untuk batal",
+      "processing": "Memproses...",
+      "evaluating": "Mengevaluasi...",
+      "correct": "Benar!",
+      "retry": "Coba lagi",
+      "answered": "Sudah dijawab",
+      "error": "Terjadi kesalahan",
+      "unsupported": "Tidak didukung"
+    }
+  },
+  "kanji": {
+    "correct": "Benar! {word} dibaca 「{reading}」.",
+    "wrong": "Cara baca belum tepat.",
+    "hint": "Dimulai dengan 「{firstKana}」 ({length} huruf kana)"
+  },
+  "conversation": {
+    "intro": "Mengobrol dengan AI dalam bahasa Jepang. Tentukan topik sendiri atau biarkan AI memilih topik acak.",
+    "topicLabel": "Topik / konteks (opsional)",
+    "topicPlaceholder": "mis. Memesan makanan di restoran, kamu pelayannya",
+    "startWithTopic": "Mulai dengan topik ini",
+    "partner": "Teman Bicara AI",
+    "typing": "sedang mengetik…",
+    "end": "Selesai",
+    "composerPlaceholder": "Ketik atau ucapkan pesan dalam bahasa Jepang…",
+    "endTitle": "Akhiri Percakapan?",
+    "endText": "Anda sudah mengirim {count} pesan. Percakapan akan disimpan ke riwayat.",
+    "endConfirm": "Akhiri"
+  },
+  "chat": {
+    "listen": "Dengarkan",
+    "translation": "Terjemahan",
+    "hideCorrection": "Sembunyikan koreksi",
+    "seeCorrection": "Lihat koreksi"
+  },
+  "recap": {
+    "notFound": "Sesi tidak ditemukan",
+    "backHome": "Kembali ke Beranda",
+    "perfOutstanding": "🌟 Luar biasa! Penguasaan yang sangat baik!",
+    "perfGreat": "👏 Bagus sekali! Terus tingkatkan!",
+    "perfOk": "💪 Lumayan! Masih bisa lebih baik.",
+    "perfLow": "📚 Terus berlatih! Setiap usaha membawa kemajuan.",
+    "complete": "Sesi Selesai!",
+    "title": "Rekap Sesi",
+    "firstTry": "Akurasi Pertama",
+    "avgTime": "Rata-rata",
+    "level": "Level",
+    "mode": "Mode",
+    "duration": "Durasi",
+    "date": "Tanggal",
+    "questionDetails": "Detail Soal",
+    "attempts": "{count} percobaan",
+    "readingText": "Teks Bacaan",
+    "prompt": "Soal",
+    "yourAnswer": "Jawaban Anda",
+    "expectedAnswer": "Jawaban yang Diharapkan",
+    "meaning": "Arti",
+    "feedback": "Feedback",
+    "vocabulary": "Kosakata",
+    "grammar": "Tata Bahasa",
+    "practiceAgain": "Latihan Lagi",
+    "conversationTitle": "Rekap Percakapan",
+    "messagesSent": "Pesan Terkirim",
+    "corrections": "Koreksi",
+    "chatTranscript": "Riwayat Chat",
+    "chatAgain": "Ngobrol Lagi"
+  },
+  "history": {
+    "clearAll": "Hapus Semua",
+    "emptyTitle": "Belum ada riwayat sesi",
+    "emptyText": "Mulai sesi latihan pertama Anda!",
+    "view": "Lihat",
+    "clearTitle": "Hapus Semua Riwayat?",
+    "clearText": "Tindakan ini tidak dapat dibatalkan. Semua riwayat sesi akan dihapus secara permanen.",
+    "deleteAll": "Hapus Semua"
+  }
+}

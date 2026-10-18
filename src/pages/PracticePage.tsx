@@ -20,6 +20,8 @@ import { useSession, getMaxAttempts } from '../hooks/useSession';
 import { getSessionModeLabel, isExamMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
 import { isSpeechRecognitionSupported, SILENCE_SUBMIT_MS } from '../services/speech';
+import { useI18n } from '../i18n';
+import type { MessageKey } from '../i18n';
 
 interface PracticePageProps {
   settings: UserSettings;
@@ -62,7 +64,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [editedTranscript, setEditedTranscript] = useState('');
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
-  const lang = settings.instructionLanguage;
+  const { lang, t } = useI18n();
   const isExam = isExamMode(settings);
   const isKanji = isKanjiMode(settings);
   const isChoice = isMultipleChoiceMode(settings);
@@ -147,12 +149,10 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="empty-state">
           <div className="spinner spinner-lg" style={{ margin: '0 auto var(--space-lg)' }}></div>
           <p className="empty-state-title">
-            {lang === 'id' ? 'Membuat soal latihan...' : 'Generating practice questions...'}
+            {t('practice.generatingTitle')}
           </p>
           <p className="empty-state-text">
-            {lang === 'id'
-              ? 'AI sedang menyiapkan soal berdasarkan konfigurasi Anda.'
-              : 'AI is preparing questions based on your configuration.'}
+            {t('practice.generatingText')}
           </p>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="empty-state">
           <div className="empty-state-icon">❌</div>
           <p className="empty-state-title">
-            {lang === 'id' ? 'Gagal membuat soal' : 'Failed to generate questions'}
+            {t('practice.generationFailed')}
           </p>
           <div className="alert alert-error" style={{ maxWidth: 500, margin: 'var(--space-md) auto', textAlign: 'left' }}>
             <AlertCircle size={16} />
@@ -174,10 +174,10 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
             <button className="btn btn-primary" onClick={() => startSession(settings)}>
-              <RotateCcw size={16} /> {lang === 'id' ? 'Coba Lagi' : 'Retry'}
+              <RotateCcw size={16} /> {t('common.retry')}
             </button>
             <button className="btn btn-secondary" onClick={onExit}>
-              {lang === 'id' ? 'Kembali' : 'Go Back'}
+              {t('practice.goBack')}
             </button>
           </div>
         </div>
@@ -201,22 +201,18 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const answerVisible = !!lastEvaluation && (showAnswer || isExam || isChoice);
 
   const getSpeechStateLabel = () => {
-    const labels: Record<string, { en: string; id: string }> = {
-      idle: { en: 'Tap to speak', id: 'Ketuk untuk berbicara' },
-      listening: isKanji
-        ? { en: 'Listening... tap ■ to cancel', id: 'Mendengarkan... ketuk ■ untuk batal' }
-        : {
-            en: `Listening... submits ${SILENCE_SUBMIT_MS / 1000}s after you stop talking · tap ■ to cancel`,
-            id: `Mendengarkan... terkirim ${SILENCE_SUBMIT_MS / 1000} detik setelah berhenti bicara · ketuk ■ untuk batal`,
-          },
-      processing: { en: 'Processing...', id: 'Memproses...' },
-      evaluating: { en: 'Evaluating...', id: 'Mengevaluasi...' },
-      correct: { en: 'Correct!', id: 'Benar!' },
-      retry: isExam ? { en: 'Answered', id: 'Sudah dijawab' } : { en: 'Try again', id: 'Coba lagi' },
-      error: { en: 'Error occurred', id: 'Terjadi kesalahan' },
-      unsupported: { en: 'Not supported', id: 'Tidak didukung' },
+    const labels: Record<string, MessageKey> = {
+      idle: 'practice.speech.idle',
+      listening: isKanji ? 'practice.speech.listeningKanji' : 'practice.speech.listening',
+      processing: 'practice.speech.processing',
+      evaluating: 'practice.speech.evaluating',
+      correct: 'practice.speech.correct',
+      retry: isExam ? 'practice.speech.answered' : 'practice.speech.retry',
+      error: 'practice.speech.error',
+      unsupported: 'practice.speech.unsupported',
     };
-    return labels[speechState]?.[lang] || '';
+    const key = labels[speechState];
+    return key ? t(key, { seconds: SILENCE_SUBMIT_MS / 1000 }) : '';
   };
 
   return (
@@ -229,7 +225,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             {getSessionModeLabel(session, lang)}
           </span>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            {lang === 'id' ? `Soal ${questionNum} dari ${session.questionCount}` : `Question ${questionNum} of ${session.questionCount}`}
+            {t('practice.questionOf', { current: questionNum, total: session.questionCount })}
           </span>
         </div>
         <div className="session-controls">
@@ -237,14 +233,14 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
           <button
             className="btn btn-ghost btn-icon"
             onClick={isPaused ? resumeSession : pauseSession}
-            title={isPaused ? 'Resume' : 'Pause'}
+            title={isPaused ? t('practice.resume') : t('practice.pause')}
           >
             {isPaused ? <Play size={18} /> : <Pause size={18} />}
           </button>
           <button
             className="btn btn-ghost btn-icon"
             onClick={() => setShowConfirmEnd(true)}
-            title={lang === 'id' ? 'Akhiri Sesi' : 'End Session'}
+            title={t('practice.endSession')}
           >
             <X size={18} />
           </button>
@@ -260,9 +256,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
       {isPaused && (
         <div className="empty-state">
           <div className="empty-state-icon">⏸️</div>
-          <p className="empty-state-title">{lang === 'id' ? 'Sesi Dijeda' : 'Session Paused'}</p>
+          <p className="empty-state-title">{t('practice.paused')}</p>
           <button className="btn btn-primary" onClick={resumeSession}>
-            <Play size={16} /> {lang === 'id' ? 'Lanjutkan' : 'Resume'}
+            <Play size={16} /> {t('practice.resume')}
           </button>
         </div>
       )}
@@ -274,9 +270,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             {isKanji ? (
               <>
                 <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
-                  {lang === 'id'
-                    ? 'Bagaimana cara membaca kata ini? Tulis dalam hiragana atau ucapkan.'
-                    : 'How is this word read? Type it in hiragana or say it.'}
+                  {t('practice.kanjiInstruction')}
                 </p>
                 <p className="kanji-display">{currentQuestion.prompt}</p>
               </>
@@ -286,7 +280,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   <div className="reading-passage">{currentQuestion.passage}</div>
                 )}
                 <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
-                  {lang === 'id' ? 'Baca teks di atas, lalu pilih jawaban yang paling tepat.' : 'Read the text above, then choose the best answer.'}
+                  {t('practice.readingInstruction')}
                 </p>
                 <p className="question-prompt jp-text">{currentQuestion.prompt}</p>
               </>
@@ -300,7 +294,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             )}
             {currentAttempts.length > 0 && maxAttempts > 1 && (
               <span className="badge badge-warning" style={{ marginTop: 'var(--space-sm)' }}>
-                {lang === 'id' ? `Percobaan ${currentAttempts.length}/${maxAttempts}` : `Attempt ${currentAttempts.length}/${maxAttempts}`}
+                {t('practice.attempt', { current: currentAttempts.length, max: maxAttempts })}
               </span>
             )}
           </div>
@@ -322,7 +316,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   disabled={selectedChoice === null}
                   onClick={() => selectedChoice !== null && submitChoice(selectedChoice)}
                 >
-                  <Send size={16} /> {lang === 'id' ? 'Kirim Jawaban' : 'Submit'}
+                  <Send size={16} /> {t('practice.submitChoice')}
                 </button>
               )}
             </>
@@ -337,10 +331,10 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   className={`form-input answer-input ${speechState === 'listening' ? 'listening' : ''}`}
                   autoFocus
                   placeholder={speechState === 'listening'
-                    ? (lang === 'id' ? 'Mendengarkan...' : 'Listening...')
+                    ? t('common.listening')
                     : isKanji
-                      ? (lang === 'id' ? 'Ketik cara baca dalam hiragana, atau tekan mikrofon...' : 'Type the reading in hiragana, or tap the mic...')
-                      : (lang === 'id' ? 'Ketik jawaban dalam bahasa Jepang, atau tekan mikrofon...' : 'Type your answer in Japanese, or tap the mic...')}
+                      ? t('practice.kanjiPlaceholder')
+                      : t('practice.answerPlaceholder')}
                   value={speechState === 'listening' ? interimTranscript : editedTranscript}
                   readOnly={speechState === 'listening'}
                   onChange={(e) => setEditedTranscript(e.target.value)}
@@ -353,21 +347,21 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   className="btn btn-primary"
                   onClick={handleManualSubmit}
                   disabled={!editedTranscript.trim() || speechState === 'listening'}
-                  title={lang === 'id' ? 'Kirim' : 'Submit'}
+                  title={t('practice.submit')}
                 >
                   <Send size={16} />
                 </button>
               </div>
             ) : (
               <div className="transcript-display">
-                {editedTranscript || finalTranscript || (lang === 'id' ? '(tidak ada jawaban)' : '(no answer)')}
+                {editedTranscript || finalTranscript || t('common.noAnswer')}
               </div>
             )}
 
             {/* Kanji: give up and see the answer without guessing */}
             {isKanji && !lastEvaluation && speechState !== 'evaluating' && speechState !== 'processing' && (
               <button className="btn btn-ghost btn-sm" onClick={handleRevealAnswer}>
-                <Eye size={14} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
+                <Eye size={14} /> {t('practice.showAnswer')}
               </button>
             )}
 
@@ -378,8 +372,8 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   className={`mic-button ${speechState === 'listening' ? 'listening' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
                   onClick={speechState === 'listening' ? stopListening : startListening}
                   title={speechState === 'listening'
-                    ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording')
-                    : (lang === 'id' ? 'Bicara' : 'Speak')}
+                    ? t('common.cancelRecording')
+                    : t('common.speak')}
                   disabled={
                     speechState === 'evaluating' ||
                     speechState === 'processing' ||
@@ -420,8 +414,8 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             <div className="correct-flash animate-in">
               <Check size={20} />
               {questionNum >= session.questionCount
-                ? (lang === 'id' ? 'Benar! 🎉 Selesai!' : 'Correct! 🎉 All done!')
-                : (lang === 'id' ? 'Benar! 🎉 Lanjut ke soal berikutnya...' : 'Correct! 🎉 Next question...')}
+                ? t('practice.correctDone')
+                : t('practice.correctNext')}
             </div>
           )}
 
@@ -431,10 +425,10 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
               <div className="feedback-panel feedback-incorrect">
                 <div className="feedback-title">
                   <RotateCcw size={20} /> {currentAttempts.length === 0
-                    ? (lang === 'id' ? 'Jawaban ditampilkan' : 'Answer revealed')
+                    ? t('practice.answerRevealed')
                     : isExam || isChoice
-                      ? (lang === 'id' ? 'Salah' : 'Incorrect')
-                      : (lang === 'id' ? 'Belum tepat' : 'Not quite right')}
+                      ? t('practice.incorrect')
+                      : t('practice.notQuite')}
                 </div>
                 {lastEvaluation.feedback && <p className="feedback-text">{lastEvaluation.feedback}</p>}
 
@@ -468,8 +462,8 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 <div className="answer-reveal">
                   <div className="answer-reveal-label">
                     {isKanji
-                      ? (lang === 'id' ? 'Cara baca' : 'Reading')
-                      : (lang === 'id' ? 'Jawaban yang diharapkan' : 'Expected answer')}
+                      ? t('practice.reading')
+                      : t('practice.expectedAnswer')}
                   </div>
                   <div className="answer-reveal-text">
                     {isKanji ? `${currentQuestion.prompt}（${currentQuestion.expectedAnswer}）` : currentQuestion.expectedAnswer}
@@ -478,12 +472,12 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                     <>
                       {currentQuestion.alternativeAnswers && currentQuestion.alternativeAnswers.length > 0 && (
                         <div className="answer-reveal-extra">
-                          {lang === 'id' ? 'Bacaan lain: ' : 'Also read: '}
+                          {t('practice.alsoRead')}
                           <span className="jp-text">{currentQuestion.alternativeAnswers.join('、')}</span>
                         </div>
                       )}
                       <div className="answer-reveal-extra">
-                        {lang === 'id' ? 'Arti: ' : 'Meaning: '}{currentQuestion.intendedMeaning}
+                        {t('practice.meaning')}{currentQuestion.intendedMeaning}
                       </div>
                       {currentQuestion.example && (
                         <div className="answer-reveal-extra">
@@ -504,20 +498,20 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                     setEditedTranscript('');
                     setShowAnswer(false);
                   }}>
-                    <RotateCcw size={16} /> {lang === 'id' ? 'Coba Lagi' : 'Try Again'}
+                    <RotateCcw size={16} /> {t('practice.tryAgain')}
                   </button>
                 ) : (
                   <button className="btn btn-primary btn-lg" onClick={goToNextQuestion}>
                     <SkipForward size={16} />
                     {questionNum >= session.questionCount
-                      ? (lang === 'id' ? 'Selesai!' : 'Finish!')
-                      : (lang === 'id' ? 'Soal Berikutnya' : 'Next Question')}
+                      ? t('practice.finish')
+                      : t('practice.nextQuestion')}
                   </button>
                 )}
                 {!answerVisible && (
                   // In kanji mode showing the answer means giving up on the question
                   <button className="btn btn-ghost" onClick={isKanji ? handleRevealAnswer : () => setShowAnswer(true)}>
-                    <Eye size={16} /> {lang === 'id' ? 'Lihat Jawaban' : 'Show Answer'}
+                    <Eye size={16} /> {t('practice.showAnswer')}
                   </button>
                 )}
               </div>
@@ -531,23 +525,19 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
         <div className="dialog-overlay" onClick={() => setShowConfirmEnd(false)}>
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <h3 className="dialog-title">
-              {lang === 'id' ? 'Akhiri Sesi?' : 'End Session?'}
+              {t('practice.endTitle')}
             </h3>
             <p className="dialog-text">
               {session.results.length > 0
-                ? (lang === 'id'
-                  ? `Anda sudah menyelesaikan ${session.results.length} soal. Sesi akan disimpan sebagai sesi yang belum selesai.`
-                  : `You've completed ${session.results.length} questions. The session will be saved as incomplete.`)
-                : (lang === 'id'
-                  ? 'Sesi ini belum memiliki soal yang diselesaikan dan akan dihapus.'
-                  : 'This session has no completed questions and will be discarded.')}
+                ? t('practice.endWithResults', { count: session.results.length })
+                : t('practice.endWithoutResults')}
             </p>
             <div className="dialog-actions">
               <button className="btn btn-secondary" onClick={() => setShowConfirmEnd(false)}>
-                {lang === 'id' ? 'Batal' : 'Cancel'}
+                {t('common.cancel')}
               </button>
               <button className="btn btn-danger" onClick={handleEndSession}>
-                {lang === 'id' ? 'Akhiri' : 'End Session'}
+                {t('practice.endConfirm')}
               </button>
             </div>
           </div>

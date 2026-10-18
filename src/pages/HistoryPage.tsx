@@ -6,16 +6,14 @@ import {
   AlertCircle,
   History as HistoryIcon,
 } from 'lucide-react';
-import type { SessionSummary, InstructionLanguage } from '../types';
+import type { SessionSummary } from '../types';
 import { getSessionModeLabel } from '../types';
 import { getSessionSummaries, deleteSession, clearAllSessions } from '../services/storage';
+import { languageMeta, useI18n } from '../i18n';
 
-interface HistoryPageProps {
-  lang: InstructionLanguage;
-}
-
-export default function HistoryPage({ lang }: HistoryPageProps) {
+export default function HistoryPage() {
   const navigate = useNavigate();
+  const { lang, t } = useI18n();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
@@ -35,7 +33,7 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
   };
 
   const formatDate = (ts: number) => {
-    return new Date(ts).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', {
+    return new Date(ts).toLocaleDateString(languageMeta(lang).locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -57,12 +55,12 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-xl)' }}>
         <h1 className="card-title" style={{ fontSize: 'var(--text-2xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <HistoryIcon size={24} />
-          {lang === 'id' ? 'Riwayat Sesi' : 'Session History'}
+          {t('common.sessionHistory')}
         </h1>
         {sessions.length > 0 && (
           <button className="btn btn-danger btn-sm" onClick={() => setConfirmClearAll(true)}>
             <Trash2 size={14} />
-            {lang === 'id' ? 'Hapus Semua' : 'Clear All'}
+            {t('history.clearAll')}
           </button>
         )}
       </div>
@@ -71,12 +69,10 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
         <div className="empty-state">
           <div className="empty-state-icon">📋</div>
           <p className="empty-state-title">
-            {lang === 'id' ? 'Belum ada riwayat sesi' : 'No session history yet'}
+            {t('history.emptyTitle')}
           </p>
           <p className="empty-state-text">
-            {lang === 'id'
-              ? 'Mulai sesi latihan pertama Anda!'
-              : 'Start your first practice session!'}
+            {t('history.emptyText')}
           </p>
         </div>
       ) : (
@@ -92,7 +88,7 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
               </span>
               <span className="history-meta-item">
                 {s.messageCount !== undefined
-                  ? `💬 ${s.messageCount} ${lang === 'id' ? 'pesan' : 'messages'}`
+                  ? t('common.messageCount', { count: s.messageCount })
                   : `${s.correctCount}/${s.questionCount} (${s.accuracy}%)`}
               </span>
               <span className="history-meta-item">
@@ -100,8 +96,8 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
               </span>
               <span className={`badge ${s.status === 'completed' ? 'badge-success' : 'badge-warning'}`}>
                 {s.status === 'completed'
-                  ? (lang === 'id' ? 'Selesai' : 'Completed')
-                  : (lang === 'id' ? 'Belum Selesai' : 'Incomplete')}
+                  ? t('common.completed')
+                  : t('common.incomplete')}
               </span>
             </div>
             <div className="history-actions">
@@ -109,7 +105,7 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
                 className="btn btn-ghost btn-sm"
                 onClick={() => navigate(`/recap/${s.sessionId}`)}
               >
-                <Eye size={14} /> {lang === 'id' ? 'Lihat' : 'View'}
+                <Eye size={14} /> {t('history.view')}
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -129,19 +125,17 @@ export default function HistoryPage({ lang }: HistoryPageProps) {
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <h3 className="dialog-title">
               <AlertCircle size={20} style={{ color: 'var(--color-error)', display: 'inline', marginRight: 8 }} />
-              {lang === 'id' ? 'Hapus Semua Riwayat?' : 'Clear All History?'}
+              {t('history.clearTitle')}
             </h3>
             <p className="dialog-text">
-              {lang === 'id'
-                ? 'Tindakan ini tidak dapat dibatalkan. Semua riwayat sesi akan dihapus secara permanen.'
-                : 'This action cannot be undone. All session history will be permanently deleted.'}
+              {t('history.clearText')}
             </p>
             <div className="dialog-actions">
               <button className="btn btn-secondary" onClick={() => setConfirmClearAll(false)}>
-                {lang === 'id' ? 'Batal' : 'Cancel'}
+                {t('common.cancel')}
               </button>
               <button className="btn btn-danger" onClick={handleClearAll}>
-                {lang === 'id' ? 'Hapus Semua' : 'Delete All'}
+                {t('history.deleteAll')}
               </button>
             </div>
           </div>

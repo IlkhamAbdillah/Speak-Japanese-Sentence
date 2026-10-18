@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Volume2, Languages, PencilLine } from 'lucide-react';
-import type { ConversationMessage, InstructionLanguage } from '../types';
+import type { ConversationMessage } from '../types';
+import { useI18n } from '../i18n';
 import { speakJapanese, isSpeechSynthesisSupported } from '../services/speech';
 
 interface ChatBubbleProps {
   message: ConversationMessage;
-  lang: InstructionLanguage;
   /** Show corrections expanded by default (e.g. on the recap page) */
   expandCorrection?: boolean;
 }
@@ -13,10 +13,11 @@ interface ChatBubbleProps {
 const formatTime = (ts: number) =>
   new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-export default function ChatBubble({ message, lang, expandCorrection = false }: ChatBubbleProps) {
+export default function ChatBubble({ message, expandCorrection = false }: ChatBubbleProps) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [showCorrection, setShowCorrection] = useState(expandCorrection);
   const isAI = message.role === 'ai';
+  const { t } = useI18n();
 
   return (
     <div className={`chat-row ${isAI ? 'chat-row-ai' : 'chat-row-user'}`}>
@@ -33,7 +34,7 @@ export default function ChatBubble({ message, lang, expandCorrection = false }: 
               <button
                 className="chat-bubble-action"
                 onClick={() => speakJapanese(message.text)}
-                title={lang === 'id' ? 'Dengarkan' : 'Listen'}
+                title={t('chat.listen')}
               >
                 <Volume2 size={14} />
               </button>
@@ -42,7 +43,7 @@ export default function ChatBubble({ message, lang, expandCorrection = false }: 
               <button
                 className={`chat-bubble-action ${showTranslation ? 'active' : ''}`}
                 onClick={() => setShowTranslation((v) => !v)}
-                title={lang === 'id' ? 'Terjemahan' : 'Translation'}
+                title={t('chat.translation')}
               >
                 <Languages size={14} />
               </button>
@@ -55,9 +56,7 @@ export default function ChatBubble({ message, lang, expandCorrection = false }: 
           <div className="chat-correction">
             <button className="chat-correction-toggle" onClick={() => setShowCorrection((v) => !v)}>
               <PencilLine size={12} />
-              {showCorrection
-                ? (lang === 'id' ? 'Sembunyikan koreksi' : 'Hide correction')
-                : (lang === 'id' ? 'Lihat koreksi' : 'See correction')}
+              {showCorrection ? t('chat.hideCorrection') : t('chat.seeCorrection')}
             </button>
             {showCorrection && (
               <div className="chat-correction-body">

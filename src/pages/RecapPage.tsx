@@ -15,19 +15,20 @@ import {
   MessageCircle,
   PencilLine,
 } from 'lucide-react';
-import type { Session, InstructionLanguage } from '../types';
+import type { Session } from '../types';
 import { getSessionModeLabel } from '../types';
 import ChatBubble from '../components/ChatBubble';
 import { getSessionById } from '../services/storage';
+import { useI18n } from '../i18n';
 
 interface RecapPageProps {
   sessionId?: string;
-  lang: InstructionLanguage;
   onPracticeAgain: () => void;
 }
 
-export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAgain }: RecapPageProps) {
+export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }: RecapPageProps) {
   const navigate = useNavigate();
+  const { lang, t } = useI18n();
   const params = useParams();
   const id = propSessionId || params.sessionId || '';
 
@@ -47,10 +48,10 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
         <div className="empty-state">
           <div className="empty-state-icon">🔍</div>
           <p className="empty-state-title">
-            {lang === 'id' ? 'Sesi tidak ditemukan' : 'Session not found'}
+            {t('recap.notFound')}
           </p>
           <button className="btn btn-primary" onClick={() => navigate('/')}>
-            <Home size={16} /> {lang === 'id' ? 'Kembali ke Beranda' : 'Back to Home'}
+            <Home size={16} /> {t('recap.backHome')}
           </button>
         </div>
       </div>
@@ -61,7 +62,6 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
     return (
       <ConversationRecap
         session={session}
-        lang={lang}
         onPracticeAgain={onPracticeAgain}
       />
     );
@@ -97,10 +97,10 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
   };
 
   const getPerformanceMessage = () => {
-    if (accuracy >= 90) return lang === 'id' ? '🌟 Luar biasa! Penguasaan yang sangat baik!' : '🌟 Outstanding! Excellent mastery!';
-    if (accuracy >= 70) return lang === 'id' ? '👏 Bagus sekali! Terus tingkatkan!' : '👏 Great job! Keep improving!';
-    if (accuracy >= 50) return lang === 'id' ? '💪 Lumayan! Masih bisa lebih baik.' : '💪 Not bad! Room for improvement.';
-    return lang === 'id' ? '📚 Terus berlatih! Setiap usaha membawa kemajuan.' : '📚 Keep practicing! Every effort brings progress.';
+    if (accuracy >= 90) return t('recap.perfOutstanding');
+    if (accuracy >= 70) return t('recap.perfGreat');
+    if (accuracy >= 50) return t('recap.perfOk');
+    return t('recap.perfLow');
   };
 
   return (
@@ -109,8 +109,8 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       <div className="recap-header animate-in">
         <h1 className="recap-title">
           {session.status === 'completed'
-            ? (lang === 'id' ? 'Sesi Selesai!' : 'Session Complete!')
-            : (lang === 'id' ? 'Rekap Sesi' : 'Session Recap')}
+            ? t('recap.complete')
+            : t('recap.title')}
         </h1>
         <p className="recap-subtitle">{getPerformanceMessage()}</p>
       </div>
@@ -123,28 +123,28 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
           </div>
           <div className="stat-label">
             <BarChart3 size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Akurasi' : 'Accuracy'}
+            {t('home.statAccuracy')}
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{correctCount}/{totalQuestions}</div>
           <div className="stat-label">
             <Target size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Benar' : 'Correct'}
+            {t('home.statCorrect')}
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{firstAttemptAccuracy}%</div>
           <div className="stat-label">
             <Trophy size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Akurasi Pertama' : 'First Try'}
+            {t('recap.firstTry')}
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{formatDuration(avgTimeMs)}</div>
           <div className="stat-label">
             <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Rata-rata' : 'Avg Time'}
+            {t('recap.avgTime')}
           </div>
         </div>
       </div>
@@ -152,16 +152,16 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       {/* Session Info */}
       <div className="card animate-in" style={{ marginBottom: 'var(--space-xl)', animationDelay: '150ms' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-md)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-          <span><strong>{lang === 'id' ? 'Level:' : 'Level:'}</strong> {session.jlptLevel}</span>
-          <span><strong>{lang === 'id' ? 'Mode:' : 'Mode:'}</strong> {getSessionModeLabel(session, lang)}</span>
-          <span><strong>{lang === 'id' ? 'Durasi:' : 'Duration:'}</strong> {formatDuration(totalTimeMs)}</span>
-          <span><strong>{lang === 'id' ? 'Tanggal:' : 'Date:'}</strong> {new Date(session.startedAt).toLocaleString()}</span>
+          <span><strong>{t('recap.level')}:</strong> {session.jlptLevel}</span>
+          <span><strong>{t('recap.mode')}:</strong> {getSessionModeLabel(session, lang)}</span>
+          <span><strong>{t('recap.duration')}:</strong> {formatDuration(totalTimeMs)}</span>
+          <span><strong>{t('recap.date')}:</strong> {new Date(session.startedAt).toLocaleString()}</span>
         </div>
       </div>
 
       {/* Question Reviews */}
       <h3 className="card-title" style={{ marginBottom: 'var(--space-md)' }}>
-        {lang === 'id' ? 'Detail Soal' : 'Question Details'}
+        {t('recap.questionDetails')}
       </h3>
 
       {session.results.map((result, idx) => (
@@ -182,7 +182,7 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>
-                {result.attempts.length} {lang === 'id' ? 'percobaan' : 'attempt(s)'}
+                {t('recap.attempts', { count: result.attempts.length })}
               </span>
               {expandedQ.has(idx) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
@@ -192,25 +192,25 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
             <div className="review-item-body">
               {result.question.passage && (
                 <div className="review-detail">
-                  <div className="review-detail-label">{lang === 'id' ? 'Teks Bacaan' : 'Reading Text'}</div>
+                  <div className="review-detail-label">{t('recap.readingText')}</div>
                   <div className="reading-passage">{result.question.passage}</div>
                 </div>
               )}
 
               <div className="review-detail">
-                <div className="review-detail-label">{lang === 'id' ? 'Soal' : 'Prompt'}</div>
+                <div className="review-detail-label">{t('recap.prompt')}</div>
                 <div className="review-detail-value">{result.question.prompt}</div>
               </div>
 
               <div className="review-detail">
-                <div className="review-detail-label">{lang === 'id' ? 'Jawaban Anda' : 'Your Answer'}</div>
+                <div className="review-detail-label">{t('recap.yourAnswer')}</div>
                 <div className="review-detail-value jp-text jp-text-sm">
-                  {result.finalTranscript || (lang === 'id' ? '(tidak ada jawaban)' : '(no answer)')}
+                  {result.finalTranscript || t('common.noAnswer')}
                 </div>
               </div>
 
               <div className="review-detail">
-                <div className="review-detail-label">{lang === 'id' ? 'Jawaban yang Diharapkan' : 'Expected Answer'}</div>
+                <div className="review-detail-label">{t('recap.expectedAnswer')}</div>
                 <div className="review-detail-value jp-text jp-text-sm" style={{ color: 'var(--accent-primary)' }}>
                   {result.question.expectedAnswer}
                 </div>
@@ -218,14 +218,14 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
 
               {result.question.mode === 'kanji' && (
                 <div className="review-detail">
-                  <div className="review-detail-label">{lang === 'id' ? 'Arti' : 'Meaning'}</div>
+                  <div className="review-detail-label">{t('recap.meaning')}</div>
                   <div className="review-detail-value">{result.question.intendedMeaning}</div>
                 </div>
               )}
 
               {result.attempts.length > 0 && (
                 <div className="review-detail">
-                  <div className="review-detail-label">{lang === 'id' ? 'Feedback' : 'Feedback'}</div>
+                  <div className="review-detail-label">{t('recap.feedback')}</div>
                   <div className="review-detail-value" style={{ fontSize: 'var(--text-sm)' }}>
                     {result.attempts[result.attempts.length - 1].feedback}
                   </div>
@@ -234,7 +234,7 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
 
               {result.question.relevantVocabulary.length > 0 && (
                 <div className="review-detail">
-                  <div className="review-detail-label">{lang === 'id' ? 'Kosakata' : 'Vocabulary'}</div>
+                  <div className="review-detail-label">{t('recap.vocabulary')}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
                     {result.question.relevantVocabulary.map((v, i) => (
                       <span key={i} className="badge badge-info" style={{ fontFamily: 'var(--font-jp)' }}>{v}</span>
@@ -245,7 +245,7 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
 
               {result.question.relevantGrammar.length > 0 && (
                 <div className="review-detail">
-                  <div className="review-detail-label">{lang === 'id' ? 'Tata Bahasa' : 'Grammar'}</div>
+                  <div className="review-detail-label">{t('recap.grammar')}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
                     {result.question.relevantGrammar.map((g, i) => (
                       <span key={i} className="badge badge-accent">{g}</span>
@@ -261,13 +261,13 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
       {/* Actions */}
       <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
         <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
-          <RotateCcw size={16} /> {lang === 'id' ? 'Latihan Lagi' : 'Practice Again'}
+          <RotateCcw size={16} /> {t('recap.practiceAgain')}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate('/history')}>
-          <History size={16} /> {lang === 'id' ? 'Riwayat Sesi' : 'Session History'}
+          <History size={16} /> {t('common.sessionHistory')}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>
-          <Home size={16} /> {lang === 'id' ? 'Beranda' : 'Home'}
+          <Home size={16} /> {t('common.home')}
         </button>
       </div>
     </div>
@@ -276,12 +276,12 @@ export default function RecapPage({ sessionId: propSessionId, lang, onPracticeAg
 
 // ─── Conversation recap ─────────────────────────────────
 
-function ConversationRecap({ session, lang, onPracticeAgain }: {
+function ConversationRecap({ session, onPracticeAgain }: {
   session: Session;
-  lang: InstructionLanguage;
   onPracticeAgain: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const messages = session.conversation?.messages ?? [];
   const userMessages = messages.filter((m) => m.role === 'user');
   const corrected = userMessages.filter((m) => m.correction).length;
@@ -294,10 +294,10 @@ function ConversationRecap({ session, lang, onPracticeAgain }: {
     <div className="app-main" style={{ maxWidth: 800, margin: '0 auto' }}>
       <div className="recap-header animate-in">
         <h1 className="recap-title">
-          {lang === 'id' ? 'Rekap Percakapan' : 'Conversation Recap'}
+          {t('recap.conversationTitle')}
         </h1>
         <p className="recap-subtitle">
-          {session.conversation?.topic || (lang === 'id' ? 'Topik acak' : 'Random topic')}
+          {session.conversation?.topic || t('common.randomTopic')}
         </p>
       </div>
 
@@ -306,7 +306,7 @@ function ConversationRecap({ session, lang, onPracticeAgain }: {
           <div className="stat-value">{userMessages.length}</div>
           <div className="stat-label">
             <MessageCircle size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Pesan Terkirim' : 'Messages Sent'}
+            {t('recap.messagesSent')}
           </div>
         </div>
         <div className="stat-card">
@@ -315,40 +315,40 @@ function ConversationRecap({ session, lang, onPracticeAgain }: {
           </div>
           <div className="stat-label">
             <PencilLine size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Koreksi' : 'Corrections'}
+            {t('recap.corrections')}
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{session.jlptLevel}</div>
-          <div className="stat-label">Level</div>
+          <div className="stat-label">{t('recap.level')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{minutes}m</div>
           <div className="stat-label">
             <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
-            {lang === 'id' ? 'Durasi' : 'Duration'}
+            {t('recap.duration')}
           </div>
         </div>
       </div>
 
       <h3 className="card-title" style={{ marginBottom: 'var(--space-md)' }}>
-        {lang === 'id' ? 'Riwayat Chat' : 'Chat Transcript'}
+        {t('recap.chatTranscript')}
       </h3>
       <div className="chat-messages chat-messages-static">
         {messages.map((m) => (
-          <ChatBubble key={m.id} message={m} lang={lang} expandCorrection />
+          <ChatBubble key={m.id} message={m} expandCorrection />
         ))}
       </div>
 
       <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
         <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
-          <RotateCcw size={16} /> {lang === 'id' ? 'Ngobrol Lagi' : 'Chat Again'}
+          <RotateCcw size={16} /> {t('recap.chatAgain')}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate('/history')}>
-          <History size={16} /> {lang === 'id' ? 'Riwayat Sesi' : 'Session History'}
+          <History size={16} /> {t('common.sessionHistory')}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>
-          <Home size={16} /> {lang === 'id' ? 'Beranda' : 'Home'}
+          <Home size={16} /> {t('common.home')}
         </button>
       </div>
     </div>

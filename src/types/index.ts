@@ -1,3 +1,6 @@
+import { translate } from '../i18n';
+import type { InstructionLanguage } from '../i18n';
+
 // ─── App Modes ──────────────────────────────────────────
 // practice: translation / situation / conversation practice
 // jlpt:     JLPT mock test — kanji reading or reading comprehension
@@ -8,69 +11,22 @@ export type AppMode = 'practice' | 'jlpt';
 /** Older sessions may carry modes that no longer exist. */
 export type StoredAppMode = AppMode | 'exam' | 'kanji';
 
-export const APP_MODE_LABELS: Record<AppMode, { en: string; id: string }> = {
-  practice: { en: 'Practice', id: 'Latihan' },
-  jlpt: { en: 'JLPT Mock Test', id: 'Simulasi JLPT' },
-};
-
-export const APP_MODE_DESCRIPTIONS: Record<AppMode, { en: string; id: string }> = {
-  practice: {
-    en: 'Translate sentences, respond to situations, or chat with AI',
-    id: 'Terjemahkan kalimat, tanggapi situasi, atau mengobrol dengan AI',
-  },
-  jlpt: {
-    en: 'JLPT-style questions: kanji and reading',
-    id: 'Soal bergaya JLPT: kanji dan membaca',
-  },
-};
+export const APP_MODES: AppMode[] = ['practice', 'jlpt'];
 
 // ─── JLPT Mock Test Sections ────────────────────────────
 export type JLPTSection = 'kanji' | 'reading';
 
-export const JLPT_SECTION_LABELS: Record<JLPTSection, { en: string; id: string }> = {
-  kanji: { en: 'Kanji', id: 'Kanji' },
-  reading: { en: 'Reading', id: 'Membaca' },
-};
-
-export const JLPT_SECTION_DESCRIPTIONS: Record<JLPTSection, { en: string; id: string }> = {
-  kanji: {
-    en: 'See a kanji word and type or say how it is read',
-    id: 'Lihat kata kanji lalu ketik atau ucapkan cara membacanya',
-  },
-  reading: {
-    en: 'Read a short Japanese text and answer 3 multiple-choice questions',
-    id: 'Baca teks bahasa Jepang singkat dan jawab 3 soal pilihan ganda',
-  },
-};
+export const JLPT_SECTIONS: JLPTSection[] = ['kanji', 'reading'];
 
 /** Reading tests always have one passage with this many questions. */
 export const READING_QUESTION_COUNT = 3;
 
-export const EXAM_MODE_LABEL = { en: 'Exam', id: 'Ujian' } as const;
-
 // ─── Exercise Modes (Practice types) ────────────────────
 export type ExerciseMode = 'translation' | 'situation' | 'conversation';
 
-export const EXERCISE_MODE_LABELS: Record<ExerciseMode, { en: string; id: string }> = {
-  translation: { en: 'Translation Practice', id: 'Latihan Terjemahan' },
-  situation: { en: 'Situation Practice', id: 'Latihan Situasi' },
-  conversation: { en: 'Conversation Practice', id: 'Latihan Percakapan' },
-};
+export const EXERCISE_MODES: ExerciseMode[] = ['translation', 'situation', 'conversation'];
 
-export const EXERCISE_MODE_DESCRIPTIONS: Record<ExerciseMode, { en: string; id: string }> = {
-  translation: {
-    en: 'Read a sentence and translate it into Japanese',
-    id: 'Baca kalimat dan terjemahkan ke bahasa Jepang',
-  },
-  situation: {
-    en: 'Respond to a real-world situation in Japanese',
-    id: 'Merespons situasi nyata dalam bahasa Jepang',
-  },
-  conversation: {
-    en: 'Chat freely with AI in Japanese, like a messaging app',
-    id: 'Mengobrol bebas dengan AI dalam bahasa Jepang, seperti aplikasi chat',
-  },
-};
+// Labels and descriptions for all of the above live in src/i18n/locales/*.json
 
 /** Label for a session, tolerating sessions saved before modes changed. */
 export function getSessionModeLabel(
@@ -78,15 +34,15 @@ export function getSessionModeLabel(
   lang: InstructionLanguage
 ): string {
   // Sessions saved when "exam" was its own mode
-  if (session.appMode === 'exam') return EXAM_MODE_LABEL[lang];
+  if (session.appMode === 'exam') return translate(lang, 'modes.exam');
 
   const jlptSection = session.appMode === 'kanji' ? 'kanji' : session.jlptSection;
   const base = jlptSection
-    ? `JLPT · ${JLPT_SECTION_LABELS[jlptSection][lang]}`
-    : session.mode in EXERCISE_MODE_LABELS
-      ? EXERCISE_MODE_LABELS[session.mode as ExerciseMode][lang]
-      : (lang === 'id' ? 'Respons Bahasa Jepang' : 'Japanese Response');
-  return session.examMode ? `${base} · ${EXAM_MODE_LABEL[lang]}` : base;
+    ? `JLPT · ${translate(lang, `modes.jlptSection.${jlptSection}.label`)}`
+    : (EXERCISE_MODES as string[]).includes(session.mode)
+      ? translate(lang, `modes.exercise.${session.mode as ExerciseMode}.label`)
+      : translate(lang, 'modes.legacyJapaneseResponse');
+  return session.examMode ? `${base} · ${translate(lang, 'modes.exam')}` : base;
 }
 
 type ModeSettings = Pick<UserSettings, 'appMode' | 'exerciseMode' | 'jlptSection' | 'examMode'>;
@@ -117,31 +73,11 @@ export function isExamMode(settings: ModeSettings): boolean {
 // ─── JLPT Levels ────────────────────────────────────────
 export type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
-export const JLPT_DESCRIPTIONS: Record<JLPTLevel, { en: string; id: string }> = {
-  N5: {
-    en: 'Basic expressions, introductions, common vocabulary',
-    id: 'Ekspresi dasar, perkenalan, kosakata umum',
-  },
-  N4: {
-    en: 'Everyday conversations and basic connected sentences',
-    id: 'Percakapan sehari-hari dan kalimat dasar',
-  },
-  N3: {
-    en: 'Intermediate everyday communication',
-    id: 'Komunikasi sehari-hari tingkat menengah',
-  },
-  N2: {
-    en: 'Broader vocabulary and nuanced expressions',
-    id: 'Kosakata luas dan ekspresi bernuansa',
-  },
-  N1: {
-    en: 'Advanced vocabulary and complex natural Japanese',
-    id: 'Kosakata tingkat lanjut dan bahasa Jepang alami',
-  },
-};
+export const JLPT_LEVELS: JLPTLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
 // ─── Instruction Language ───────────────────────────────
-export type InstructionLanguage = 'en' | 'id';
+// The languages themselves are defined in src/i18n
+export type { InstructionLanguage };
 
 // ─── Question ───────────────────────────────────────────
 export type QuestionMode = 'translation' | 'situation' | 'kanji' | 'reading';

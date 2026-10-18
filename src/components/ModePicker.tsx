@@ -1,28 +1,16 @@
-import type { AppMode, ExerciseMode, InstructionLanguage, JLPTSection, UserSettings } from '../types';
-import {
-  APP_MODE_LABELS,
-  APP_MODE_DESCRIPTIONS,
-  EXERCISE_MODE_LABELS,
-  EXERCISE_MODE_DESCRIPTIONS,
-  JLPT_SECTION_LABELS,
-  JLPT_SECTION_DESCRIPTIONS,
-  canUseExamMode,
-} from '../types';
+import type { AppMode, ExerciseMode, JLPTSection, UserSettings } from '../types';
+import { APP_MODES, EXERCISE_MODES, JLPT_SECTIONS, canUseExamMode } from '../types';
+import { useI18n } from '../i18n';
 
 interface ModePickerProps {
   appMode: AppMode;
   exerciseMode: ExerciseMode;
   jlptSection: JLPTSection;
   examMode: boolean;
-  lang: InstructionLanguage;
   onChange: (partial: Partial<UserSettings>) => void;
   /** 'cards' shows descriptions (settings page); 'pills' is compact (home page) */
   variant?: 'cards' | 'pills';
 }
-
-const APP_MODES = Object.keys(APP_MODE_LABELS) as AppMode[];
-const EXERCISE_MODES = Object.keys(EXERCISE_MODE_LABELS) as ExerciseMode[];
-const JLPT_SECTIONS = Object.keys(JLPT_SECTION_LABELS) as JLPTSection[];
 
 type Option = { key: string; label: string; desc: string; active: boolean; select: () => void };
 
@@ -31,14 +19,14 @@ export default function ModePicker({
   exerciseMode,
   jlptSection,
   examMode,
-  lang,
   onChange,
   variant = 'cards',
 }: ModePickerProps) {
+  const { t } = useI18n();
   const modeOptions: Option[] = APP_MODES.map((mode) => ({
     key: mode,
-    label: APP_MODE_LABELS[mode][lang],
-    desc: APP_MODE_DESCRIPTIONS[mode][lang],
+    label: t(`modes.app.${mode}.label`),
+    desc: t(`modes.app.${mode}.desc`),
     active: appMode === mode,
     select: () => onChange({ appMode: mode }),
   }));
@@ -47,21 +35,19 @@ export default function ModePicker({
   const subOptions: Option[] = appMode === 'practice'
     ? EXERCISE_MODES.map((mode) => ({
         key: mode,
-        label: EXERCISE_MODE_LABELS[mode][lang],
-        desc: EXERCISE_MODE_DESCRIPTIONS[mode][lang],
+        label: t(`modes.exercise.${mode}.label`),
+        desc: t(`modes.exercise.${mode}.desc`),
         active: exerciseMode === mode,
         select: () => onChange({ exerciseMode: mode }),
       }))
     : JLPT_SECTIONS.map((section) => ({
         key: section,
-        label: JLPT_SECTION_LABELS[section][lang],
-        desc: JLPT_SECTION_DESCRIPTIONS[section][lang],
+        label: t(`modes.jlptSection.${section}.label`),
+        desc: t(`modes.jlptSection.${section}.desc`),
         active: jlptSection === section,
         select: () => onChange({ jlptSection: section }),
       }));
-  const subTitle = appMode === 'practice'
-    ? (lang === 'id' ? 'Jenis Latihan' : 'Practice Type')
-    : (lang === 'id' ? 'Bagian Tes' : 'Test Section');
+  const subTitle = appMode === 'practice' ? t('modes.practiceType') : t('modes.testSection');
 
   const examToggle = canUseExamMode({ appMode, exerciseMode, jlptSection }) && (
     <label className="exam-toggle">
@@ -71,11 +57,9 @@ export default function ModePicker({
         onChange={(e) => onChange({ examMode: e.target.checked })}
       />
       <span>
-        <strong>{lang === 'id' ? 'Mode Ujian' : 'Exam mode'}</strong>
+        <strong>{t('modes.examToggle')}</strong>
         {' — '}
-        {lang === 'id'
-          ? 'hanya 1 kali jawab per soal, penjelasan langsung muncul setelah menjawab'
-          : 'only 1 attempt per question; the explanation appears right after you answer'}
+        {t('modes.examToggleDesc')}
       </span>
     </label>
   );

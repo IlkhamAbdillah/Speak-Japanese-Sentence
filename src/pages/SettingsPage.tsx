@@ -10,11 +10,11 @@ import {
   Trash2,
   RefreshCw,
 } from 'lucide-react';
-import type { UserSettings, AIProvider, JLPTLevel, InstructionLanguage } from '../types';
+import type { UserSettings, AIProvider } from '../types';
 import {
   AI_PROVIDER_LABELS,
   AI_PROVIDER_MODELS,
-  JLPT_DESCRIPTIONS,
+  JLPT_LEVELS,
   isConversationMode,
   isExamMode,
   isMultipleChoiceMode,
@@ -22,6 +22,7 @@ import {
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
 import ModePicker from '../components/ModePicker';
+import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
 
 interface SettingsPageProps {
   settings: UserSettings;
@@ -38,7 +39,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [fetchStatus, setFetchStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [manualModelInput, setManualModelInput] = useState(false);
 
-  const lang = settings.instructionLanguage;
+  const { t } = useI18n();
   // Conversations have no question count; a reading test always has READING_QUESTION_COUNT
   const hasQuestionCount = !isConversationMode(settings)
     && !(settings.appMode === 'jlpt' && settings.jlptSection === 'reading');
@@ -62,7 +63,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       setConnStatus('success');
     } else {
       setConnStatus('error');
-      setConnError(result.error || 'Connection failed');
+      setConnError(result.error || t('settings.connectionFailed'));
     }
   };
 
@@ -75,9 +76,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         setFetchStatus({
           type: 'error',
           message:
-            lang === 'id'
-              ? 'Tidak ada model ditemukan. Pastikan Anda sudah pull model (misal: ollama pull llama3.1).'
-              : 'No models found. Ensure you have pulled a model (e.g. ollama pull llama3.1).',
+            t('settings.noModelsFound'),
         });
       } else {
         setFetchedModels(models);
@@ -85,9 +84,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         setFetchStatus({
           type: 'success',
           message:
-            lang === 'id'
-              ? `Ditemukan ${models.length} model!`
-              : `Found ${models.length} model(s)!`,
+            t('settings.modelsFound', { count: models.length }),
         });
         // If current model isn't in fetched list, switch to first one
         if (!models.includes(settings.aiModel) && models.length > 0) {
@@ -119,17 +116,17 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   return (
     <div className="app-main" style={{ maxWidth: 720, margin: '0 auto' }}>
       <h1 className="card-title" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2xl)' }}>
-        {lang === 'id' ? '⚙️ Pengaturan' : '⚙️ Settings'}
+        {t('settings.title')}
       </h1>
 
       {/* AI Provider */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Provider AI' : 'AI Provider'}
+          {t('settings.aiProvider')}
         </h2>
 
         <div className="form-group">
-          <label className="form-label">{lang === 'id' ? 'Provider' : 'Provider'}</label>
+          <label className="form-label">{t('settings.provider')}</label>
           <div className="option-group">
             {(Object.keys(AI_PROVIDER_LABELS) as AIProvider[]).map((p) => (
               <button
@@ -145,9 +142,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
 
         {settings.aiProvider === 'ollama' && (
           <div className="alert alert-info" style={{ marginBottom: 'var(--space-md)' }}>
-            {lang === 'id'
-              ? 'Mendukung Ollama lokal (http://localhost:11434/v1) maupun (https://example.com/api/v1). Pastikan model sudah di-pull di instance Ollama tersebut.'
-              : 'Supports local Ollama (http://localhost:11434/v1) or (https://example.com/api/v1). Ensure the model is pulled on the Ollama instance.'}
+            {t('settings.ollamaInfo')}
           </div>
         )}
 
@@ -155,19 +150,17 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         {settings.aiProvider === 'ollama' && (
           <div className="form-group">
             <label className="form-label">
-              {lang === 'id' ? 'Ollama API URL / Tunnel URL' : 'Ollama API URL / Tunnel URL'}
+              {t('settings.ollamaUrl')}
             </label>
             <input
               type="text"
               className="form-input"
-              placeholder="http://localhost:11434/v1 atau https://tunnel.example.com"
+              placeholder={t('settings.ollamaUrlPlaceholder')}
               value={settings.ollamaBaseUrl ?? 'http://localhost:11434/v1'}
               onChange={(e) => update({ ollamaBaseUrl: e.target.value })}
             />
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
-              {lang === 'id'
-                ? 'Bisa berupa http://localhost:11434/v1, IP LAN, atau URL (https://example.com/api/v1). Akhiran /v1 akan disesuaikan otomatis.'
-                : 'Can be http://localhost:11434/v1, local LAN IP, or URL (https://example.com/api/v1). Suffix /v1 is handled automatically.'}
+              {t('settings.ollamaUrlHelp')}
             </p>
           </div>
         )}
@@ -175,7 +168,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         {/* Model field */}
         <div className="form-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
-            <label className="form-label" style={{ marginBottom: 0 }}>Model</label>
+            <label className="form-label" style={{ marginBottom: 0 }}>{t('settings.model')}</label>
             {settings.aiProvider === 'ollama' && (
               <button
                 type="button"
@@ -187,12 +180,12 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                 {isFetchingModels ? (
                   <>
                     <Loader2 size={12} className="spinner" style={{ border: 'none', animation: 'spin 0.8s linear infinite' }} />
-                    {lang === 'id' ? 'Mengambil...' : 'Fetching...'}
+                    {t('settings.fetching')}
                   </>
                 ) : (
                   <>
                     <RefreshCw size={12} />
-                    {lang === 'id' ? 'Fetch Model' : 'Fetch Models'}
+                    {t('settings.fetchModels')}
                   </>
                 )}
               </button>
@@ -218,14 +211,14 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                     onClick={() => setManualModelInput(true)}
                     style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)' }}
                   >
-                    {lang === 'id' ? '✏️ Ketik Manual' : '✏️ Type Manual'}
+                    {t('settings.typeManual')}
                   </button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
                   <input
                     className="form-input"
-                    placeholder={lang === 'id' ? 'Nama model (misal: llama3.1)' : 'Model name (e.g. llama3.1)'}
+                    placeholder={t('settings.modelPlaceholder')}
                     value={settings.aiModel}
                     onChange={(e) => update({ aiModel: e.target.value })}
                     list="ollama-models"
@@ -237,7 +230,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                       onClick={() => setManualModelInput(false)}
                       style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)' }}
                     >
-                      {lang === 'id' ? '📋 Pilih Daftar' : '📋 Pick List'}
+                      {t('settings.pickList')}
                     </button>
                   )}
                   <datalist id="ollama-models">
@@ -267,10 +260,8 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               {!fetchStatus && (
                 <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
                   {fetchedModels.length > 0
-                    ? (lang === 'id' ? 'Model berhasil diambil dari server Ollama.' : 'Models loaded from Ollama server.')
-                    : (lang === 'id'
-                      ? 'Klik "Fetch Model" untuk melihat model yang terinstall di Ollama Anda, atau ketik manual.'
-                      : 'Click "Fetch Models" to list installed models from your Ollama instance, or type manually.')}
+                    ? t('settings.modelsLoaded')
+                    : t('settings.fetchModelsHelp')}
                 </p>
               )}
             </>
@@ -290,8 +281,8 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         <div className="form-group">
           <label className="form-label">
             {settings.aiProvider === 'ollama'
-              ? (lang === 'id' ? 'API Key / Token (Opsional)' : 'API Key / Token (Optional)')
-              : 'API Key'}
+              ? t('settings.apiKeyOptional')
+              : t('settings.apiKey')}
           </label>
           <div className="password-input-wrapper">
             <input
@@ -299,8 +290,8 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               className="form-input"
               placeholder={
                 settings.aiProvider === 'ollama'
-                  ? (lang === 'id' ? 'Kosongkan jika tanpa password/token...' : 'Leave empty if no auth token required...')
-                  : (lang === 'id' ? 'Masukkan API key...' : 'Enter API key...')
+                  ? t('settings.apiKeyOptionalPlaceholder')
+                  : t('settings.apiKeyPlaceholder')
               }
               value={settings.apiKey}
               onChange={(e) => update({ apiKey: e.target.value })}
@@ -309,19 +300,15 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               className="password-toggle"
               onClick={() => setShowKey(!showKey)}
               type="button"
-              aria-label={showKey ? 'Hide API key' : 'Show API key'}
+              aria-label={showKey ? t('settings.hideApiKey') : t('settings.showApiKey')}
             >
               {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
             {settings.aiProvider === 'ollama'
-              ? (lang === 'id'
-                ? 'Opsional: isi jika tunnel reverse proxy Anda diproteksi Bearer token.'
-                : 'Optional: provide if your reverse proxy is protected by a Bearer token.')
-              : (lang === 'id'
-                ? 'Disimpan di perangkat Anda. Tidak pernah dikirim ke server kami.'
-                : 'Stored on your device. Never sent to our servers.')}
+              ? t('settings.apiKeyOptionalHelp')
+              : t('settings.apiKeyHelp')}
           </p>
         </div>
 
@@ -335,21 +322,21 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
             }
           >
             {connStatus === 'testing' ? (
-              <><Loader2 size={14} className="spinner" style={{ border: 'none', animation: 'spin 0.8s linear infinite' }} /> {lang === 'id' ? 'Menguji...' : 'Testing...'}</>
+              <><Loader2 size={14} className="spinner" style={{ border: 'none', animation: 'spin 0.8s linear infinite' }} /> {t('settings.testing')}</>
             ) : (
-              <><Zap size={14} /> {lang === 'id' ? 'Test Koneksi' : 'Test Connection'}</>
+              <><Zap size={14} /> {t('settings.testConnection')}</>
             )}
           </button>
 
           {settings.apiKey && (
             <button className="btn btn-ghost btn-sm" onClick={handleClearKey}>
-              <Trash2 size={14} /> {lang === 'id' ? 'Hapus Key' : 'Clear Key'}
+              <Trash2 size={14} /> {t('settings.clearKey')}
             </button>
           )}
 
           {connStatus === 'success' && (
             <span className="connection-status connected">
-              <Check size={14} /> {lang === 'id' ? 'Terhubung' : 'Connected'}
+              <Check size={14} /> {t('settings.connected')}
             </span>
           )}
           {connStatus === 'error' && (
@@ -363,14 +350,13 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {/* Mode */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Mode' : 'Mode'}
+          {t('settings.mode')}
         </h2>
         <ModePicker
           appMode={settings.appMode}
           exerciseMode={settings.exerciseMode}
           jlptSection={settings.jlptSection}
           examMode={settings.examMode}
-          lang={lang}
           onChange={update}
         />
       </div>
@@ -378,22 +364,22 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {/* JLPT Level */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Level JLPT' : 'JLPT Level'}
+          {t('settings.jlptLevel')}
         </h2>
         <div className="option-group">
-          {(['N5', 'N4', 'N3', 'N2', 'N1'] as JLPTLevel[]).map((level) => (
+          {JLPT_LEVELS.map((level) => (
             <button
               key={level}
               className={`option-pill ${settings.jlptLevel === level ? 'active' : ''}`}
               onClick={() => update({ jlptLevel: level })}
-              title={JLPT_DESCRIPTIONS[level][lang]}
+              title={t(`jlptLevels.${level}`)}
             >
               {level}
             </button>
           ))}
         </div>
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-sm)' }}>
-          {JLPT_DESCRIPTIONS[settings.jlptLevel][lang]}
+          {t(`jlptLevels.${settings.jlptLevel}`)}
         </p>
       </div>
 
@@ -401,7 +387,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {hasQuestionCount && (
         <div className="settings-section">
           <h2 className="settings-section-title">
-            {lang === 'id' ? 'Jumlah Soal' : 'Question Count'}
+            {t('settings.questionCount')}
           </h2>
           <div className="option-group">
             {[5, 10, 15, 20].map((n) => (
@@ -410,7 +396,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                 className={`option-pill ${settings.questionCount === n ? 'active' : ''}`}
                 onClick={() => update({ questionCount: n })}
               >
-                {n} {lang === 'id' ? 'soal' : 'questions'}
+                {n} {t('common.questions')}
               </button>
             ))}
           </div>
@@ -420,19 +406,16 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {/* Instruction Language */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Bahasa Instruksi' : 'Instruction Language'}
+          {t('settings.instructionLanguage')}
         </h2>
         <div className="option-group">
-          {([
-            { value: 'id' as InstructionLanguage, label: '🇮🇩 Indonesia' },
-            { value: 'en' as InstructionLanguage, label: '🇺🇸 English' },
-          ]).map((opt) => (
+          {LANGUAGE_CODES.map((code) => (
             <button
-              key={opt.value}
-              className={`option-pill ${settings.instructionLanguage === opt.value ? 'active' : ''}`}
-              onClick={() => update({ instructionLanguage: opt.value })}
+              key={code}
+              className={`option-pill ${settings.instructionLanguage === code ? 'active' : ''}`}
+              onClick={() => update({ instructionLanguage: code })}
             >
-              {opt.label}
+              {languageMeta(code).label}
             </button>
           ))}
         </div>
@@ -441,11 +424,11 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {/* Options */}
       <div className="settings-section">
         <h2 className="settings-section-title">
-          {lang === 'id' ? 'Opsi Lainnya' : 'Additional Options'}
+          {t('settings.additionalOptions')}
         </h2>
 
         <div className="form-group">
-          <label className="form-label">{lang === 'id' ? 'Maks. Percobaan per Soal' : 'Max Attempts per Question'}</label>
+          <label className="form-label">{t('settings.maxAttempts')}</label>
           <select
             className="form-select"
             value={settings.maxAttempts}
@@ -459,8 +442,8 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
           {(isExamMode(settings) || isMultipleChoiceMode(settings)) && (
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-xs)' }}>
               {isMultipleChoiceMode(settings)
-                ? (lang === 'id' ? 'Soal pilihan ganda selalu hanya 1 kali jawab.' : 'Multiple-choice questions always allow only 1 attempt.')
-                : (lang === 'id' ? 'Mode ujian selalu hanya 1 kali jawab.' : 'Exam mode always allows only 1 attempt.')}
+                ? t('settings.maxAttemptsChoice')
+                : t('settings.maxAttemptsExam')}
             </p>
           )}
         </div>
@@ -472,7 +455,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               checked={settings.hintsEnabled}
               onChange={(e) => update({ hintsEnabled: e.target.checked })}
             />
-            {lang === 'id' ? 'Aktifkan petunjuk' : 'Enable hints'}
+            {t('settings.enableHints')}
           </label>
         </div>
       </div>
@@ -480,7 +463,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
       {/* Save */}
       <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
         <button className="btn btn-primary btn-lg" onClick={handleSave}>
-          {lang === 'id' ? 'Simpan Pengaturan' : 'Save Settings'}
+          {t('settings.save')}
         </button>
       </div>
     </div>

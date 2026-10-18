@@ -10,6 +10,7 @@ import type {
   ConversationCorrection,
 } from '../types';
 import { READING_QUESTION_COUNT } from '../types';
+import { languageMeta, translate } from '../i18n';
 
 // ─── Provider Request Helpers ───────────────────────────
 
@@ -377,7 +378,7 @@ type PracticeKind = 'translation' | 'situation';
 
 const JLPT_ORDER: JLPTLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-const langNameOf = (lang: InstructionLanguage) => (lang === 'id' ? 'Indonesian' : 'English');
+const langNameOf = (lang: InstructionLanguage) => languageMeta(lang).promptName;
 
 function buildQuestionGenerationPrompt(
   kind: PracticeKind,
@@ -836,7 +837,7 @@ export function evaluateKanjiAnswer(
   maxAttempts: number,
   isExam: boolean
 ): EvaluationResponse {
-  const id = question.instructionLanguage === 'id';
+  const lang = question.instructionLanguage;
   const correct = isKanjiAnswerCorrect(question, answer);
   const firstKana = [...question.expectedAnswer][0] ?? '';
 
@@ -844,15 +845,13 @@ export function evaluateKanjiAnswer(
     correct,
     transcript: answer,
     feedback: correct
-      ? (id ? `Benar! ${question.prompt} dibaca 「${question.expectedAnswer}」.` : `Correct! ${question.prompt} is read 「${question.expectedAnswer}」.`)
-      : (id ? 'Cara baca belum tepat.' : "That's not the right reading."),
+      ? translate(lang, 'kanji.correct', { word: question.prompt, reading: question.expectedAnswer })
+      : translate(lang, 'kanji.wrong'),
     grammarNotes: [],
     vocabularyNotes: [],
     hint: correct || isExam
       ? null
-      : (id
-          ? `Dimulai dengan 「${firstKana}」 (${[...question.expectedAnswer].length} huruf kana)`
-          : `Starts with 「${firstKana}」 (${[...question.expectedAnswer].length} kana)`),
+      : translate(lang, 'kanji.hint', { firstKana, length: [...question.expectedAnswer].length }),
     nextAction: correct ? 'next_question' : attemptNumber >= maxAttempts ? 'reveal_answer' : 'retry',
   };
 }

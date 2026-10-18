@@ -3,6 +3,7 @@ import { Mic, Square, Send, X, Shuffle, MessageCircle, AlertCircle, RotateCcw } 
 import type { UserSettings } from '../types';
 import { useConversation } from '../hooks/useConversation';
 import ChatBubble from '../components/ChatBubble';
+import { useI18n } from '../i18n';
 import {
   startRecognition,
   stopRecognition,
@@ -16,7 +17,7 @@ interface ConversationPageProps {
 }
 
 export default function ConversationPage({ settings, onFinish, onExit }: ConversationPageProps) {
-  const lang = settings.instructionLanguage;
+  const { t } = useI18n();
   const { session, messages, isWaitingForAI, error, start, send, retry, end } = useConversation(settings);
 
   const [topicInput, setTopicInput] = useState('');
@@ -81,25 +82,21 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
         <div className="start-card animate-in" style={{ marginTop: 'var(--space-2xl)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
             <MessageCircle size={20} style={{ color: 'var(--accent-primary)' }} />
-            <h2 className="card-title">{lang === 'id' ? 'Latihan Percakapan' : 'Conversation Practice'}</h2>
+            <h2 className="card-title">{t('modes.exercise.conversation.label')}</h2>
             <span className="badge badge-accent">{settings.jlptLevel}</span>
           </div>
           <p className="card-subtitle" style={{ marginBottom: 'var(--space-lg)' }}>
-            {lang === 'id'
-              ? 'Mengobrol dengan AI dalam bahasa Jepang. Tentukan topik sendiri atau biarkan AI memilih topik acak.'
-              : 'Chat with AI in Japanese. Choose your own topic, or let the AI start a random one.'}
+            {t('conversation.intro')}
           </p>
 
           <div className="form-group">
             <label className="form-label">
-              {lang === 'id' ? 'Topik / konteks (opsional)' : 'Topic / context (optional)'}
+              {t('conversation.topicLabel')}
             </label>
             <textarea
               className="form-input chat-topic-input"
               rows={3}
-              placeholder={lang === 'id'
-                ? 'mis. Memesan makanan di restoran, kamu pelayannya'
-                : 'e.g. Ordering food at a restaurant, you are the waiter'}
+              placeholder={t('conversation.topicPlaceholder')}
               value={topicInput}
               onChange={(e) => setTopicInput(e.target.value)}
             />
@@ -112,14 +109,14 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
               onClick={() => start(topicInput.trim())}
             >
               <MessageCircle size={16} />
-              {lang === 'id' ? 'Mulai dengan topik ini' : 'Start with this topic'}
+              {t('conversation.startWithTopic')}
             </button>
             <button className="btn btn-secondary" onClick={() => start(null)}>
               <Shuffle size={16} />
-              {lang === 'id' ? 'Topik acak' : 'Random topic'}
+              {t('common.randomTopic')}
             </button>
             <button className="btn btn-ghost" onClick={onExit}>
-              {lang === 'id' ? 'Kembali' : 'Back'}
+              {t('common.back')}
             </button>
           </div>
         </div>
@@ -136,32 +133,32 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
         <div className="chat-avatar" aria-hidden="true">話</div>
         <div className="chat-header-info">
           <div className="chat-header-title">
-            {lang === 'id' ? 'Teman Bicara AI' : 'AI Chat Partner'}
+            {t('conversation.partner')}
             <span className="badge badge-accent">{session.jlptLevel}</span>
           </div>
           <div className="chat-header-subtitle">
             {isWaitingForAI
-              ? (lang === 'id' ? 'sedang mengetik…' : 'typing…')
-              : topic || (lang === 'id' ? 'Topik acak' : 'Random topic')}
+              ? t('conversation.typing')
+              : topic || t('common.randomTopic')}
           </div>
         </div>
         <button
           className="btn btn-ghost btn-sm"
           onClick={() => (userMessageCount > 0 ? setShowConfirmEnd(true) : handleEnd())}
         >
-          <X size={16} /> {lang === 'id' ? 'Selesai' : 'End'}
+          <X size={16} /> {t('conversation.end')}
         </button>
       </div>
 
       <div className="chat-messages" ref={scrollRef}>
         {messages.map((m) => (
-          <ChatBubble key={m.id} message={m} lang={lang} />
+          <ChatBubble key={m.id} message={m} />
         ))}
 
         {isWaitingForAI && (
           <div className="chat-row chat-row-ai">
             <div className="chat-avatar" aria-hidden="true">話</div>
-            <div className="chat-bubble chat-bubble-ai chat-typing" aria-label="typing">
+            <div className="chat-bubble chat-bubble-ai chat-typing" aria-label={t('conversation.typing')}>
               <span /><span /><span />
             </div>
           </div>
@@ -172,7 +169,7 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
             <AlertCircle size={16} />
             <span style={{ flex: 1 }}>{error}</span>
             <button className="btn btn-ghost btn-sm" onClick={retry}>
-              <RotateCcw size={14} /> {lang === 'id' ? 'Coba lagi' : 'Retry'}
+              <RotateCcw size={14} /> {t('common.retry')}
             </button>
           </div>
         )}
@@ -183,7 +180,7 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
           <button
             className={`chat-composer-btn ${isListening ? 'listening' : ''}`}
             onClick={toggleListening}
-            title={isListening ? (lang === 'id' ? 'Batalkan rekaman' : 'Cancel recording') : (lang === 'id' ? 'Bicara' : 'Speak')}
+            title={isListening ? t('common.cancelRecording') : t('common.speak')}
           >
             {isListening ? <Square size={18} /> : <Mic size={18} />}
           </button>
@@ -191,8 +188,8 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
         <input
           className="chat-composer-input"
           placeholder={isListening
-            ? (lang === 'id' ? 'Mendengarkan…' : 'Listening…')
-            : (lang === 'id' ? 'Ketik atau ucapkan pesan dalam bahasa Jepang…' : 'Type or say a message in Japanese…')}
+            ? t('common.listening')
+            : t('conversation.composerPlaceholder')}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -204,7 +201,7 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
           className="chat-composer-btn chat-composer-send"
           onClick={handleSend}
           disabled={!draft.trim() || isWaitingForAI}
-          title={lang === 'id' ? 'Kirim' : 'Send'}
+          title={t('common.send')}
         >
           <Send size={18} />
         </button>
@@ -213,18 +210,16 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
       {showConfirmEnd && (
         <div className="dialog-overlay" onClick={() => setShowConfirmEnd(false)}>
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <h3 className="dialog-title">{lang === 'id' ? 'Akhiri Percakapan?' : 'End Conversation?'}</h3>
+            <h3 className="dialog-title">{t('conversation.endTitle')}</h3>
             <p className="dialog-text">
-              {lang === 'id'
-                ? `Anda sudah mengirim ${userMessageCount} pesan. Percakapan akan disimpan ke riwayat.`
-                : `You've sent ${userMessageCount} message(s). The conversation will be saved to your history.`}
+              {t('conversation.endText', { count: userMessageCount })}
             </p>
             <div className="dialog-actions">
               <button className="btn btn-secondary" onClick={() => setShowConfirmEnd(false)}>
-                {lang === 'id' ? 'Batal' : 'Cancel'}
+                {t('common.cancel')}
               </button>
               <button className="btn btn-primary" onClick={handleEnd}>
-                {lang === 'id' ? 'Akhiri' : 'End'}
+                {t('conversation.endConfirm')}
               </button>
             </div>
           </div>

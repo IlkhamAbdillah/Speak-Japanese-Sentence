@@ -1,5 +1,6 @@
 import type { UserSettings, Session, SessionSummary } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODE_LABELS, JLPT_SECTION_LABELS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS } from '../types';
+import { LANGUAGES } from '../i18n';
 
 const KEYS = {
   settings: 'sjp_settings',
@@ -47,7 +48,7 @@ export function loadSettings(): UserSettings {
   const stored = safeGet<Partial<UserSettings>>(KEYS.settings, {});
   const settings = { ...DEFAULT_SETTINGS, ...stored };
   // 'japanese-response' was replaced by conversation practice
-  if (!(settings.exerciseMode in EXERCISE_MODE_LABELS)) settings.exerciseMode = 'conversation';
+  if (!EXERCISE_MODES.includes(settings.exerciseMode)) settings.exerciseMode = 'conversation';
   // 'exam' used to be its own mode; it's now a toggle on the other modes
   if ((settings.appMode as string) === 'exam') {
     settings.appMode = 'practice';
@@ -55,12 +56,14 @@ export function loadSettings(): UserSettings {
     if (settings.exerciseMode === 'conversation') settings.exerciseMode = 'translation';
   }
   // The grammar section was removed
-  if (!(settings.jlptSection in JLPT_SECTION_LABELS)) settings.jlptSection = 'kanji';
+  if (!JLPT_SECTIONS.includes(settings.jlptSection)) settings.jlptSection = 'kanji';
   // Kanji recognition moved into the JLPT mock test
   if ((settings.appMode as string) === 'kanji') {
     settings.appMode = 'jlpt';
     settings.jlptSection = 'kanji';
   }
+  // A language that is no longer shipped
+  if (!(settings.instructionLanguage in LANGUAGES)) settings.instructionLanguage = DEFAULT_SETTINGS.instructionLanguage;
   return settings;
 }
 

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import type { UserSettings, MicPermission } from './types';
 import { isConversationMode } from './types';
 import { loadSettings, saveSettings } from './services/storage';
+import { LanguageContext } from './i18n';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
@@ -51,65 +52,68 @@ function AppInner() {
   if (practiceActive) {
     const isConversation = isConversationMode(settings);
     return (
-      <div className="app-layout">
-        {isConversation ? (
-          <ConversationPage
-            settings={settings}
-            onFinish={handleFinishPractice}
-            onExit={handleExitPractice}
-          />
-        ) : (
-          <PracticePage
-            settings={settings}
-            onFinish={handleFinishPractice}
-            onExit={handleExitPractice}
-          />
-        )}
-      </div>
+      <LanguageContext value={settings.instructionLanguage}>
+        <div className="app-layout">
+          {isConversation ? (
+            <ConversationPage
+              settings={settings}
+              onFinish={handleFinishPractice}
+              onExit={handleExitPractice}
+            />
+          ) : (
+            <PracticePage
+              settings={settings}
+              onFinish={handleFinishPractice}
+              onExit={handleExitPractice}
+            />
+          )}
+        </div>
+      </LanguageContext>
     );
   }
 
   return (
-    <div className="app-layout">
-      <Header micPermission={micPermission} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              settings={settings}
-              micPermission={micPermission}
-              onMicPermissionChange={setMicPermission}
-              onSettingsChange={handleSettingsChange}
-              onStartPractice={handleStartPractice}
-            />
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <SettingsPage
-              settings={settings}
-              onSettingsChange={handleSettingsChange}
-            />
-          }
-        />
-        <Route
-          path="/history"
-          element={<HistoryPage lang={settings.instructionLanguage} />}
-        />
-        <Route
-          path="/recap/:sessionId"
-          element={
-            <RecapPage
-              sessionId={recapSessionId ?? undefined}
-              lang={settings.instructionLanguage}
-              onPracticeAgain={handlePracticeAgain}
-            />
-          }
-        />
-      </Routes>
-    </div>
+    <LanguageContext value={settings.instructionLanguage}>
+      <div className="app-layout">
+        <Header micPermission={micPermission} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                settings={settings}
+                micPermission={micPermission}
+                onMicPermissionChange={setMicPermission}
+                onSettingsChange={handleSettingsChange}
+                onStartPractice={handleStartPractice}
+              />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <SettingsPage
+                settings={settings}
+                onSettingsChange={handleSettingsChange}
+              />
+            }
+          />
+          <Route
+            path="/history"
+            element={<HistoryPage />}
+          />
+          <Route
+            path="/recap/:sessionId"
+            element={
+              <RecapPage
+                sessionId={recapSessionId ?? undefined}
+                onPracticeAgain={handlePracticeAgain}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </LanguageContext>
   );
 }
 

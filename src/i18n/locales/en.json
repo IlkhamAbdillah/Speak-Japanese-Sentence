@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "label": "🇺🇸 English",
+    "locale": "en-US",
+    "promptName": "English"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "back": "Back",
+    "retry": "Retry",
+    "send": "Send",
+    "speak": "Speak",
+    "cancelRecording": "Cancel recording",
+    "listening": "Listening…",
+    "noAnswer": "(no answer)",
+    "randomTopic": "Random topic",
+    "questions": "questions",
+    "messageCount": "💬 {count} messages",
+    "completed": "Completed",
+    "incomplete": "Incomplete",
+    "sessionHistory": "Session History",
+    "home": "Home"
+  },
+  "header": {
+    "micReady": "Ready",
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "modes": {
+    "app": {
+      "practice": {
+        "label": "Practice",
+        "desc": "Translate sentences, respond to situations, or chat with AI"
+      },
+      "jlpt": {
+        "label": "JLPT Mock Test",
+        "desc": "JLPT-style questions: kanji and reading"
+      }
+    },
+    "exercise": {
+      "translation": {
+        "label": "Translation Practice",
+        "desc": "Read a sentence and translate it into Japanese"
+      },
+      "situation": {
+        "label": "Situation Practice",
+        "desc": "Respond to a real-world situation in Japanese"
+      },
+      "conversation": {
+        "label": "Conversation Practice",
+        "desc": "Chat freely with AI in Japanese, like a messaging app"
+      }
+    },
+    "jlptSection": {
+      "kanji": {
+        "label": "Kanji",
+        "desc": "See a kanji word and type or say how it is read"
+      },
+      "reading": {
+        "label": "Reading",
+        "desc": "Read a short Japanese text and answer 3 multiple-choice questions"
+      }
+    },
+    "exam": "Exam",
+    "legacyJapaneseResponse": "Japanese Response",
+    "practiceType": "Practice Type",
+    "testSection": "Test Section",
+    "examToggle": "Exam mode",
+    "examToggleDesc": "only 1 attempt per question; the explanation appears right after you answer"
+  },
+  "jlptLevels": {
+    "N5": "Basic expressions, introductions, common vocabulary",
+    "N4": "Everyday conversations and basic connected sentences",
+    "N3": "Intermediate everyday communication",
+    "N2": "Broader vocabulary and nuanced expressions",
+    "N1": "Advanced vocabulary and complex natural Japanese"
+  },
+  "home": {
+    "startConversation": "Start Conversation",
+    "startExam": "Start Exam",
+    "startMockTest": "Start Mock Test",
+    "startPractice": "Start Practice",
+    "welcomeTitle": "Ready to Speak Japanese?",
+    "welcomeSubtitle": "Practice one sentence at a time, improve your Japanese, and track your progress.",
+    "speechUnsupported": "Your browser does not support Speech Recognition. Use Chrome or Edge for full features.",
+    "micDenied": "Microphone access denied. Please allow microphone access in your browser settings.",
+    "enableMic": "Enable Microphone",
+    "startCardTitle": "Start Speaking Practice",
+    "startCardSubtitle": "Practice your Japanese speaking skills with AI evaluation.",
+    "examBadge": "Exam · 1 attempt",
+    "apiKeyMissing": "API key not configured. Go to Settings to set it up.",
+    "usingOllama": "Using Ollama ({model}) at {url}",
+    "configure": "Configure",
+    "overview": "Learning Overview",
+    "noSessionsTitle": "No practice sessions yet",
+    "noSessionsText": "Start your first session to see stats here!",
+    "statSessions": "Sessions",
+    "statQuestions": "Questions",
+    "statAccuracy": "Accuracy",
+    "statCorrect": "Correct",
+    "recentSessions": "Recent Sessions",
+    "viewAll": "View All"
+  },
+  "settings": {
+    "title": "⚙️ Settings",
+    "aiProvider": "AI Provider",
+    "provider": "Provider",
+    "noModelsFound": "No models found. Ensure you have pulled a model (e.g. ollama pull llama3.1).",
+    "modelsFound": "Found {count} model(s)!",
+    "connectionFailed": "Connection failed",
+    "ollamaInfo": "Supports local Ollama (http://localhost:11434/v1) or (https://example.com/api/v1). Ensure the model is pulled on the Ollama instance.",
+    "ollamaUrl": "Ollama API URL / Tunnel URL",
+    "ollamaUrlPlaceholder": "http://localhost:11434/v1 or https://tunnel.example.com",
+    "ollamaUrlHelp": "Can be http://localhost:11434/v1, local LAN IP, or URL (https://example.com/api/v1). Suffix /v1 is handled automatically.",
+    "model": "Model",
+    "fetching": "Fetching...",
+    "fetchModels": "Fetch Models",
+    "typeManual": "✏️ Type Manual",
+    "modelPlaceholder": "Model name (e.g. llama3.1)",
+    "pickList": "📋 Pick List",
+    "modelsLoaded": "Models loaded from Ollama server.",
+    "fetchModelsHelp": "Click \"Fetch Models\" to list installed models from your Ollama instance, or type manually.",
+    "apiKey": "API Key",
+    "apiKeyOptional": "API Key / Token (Optional)",
+    "apiKeyOptionalPlaceholder": "Leave empty if no auth token required...",
+    "apiKeyPlaceholder": "Enter API key...",
+    "showApiKey": "Show API key",
+    "hideApiKey": "Hide API key",
+    "apiKeyOptionalHelp": "Optional: provide if your reverse proxy is protected by a Bearer token.",
+    "apiKeyHelp": "Stored on your device. Never sent to our servers.",
+    "testing": "Testing...",
+    "testConnection": "Test Connection",
+    "clearKey": "Clear Key",
+    "connected": "Connected",
+    "mode": "Mode",
+    "jlptLevel": "JLPT Level",
+    "questionCount": "Question Count",
+    "instructionLanguage": "Instruction Language",
+    "additionalOptions": "Additional Options",
+    "maxAttempts": "Max Attempts per Question",
+    "maxAttemptsChoice": "Multiple-choice questions always allow only 1 attempt.",
+    "maxAttemptsExam": "Exam mode always allows only 1 attempt.",
+    "enableHints": "Enable hints",
+    "save": "Save Settings"
+  },
+  "practice": {
+    "generatingTitle": "Generating practice questions...",
+    "generatingText": "AI is preparing questions based on your configuration.",
+    "generationFailed": "Failed to generate questions",
+    "goBack": "Go Back",
+    "questionOf": "Question {current} of {total}",
+    "pause": "Pause",
+    "resume": "Resume",
+    "endSession": "End Session",
+    "paused": "Session Paused",
+    "kanjiInstruction": "How is this word read? Type it in hiragana or say it.",
+    "readingInstruction": "Read the text above, then choose the best answer.",
+    "attempt": "Attempt {current}/{max}",
+    "submitChoice": "Submit",
+    "kanjiPlaceholder": "Type the reading in hiragana, or tap the mic...",
+    "answerPlaceholder": "Type your answer in Japanese, or tap the mic...",
+    "submit": "Submit",
+    "showAnswer": "Show Answer",
+    "correctDone": "Correct! 🎉 All done!",
+    "correctNext": "Correct! 🎉 Next question...",
+    "answerRevealed": "Answer revealed",
+    "incorrect": "Incorrect",
+    "notQuite": "Not quite right",
+    "reading": "Reading",
+    "expectedAnswer": "Expected answer",
+    "alsoRead": "Also read: ",
+    "meaning": "Meaning: ",
+    "tryAgain": "Try Again",
+    "finish": "Finish!",
+    "nextQuestion": "Next Question",
+    "endTitle": "End Session?",
+    "endWithResults": "You've completed {count} questions. The session will be saved as incomplete.",
+    "endWithoutResults": "This session has no completed questions and will be discarded.",
+    "endConfirm": "End Session",
+    "speech": {
+      "idle": "Tap to speak",
+      "listening": "Listening... submits {seconds}s after you stop talking · tap ■ to cancel",
+      "listeningKanji": "Listening... tap ■ to cancel",
+      "processing": "Processing...",
+      "evaluating": "Evaluating...",
+      "correct": "Correct!",
+      "retry": "Try again",
+      "answered": "Answered",
+      "error": "Error occurred",
+      "unsupported": "Not supported"
+    }
+  },
+  "kanji": {
+    "correct": "Correct! {word} is read 「{reading}」.",
+    "wrong": "That's not the right reading.",
+    "hint": "Starts with 「{firstKana}」 ({length} kana)"
+  },
+  "conversation": {
+    "intro": "Chat with AI in Japanese. Choose your own topic, or let the AI start a random one.",
+    "topicLabel": "Topic / context (optional)",
+    "topicPlaceholder": "e.g. Ordering food at a restaurant, you are the waiter",
+    "startWithTopic": "Start with this topic",
+    "partner": "AI Chat Partner",
+    "typing": "typing…",
+    "end": "End",
+    "composerPlaceholder": "Type or say a message in Japanese…",
+    "endTitle": "End Conversation?",
+    "endText": "You've sent {count} message(s). The conversation will be saved to your history.",
+    "endConfirm": "End"
+  },
+  "chat": {
+    "listen": "Listen",
+    "translation": "Translation",
+    "hideCorrection": "Hide correction",
+    "seeCorrection": "See correction"
+  },
+  "recap": {
+    "notFound": "Session not found",
+    "backHome": "Back to Home",
+    "perfOutstanding": "🌟 Outstanding! Excellent mastery!",
+    "perfGreat": "👏 Great job! Keep improving!",
+    "perfOk": "💪 Not bad! Room for improvement.",
+    "perfLow": "📚 Keep practicing! Every effort brings progress.",
+    "complete": "Session Complete!",
+    "title": "Session Recap",
+    "firstTry": "First Try",
+    "avgTime": "Avg Time",
+    "level": "Level",
+    "mode": "Mode",
+    "duration": "Duration",
+    "date": "Date",
+    "questionDetails": "Question Details",
+    "attempts": "{count} attempt(s)",
+    "readingText": "Reading Text",
+    "prompt": "Prompt",
+    "yourAnswer": "Your Answer",
+    "expectedAnswer": "Expected Answer",
+    "meaning": "Meaning",
+    "feedback": "Feedback",
+    "vocabulary": "Vocabulary",
+    "grammar": "Grammar",
+    "practiceAgain": "Practice Again",
+    "conversationTitle": "Conversation Recap",
+    "messagesSent": "Messages Sent",
+    "corrections": "Corrections",
+    "chatTranscript": "Chat Transcript",
+    "chatAgain": "Chat Again"
+  },
+  "history": {
+    "clearAll": "Clear All",
+    "emptyTitle": "No session history yet",
+    "emptyText": "Start your first practice session!",
+    "view": "View",
+    "clearTitle": "Clear All History?",
+    "clearText": "This action cannot be undone. All session history will be permanently deleted.",
+    "deleteAll": "Delete All"
+  }
+}
