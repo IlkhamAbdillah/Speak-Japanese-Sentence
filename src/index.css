@@ -1120,13 +1120,6 @@ a:hover {
   font-weight: 600;
   font-size: var(--text-sm);
   color: var(--text-primary);
-  margin-bottom: var(--space-xs);
-}
-
-.mode-card-desc {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  line-height: 1.5;
 }
 
 /* ─── Responsive ─────────────────────────────────────── */
@@ -1231,15 +1224,9 @@ a:hover {
   margin: 0 auto var(--space-2xl);
 }
 
-.start-card-config {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  margin: var(--space-md) 0 var(--space-lg);
-}
-
 .start-card-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-md);
   justify-content: center;
 }
@@ -1309,26 +1296,11 @@ a:hover {
   margin: var(--space-md) 0;
 }
 
-.mode-picker-sub {
-  padding-left: var(--space-md);
-  border-left: 2px solid var(--border-default);
-}
-
 .mode-picker-subtitle {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-secondary);
   margin-top: var(--space-md);
-}
-
-.mode-picker-desc {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-.option-pill-sm {
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--text-xs);
 }
 
 /* ─── Kanji Mode ─────────────────────────────────────── */
@@ -1652,26 +1624,6 @@ a:hover {
   }
 }
 
-.exam-toggle {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  margin-top: var(--space-sm);
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  cursor: pointer;
-  line-height: 1.5;
-}
-
-.exam-toggle input {
-  margin-top: 2px;
-  accent-color: var(--accent-primary);
-}
-
-.exam-toggle strong {
-  color: var(--text-primary);
-}
-
 /* ─── Answer input ───────────────────────────────────── */
 
 .answer-input-row {
@@ -1801,4 +1753,138 @@ a:hover {
 
 .choice-item.dimmed {
   opacity: 0.5;
+}
+
+/* ─── Mode selection (home) ──────────────────────────── */
+
+.mode-select-card {
+  max-width: 760px;
+}
+
+button.mode-card {
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.mode-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ─── Session setup dialog ───────────────────────────── */
+
+.setup-dialog {
+  max-width: 520px;
+  max-height: calc(100vh - 2 * var(--space-lg));
+  overflow-y: auto;
+}
+
+.setup-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.setup-dialog-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.setup-field {
+  margin-bottom: var(--space-lg);
+}
+
+.setup-field-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.setup-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.setup-checkbox input {
+  accent-color: var(--accent-primary);
+}
+
+.setup-field-help {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-sm);
+}
+
+.setup-dialog-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+/* ─── Header language switcher ───────────────────────── */
+
+.lang-switcher {
+  position: relative;
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  min-width: 180px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xs);
+  z-index: 150;
+  animation: fadeIn 150ms ease;
+}
+
+.lang-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lang-menu-item:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.lang-menu-item.active {
+  color: var(--accent-primary);
+}
+
+/* Narrow screens: icons only in the header */
+@media (max-width: 640px) {
+  .header-nav-label {
+    display: none;
+  }
+
+  .header-nav-link {
+    padding: var(--space-sm);
+  }
 }

@@ -1,21 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import {
   Mic,
-  Play,
-  Settings,
   BookOpen,
   Target,
   BarChart3,
   ChevronRight,
+  Bot,
 } from 'lucide-react';
 import type { UserSettings, MicPermission } from '../types';
-import { READING_QUESTION_COUNT, isConversationMode, isExamMode } from '../types';
+import { isConversationMode } from '../types';
 import { useI18n } from '../i18n';
 import ModePicker from '../components/ModePicker';
+import SessionSetupDialog from '../components/SessionSetupDialog';
 import { getLearningStats } from '../services/storage';
 import type { LearningStats } from '../services/storage';
 import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface HomePageProps {
   settings: UserSettings;
@@ -35,6 +35,8 @@ export default function HomePage({
   const navigate = useNavigate();
   const { t } = useI18n();
   const [stats, setStats] = useState<LearningStats | null>(null);
+  const [showSetup, setShowSetup] = useState(false);
+  const closeSetup = useCallback(() => setShowSetup(false), []);
 
   useEffect(() => {
     setStats(getLearningStats());
@@ -46,22 +48,21 @@ export default function HomePage({
   };
 
   const hasValidAuth = settings.aiProvider === 'ollama' || settings.apiKey.trim().length > 0;
-  const canStart =
-    hasValidAuth &&
-    (micPermission === 'granted' || micPermission === 'not-requested') &&
-    isSpeechRecognitionSupported();
+  const blockedReason = !hasValidAuth
+    ? t('home.apiKeyMissing')
+    : !isSpeechRecognitionSupported()
+      ? t('home.speechUnsupported')
+      : micPermission === 'granted' || micPermission === 'not-requested'
+        ? null
+        : t('home.micDenied');
 
   const isConversation = isConversationMode(settings);
-  const isExam = isExamMode(settings);
-  const isReading = settings.appMode === 'jlpt' && settings.jlptSection === 'reading';
 
   const startLabel = isConversation
     ? t('home.startConversation')
-    : isExam
-      ? t('home.startExam')
-      : settings.appMode === 'jlpt'
-        ? t('home.startMockTest')
-        : t('home.startPractice');
+    : settings.appMode === 'jlpt'
+      ? t('home.startMockTest')
+      : t('home.startPractice');
 
   return (
     <div className="app-main">
@@ -97,48 +98,26 @@ export default function HomePage({
         </div>
       )}
 
-      {/* Start Card */}
-      <section className="start-card animate-in" style={{ animationDelay: '100ms' }}>
+      {/* Mode selection: pick a mode, then Select opens its options */}
+      <section className="start-card mode-select-card animate-in" style={{ animationDelay: '100ms' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
           <BookOpen size={20} style={{ color: 'var(--accent-primary)' }} />
           <h2 className="card-title">
-            {t('home.startCardTitle')}
+            {t('home.chooseMode')}
           </h2>
         </div>
         <p className="card-subtitle">
-          {t('home.startCardSubtitle')}
+          {t('home.chooseModeSubtitle')}
         </p>
 
         <ModePicker
-          variant="pills"
           appMode={settings.appMode}
           exerciseMode={settings.exerciseMode}
           jlptSection={settings.jlptSection}
-          examMode={settings.examMode}
           onChange={(partial) => onSettingsChange({ ...settings, ...partial })}
         />
 
-        <div className="start-card-config">
-          <span className="badge badge-accent">
-            {settings.jlptLevel}
-          </span>
-          {!isConversation && (
-            <span className="badge badge-info">
-              {isReading ? READING_QUESTION_COUNT : settings.questionCount} {t('common.questions')}
-            </span>
-          )}
-          {isExam && (
-            <span className="badge badge-warning">
-              {t('home.examBadge')}
-            </span>
-          )}
-        </div>
-
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginBottom: 'var(--space-md)' }}>
-          {t(`jlptLevels.${settings.jlptLevel}`)}
-        </p>
-
-        {!settings.apiKey && settings.aiProvider !== 'ollama' && (
+        {!hasValidAuth && (
           <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)' }}>
             ⚙️ {t('home.apiKeyMissing')}
           </div>
@@ -151,23 +130,27 @@ export default function HomePage({
         )}
 
         <div className="start-card-actions">
-          <button
-            className="btn btn-primary btn-lg"
-            disabled={!canStart}
-            onClick={onStartPractice}
-          >
-            <Play size={18} />
-            {startLabel}
+          <button className="btn btn-secondary btn-lg" onClick={() => navigate('/settings')}>
+            <Bot size={18} />
+            {t('common.aiSetup')}
           </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate('/settings')}
-          >
-            <Settings size={16} />
-            {t('home.configure')}
+          <button className="btn btn-primary btn-lg" onClick={() => setShowSetup(true)}>
+            {t('home.select')}
+            <ChevronRight size={18} />
           </button>
         </div>
       </section>
+
+      {showSetup && (
+        <SessionSetupDialog
+          settings={settings}
+          onSettingsChange={onSettingsChange}
+          blockedReason={blockedReason}
+          startLabel={startLabel}
+          onStart={onStartPractice}
+          onClose={closeSetup}
+        />
+      )}
 
       {/* Stats */}
       {stats && (

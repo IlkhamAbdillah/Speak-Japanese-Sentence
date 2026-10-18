@@ -4,8 +4,8 @@ import type { InstructionLanguage } from '../i18n';
 // ─── App Modes ──────────────────────────────────────────
 // practice: translation / situation / conversation practice
 // jlpt:     JLPT mock test — kanji reading or reading comprehension
-// Practice (except conversation) and the kanji section can be played as an exam
-// (see UserSettings.examMode); reading is always one attempt.
+// Practice (except conversation) and the kanji section can be limited to one
+// attempt per question (maxAttempts = 1); reading is always one attempt.
 export type AppMode = 'practice' | 'jlpt';
 
 /** Older sessions may carry modes that no longer exist. */
@@ -42,10 +42,11 @@ export function getSessionModeLabel(
     : (EXERCISE_MODES as string[]).includes(session.mode)
       ? translate(lang, `modes.exercise.${session.mode as ExerciseMode}.label`)
       : translate(lang, 'modes.legacyJapaneseResponse');
+  // Older sessions had a separate exam mode
   return session.examMode ? `${base} · ${translate(lang, 'modes.exam')}` : base;
 }
 
-type ModeSettings = Pick<UserSettings, 'appMode' | 'exerciseMode' | 'jlptSection' | 'examMode'>;
+type ModeSettings = Pick<UserSettings, 'appMode' | 'exerciseMode' | 'jlptSection' | 'maxAttempts'>;
 
 export function isConversationMode(settings: Pick<ModeSettings, 'appMode' | 'exerciseMode'>): boolean {
   return settings.appMode === 'practice' && settings.exerciseMode === 'conversation';
@@ -60,14 +61,17 @@ export function isMultipleChoiceMode(settings: Pick<ModeSettings, 'appMode' | 'j
   return settings.appMode === 'jlpt' && settings.jlptSection === 'reading';
 }
 
-/** Whether the "Exam mode" toggle applies: not to conversation, and multiple choice is always one attempt. */
-export function canUseExamMode(settings: Omit<ModeSettings, 'examMode'>): boolean {
+/** Whether the attempts-per-question choice applies: not to conversation, and multiple choice is always one attempt. */
+export function hasAttemptChoice(settings: Omit<ModeSettings, 'maxAttempts'>): boolean {
   return !isConversationMode(settings) && !isMultipleChoiceMode(settings);
 }
 
-/** Exam = one attempt per question with the explanation shown right away. */
-export function isExamMode(settings: ModeSettings): boolean {
-  return settings.examMode && canUseExamMode(settings);
+/**
+ * One attempt per question (the user picked 1): nothing to retry, so the
+ * explanation is shown right away and the AI gives no hint.
+ */
+export function isSingleAttemptMode(settings: ModeSettings): boolean {
+  return settings.maxAttempts === 1 && hasAttemptChoice(settings);
 }
 
 // ─── JLPT Levels ────────────────────────────────────────
@@ -167,6 +171,7 @@ export interface Session {
   /** Missing on sessions saved before app modes existed (treated as 'practice'); 'exam' on older exam sessions */
   appMode?: StoredAppMode;
   jlptSection?: JLPTSection;
+  /** Set on sessions from when exam mode was a separate toggle */
   examMode?: boolean;
   mode: ExerciseMode;
   jlptLevel: JLPTLevel;
@@ -223,11 +228,10 @@ export interface UserSettings {
   appMode: AppMode;
   exerciseMode: ExerciseMode;
   jlptSection: JLPTSection;
-  /** One attempt per question (practice types except conversation, and kanji) */
-  examMode: boolean;
   jlptLevel: JLPTLevel;
   instructionLanguage: InstructionLanguage;
   questionCount: number;
+  /** 1 = a single attempt with the explanation shown right away (see isSingleAttemptMode) */
   maxAttempts: number;
   hintsEnabled: boolean;
 }
@@ -240,7 +244,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
   appMode: 'practice',
   exerciseMode: 'translation',
   jlptSection: 'kanji',
-  examMode: false,
   jlptLevel: 'N5',
   instructionLanguage: 'en',
   questionCount: 5,

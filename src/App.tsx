@@ -75,7 +75,10 @@ function AppInner() {
   return (
     <LanguageContext value={settings.instructionLanguage}>
       <div className="app-layout">
-        <Header micPermission={micPermission} />
+        <Header
+          micPermission={micPermission}
+          onLanguageChange={(lang) => handleSettingsChange({ ...settings, instructionLanguage: lang })}
+        />
         <Routes>
           <Route
             path="/"

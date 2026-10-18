@@ -14,28 +14,26 @@
     "listening": "Mendengarkan…",
     "noAnswer": "(tidak ada jawaban)",
     "randomTopic": "Topik acak",
-    "questions": "soal",
     "messageCount": "💬 {count} pesan",
     "completed": "Selesai",
     "incomplete": "Belum Selesai",
     "sessionHistory": "Riwayat Sesi",
-    "home": "Beranda"
+    "home": "Beranda",
+    "aiSetup": "Pengaturan AI"
   },
   "header": {
     "micReady": "Siap",
     "home": "Beranda",
     "history": "Riwayat",
-    "settings": "Pengaturan"
+    "language": "Bahasa"
   },
   "modes": {
     "app": {
       "practice": {
-        "label": "Latihan",
-        "desc": "Terjemahkan kalimat, tanggapi situasi, atau mengobrol dengan AI"
+        "label": "Latihan"
       },
       "jlpt": {
-        "label": "Simulasi JLPT",
-        "desc": "Soal bergaya JLPT: kanji dan membaca"
+        "label": "Simulasi JLPT"
       }
     },
     "exercise": {
@@ -65,20 +63,10 @@
     "exam": "Ujian",
     "legacyJapaneseResponse": "Respons Bahasa Jepang",
     "practiceType": "Jenis Latihan",
-    "testSection": "Bagian Tes",
-    "examToggle": "Mode Ujian",
-    "examToggleDesc": "hanya 1 kali jawab per soal, penjelasan langsung muncul setelah menjawab"
-  },
-  "jlptLevels": {
-    "N5": "Ekspresi dasar, perkenalan, kosakata umum",
-    "N4": "Percakapan sehari-hari dan kalimat dasar",
-    "N3": "Komunikasi sehari-hari tingkat menengah",
-    "N2": "Kosakata luas dan ekspresi bernuansa",
-    "N1": "Kosakata tingkat lanjut dan bahasa Jepang alami"
+    "testSection": "Bagian Tes"
   },
   "home": {
     "startConversation": "Mulai Percakapan",
-    "startExam": "Mulai Ujian",
     "startMockTest": "Mulai Simulasi",
     "startPractice": "Mulai Latihan",
     "welcomeTitle": "Siap Berbicara Bahasa Jepang?",
@@ -86,12 +74,8 @@
     "speechUnsupported": "Browser Anda tidak mendukung Speech Recognition. Gunakan Chrome atau Edge untuk fitur penuh.",
     "micDenied": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.",
     "enableMic": "Aktifkan Mikrofon",
-    "startCardTitle": "Mulai Latihan Berbicara",
-    "startCardSubtitle": "Latih kemampuan berbicara bahasa Jepang dengan evaluasi AI.",
-    "examBadge": "Ujian · 1 kali jawab",
-    "apiKeyMissing": "API key belum dikonfigurasi. Buka Settings untuk mengaturnya.",
+    "apiKeyMissing": "API key belum dikonfigurasi. Buka Pengaturan AI untuk menambahkannya.",
     "usingOllama": "Menggunakan Ollama ({model}) di {url}",
-    "configure": "Konfigurasi",
     "overview": "Ringkasan Belajar",
     "noSessionsTitle": "Belum ada sesi latihan",
     "noSessionsText": "Mulai sesi pertama Anda untuk melihat statistik di sini!",
@@ -100,10 +84,21 @@
     "statAccuracy": "Akurasi",
     "statCorrect": "Benar",
     "recentSessions": "Sesi Terakhir",
-    "viewAll": "Lihat Semua"
+    "viewAll": "Lihat Semua",
+    "chooseMode": "Pilih Mode",
+    "chooseModeSubtitle": "Pilih apa yang ingin Anda latih, lalu tekan Pilih untuk mengaturnya.",
+    "select": "Pilih"
+  },
+  "setup": {
+    "jlptLevel": "Level JLPT",
+    "questionCount": "Jumlah Soal",
+    "readingQuestionCount": "Satu teks bacaan dengan {count} soal.",
+    "maxAttempts": "Percobaan per Soal",
+    "hints": "Petunjuk"
   },
   "settings": {
-    "title": "⚙️ Pengaturan",
+    "title": "Pengaturan AI",
+    "subtitle": "Pilih AI yang membuat soal dan memeriksa jawaban Anda.",
     "aiProvider": "Provider AI",
     "provider": "Provider",
     "noModelsFound": "Tidak ada model ditemukan. Pastikan Anda sudah pull model (misal: ollama pull llama3.1).",
@@ -133,16 +128,7 @@
     "testConnection": "Test Koneksi",
     "clearKey": "Hapus Key",
     "connected": "Terhubung",
-    "mode": "Mode",
-    "jlptLevel": "Level JLPT",
-    "questionCount": "Jumlah Soal",
-    "instructionLanguage": "Bahasa Instruksi",
-    "additionalOptions": "Opsi Lainnya",
-    "maxAttempts": "Maks. Percobaan per Soal",
-    "maxAttemptsChoice": "Soal pilihan ganda selalu hanya 1 kali jawab.",
-    "maxAttemptsExam": "Mode ujian selalu hanya 1 kali jawab.",
-    "enableHints": "Aktifkan petunjuk",
-    "save": "Simpan Pengaturan"
+    "save": "Simpan"
   },
   "practice": {
     "generatingTitle": "Membuat soal latihan...",

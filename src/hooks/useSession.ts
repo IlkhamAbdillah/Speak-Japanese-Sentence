@@ -7,7 +7,7 @@ import type {
   UserSettings,
   EvaluationResponse,
 } from '../types';
-import { isExamMode, isKanjiMode, isMultipleChoiceMode } from '../types';
+import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import { saveSession } from '../services/storage';
 import { generateQuestions, evaluateAnswer, aiConfigFromSettings } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
@@ -45,9 +45,9 @@ interface UseSessionReturn {
   isPaused: boolean;
 }
 
-/** Attempts allowed per question — an exam or a multiple-choice question only gets one. */
+/** Attempts allowed per question — a multiple-choice question only gets one. */
 export function getMaxAttempts(settings: UserSettings): number {
-  return isExamMode(settings) || isMultipleChoiceMode(settings) ? 1 : settings.maxAttempts;
+  return isMultipleChoiceMode(settings) ? 1 : settings.maxAttempts;
 }
 
 export function useSession(): UseSessionReturn {
@@ -134,7 +134,6 @@ export function useSession(): UseSessionReturn {
           status: 'in-progress',
           appMode: settings.appMode,
           jlptSection: settings.appMode === 'jlpt' ? settings.jlptSection : undefined,
-          examMode: isExamMode(settings),
           mode: settings.exerciseMode,
           jlptLevel: settings.jlptLevel,
           instructionLanguage: settings.instructionLanguage,
@@ -238,7 +237,7 @@ export function useSession(): UseSessionReturn {
           currentAttempts,
           attemptNumber,
           getMaxAttempts(settings),
-          isExamMode(settings)
+          isSingleAttemptMode(settings)
         );
 
         setLastEvaluation(result);

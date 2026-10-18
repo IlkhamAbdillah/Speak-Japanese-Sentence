@@ -45,14 +45,16 @@ function ensureSchema(): void {
 
 export function loadSettings(): UserSettings {
   ensureSchema();
-  const stored = safeGet<Partial<UserSettings>>(KEYS.settings, {});
+  const { examMode, ...stored } = safeGet<Partial<UserSettings> & { examMode?: boolean }>(KEYS.settings, {});
   const settings = { ...DEFAULT_SETTINGS, ...stored };
+  // Exam mode was a toggle; it's now the "1 attempt" choice
+  if (examMode) settings.maxAttempts = 1;
   // 'japanese-response' was replaced by conversation practice
   if (!EXERCISE_MODES.includes(settings.exerciseMode)) settings.exerciseMode = 'conversation';
-  // 'exam' used to be its own mode; it's now a toggle on the other modes
+  // 'exam' used to be its own mode; it's now the "1 attempt" choice
   if ((settings.appMode as string) === 'exam') {
     settings.appMode = 'practice';
-    settings.examMode = true;
+    settings.maxAttempts = 1;
     if (settings.exerciseMode === 'conversation') settings.exerciseMode = 'translation';
   }
   // The grammar section was removed

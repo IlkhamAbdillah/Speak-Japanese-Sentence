@@ -11,18 +11,10 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import type { UserSettings, AIProvider } from '../types';
-import {
-  AI_PROVIDER_LABELS,
-  AI_PROVIDER_MODELS,
-  JLPT_LEVELS,
-  isConversationMode,
-  isExamMode,
-  isMultipleChoiceMode,
-} from '../types';
+import { AI_PROVIDER_LABELS, AI_PROVIDER_MODELS } from '../types';
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
-import ModePicker from '../components/ModePicker';
-import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
+import { useI18n } from '../i18n';
 
 interface SettingsPageProps {
   settings: UserSettings;
@@ -40,9 +32,6 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [manualModelInput, setManualModelInput] = useState(false);
 
   const { t } = useI18n();
-  // Conversations have no question count; a reading test always has READING_QUESTION_COUNT
-  const hasQuestionCount = !isConversationMode(settings)
-    && !(settings.appMode === 'jlpt' && settings.jlptSection === 'reading');
 
   const update = (partial: Partial<UserSettings>) => {
     const next = { ...settings, ...partial };
@@ -115,9 +104,12 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
 
   return (
     <div className="app-main" style={{ maxWidth: 720, margin: '0 auto' }}>
-      <h1 className="card-title" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2xl)' }}>
+      <h1 className="card-title" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-xs)' }}>
         {t('settings.title')}
       </h1>
+      <p className="card-subtitle" style={{ marginBottom: 'var(--space-2xl)' }}>
+        {t('settings.subtitle')}
+      </p>
 
       {/* AI Provider */}
       <div className="settings-section">
@@ -344,119 +336,6 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               <AlertCircle size={14} /> {connError}
             </span>
           )}
-        </div>
-      </div>
-
-      {/* Mode */}
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          {t('settings.mode')}
-        </h2>
-        <ModePicker
-          appMode={settings.appMode}
-          exerciseMode={settings.exerciseMode}
-          jlptSection={settings.jlptSection}
-          examMode={settings.examMode}
-          onChange={update}
-        />
-      </div>
-
-      {/* JLPT Level */}
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          {t('settings.jlptLevel')}
-        </h2>
-        <div className="option-group">
-          {JLPT_LEVELS.map((level) => (
-            <button
-              key={level}
-              className={`option-pill ${settings.jlptLevel === level ? 'active' : ''}`}
-              onClick={() => update({ jlptLevel: level })}
-              title={t(`jlptLevels.${level}`)}
-            >
-              {level}
-            </button>
-          ))}
-        </div>
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-sm)' }}>
-          {t(`jlptLevels.${settings.jlptLevel}`)}
-        </p>
-      </div>
-
-      {/* Question Count */}
-      {hasQuestionCount && (
-        <div className="settings-section">
-          <h2 className="settings-section-title">
-            {t('settings.questionCount')}
-          </h2>
-          <div className="option-group">
-            {[5, 10, 15, 20].map((n) => (
-              <button
-                key={n}
-                className={`option-pill ${settings.questionCount === n ? 'active' : ''}`}
-                onClick={() => update({ questionCount: n })}
-              >
-                {n} {t('common.questions')}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Instruction Language */}
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          {t('settings.instructionLanguage')}
-        </h2>
-        <div className="option-group">
-          {LANGUAGE_CODES.map((code) => (
-            <button
-              key={code}
-              className={`option-pill ${settings.instructionLanguage === code ? 'active' : ''}`}
-              onClick={() => update({ instructionLanguage: code })}
-            >
-              {languageMeta(code).label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Options */}
-      <div className="settings-section">
-        <h2 className="settings-section-title">
-          {t('settings.additionalOptions')}
-        </h2>
-
-        <div className="form-group">
-          <label className="form-label">{t('settings.maxAttempts')}</label>
-          <select
-            className="form-select"
-            value={settings.maxAttempts}
-            onChange={(e) => update({ maxAttempts: Number(e.target.value) })}
-            disabled={isExamMode(settings) || isMultipleChoiceMode(settings)}
-          >
-            {[2, 3, 5, 10].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-          {(isExamMode(settings) || isMultipleChoiceMode(settings)) && (
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--space-xs)' }}>
-              {isMultipleChoiceMode(settings)
-                ? t('settings.maxAttemptsChoice')
-                : t('settings.maxAttemptsExam')}
-            </p>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: 'var(--space-xl)', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            <input
-              type="checkbox"
-              checked={settings.hintsEnabled}
-              onChange={(e) => update({ hintsEnabled: e.target.checked })}
-            />
-            {t('settings.enableHints')}
-          </label>
         </div>
       </div>
 

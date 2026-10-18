@@ -14,28 +14,26 @@
     "listening": "Listening…",
     "noAnswer": "(no answer)",
     "randomTopic": "Random topic",
-    "questions": "questions",
     "messageCount": "💬 {count} messages",
     "completed": "Completed",
     "incomplete": "Incomplete",
     "sessionHistory": "Session History",
-    "home": "Home"
+    "home": "Home",
+    "aiSetup": "AI Setup"
   },
   "header": {
     "micReady": "Ready",
     "home": "Home",
     "history": "History",
-    "settings": "Settings"
+    "language": "Language"
   },
   "modes": {
     "app": {
       "practice": {
-        "label": "Practice",
-        "desc": "Translate sentences, respond to situations, or chat with AI"
+        "label": "Practice"
       },
       "jlpt": {
-        "label": "JLPT Mock Test",
-        "desc": "JLPT-style questions: kanji and reading"
+        "label": "JLPT Mock Test"
       }
     },
     "exercise": {
@@ -65,20 +63,10 @@
     "exam": "Exam",
     "legacyJapaneseResponse": "Japanese Response",
     "practiceType": "Practice Type",
-    "testSection": "Test Section",
-    "examToggle": "Exam mode",
-    "examToggleDesc": "only 1 attempt per question; the explanation appears right after you answer"
-  },
-  "jlptLevels": {
-    "N5": "Basic expressions, introductions, common vocabulary",
-    "N4": "Everyday conversations and basic connected sentences",
-    "N3": "Intermediate everyday communication",
-    "N2": "Broader vocabulary and nuanced expressions",
-    "N1": "Advanced vocabulary and complex natural Japanese"
+    "testSection": "Test Section"
   },
   "home": {
     "startConversation": "Start Conversation",
-    "startExam": "Start Exam",
     "startMockTest": "Start Mock Test",
     "startPractice": "Start Practice",
     "welcomeTitle": "Ready to Speak Japanese?",
@@ -86,12 +74,8 @@
     "speechUnsupported": "Your browser does not support Speech Recognition. Use Chrome or Edge for full features.",
     "micDenied": "Microphone access denied. Please allow microphone access in your browser settings.",
     "enableMic": "Enable Microphone",
-    "startCardTitle": "Start Speaking Practice",
-    "startCardSubtitle": "Practice your Japanese speaking skills with AI evaluation.",
-    "examBadge": "Exam · 1 attempt",
-    "apiKeyMissing": "API key not configured. Go to Settings to set it up.",
+    "apiKeyMissing": "API key not configured. Open AI Setup to add one.",
     "usingOllama": "Using Ollama ({model}) at {url}",
-    "configure": "Configure",
     "overview": "Learning Overview",
     "noSessionsTitle": "No practice sessions yet",
     "noSessionsText": "Start your first session to see stats here!",
@@ -100,10 +84,21 @@
     "statAccuracy": "Accuracy",
     "statCorrect": "Correct",
     "recentSessions": "Recent Sessions",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "chooseMode": "Choose a Mode",
+    "chooseModeSubtitle": "Pick what you want to practice, then press Select to set it up.",
+    "select": "Select"
+  },
+  "setup": {
+    "jlptLevel": "JLPT Level",
+    "questionCount": "Questions",
+    "readingQuestionCount": "One reading text with {count} questions.",
+    "maxAttempts": "Attempts per Question",
+    "hints": "Hints"
   },
   "settings": {
-    "title": "⚙️ Settings",
+    "title": "AI Setup",
+    "subtitle": "Choose the AI that writes your questions and checks your answers.",
     "aiProvider": "AI Provider",
     "provider": "Provider",
     "noModelsFound": "No models found. Ensure you have pulled a model (e.g. ollama pull llama3.1).",
@@ -133,16 +128,7 @@
     "testConnection": "Test Connection",
     "clearKey": "Clear Key",
     "connected": "Connected",
-    "mode": "Mode",
-    "jlptLevel": "JLPT Level",
-    "questionCount": "Question Count",
-    "instructionLanguage": "Instruction Language",
-    "additionalOptions": "Additional Options",
-    "maxAttempts": "Max Attempts per Question",
-    "maxAttemptsChoice": "Multiple-choice questions always allow only 1 attempt.",
-    "maxAttemptsExam": "Exam mode always allows only 1 attempt.",
-    "enableHints": "Enable hints",
-    "save": "Save Settings"
+    "save": "Save"
   },
   "practice": {
     "generatingTitle": "Generating practice questions...",

@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useSession, getMaxAttempts } from '../hooks/useSession';
-import { getSessionModeLabel, isExamMode, isKanjiMode, isMultipleChoiceMode } from '../types';
+import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
 import { isSpeechRecognitionSupported, SILENCE_SUBMIT_MS } from '../services/speech';
 import { useI18n } from '../i18n';
@@ -65,7 +65,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
   const { lang, t } = useI18n();
-  const isExam = isExamMode(settings);
+  const isSingleAttempt = isSingleAttemptMode(settings);
   const isKanji = isKanjiMode(settings);
   const isChoice = isMultipleChoiceMode(settings);
   const maxAttempts = getMaxAttempts(settings);
@@ -193,12 +193,12 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const speechSupported = isSpeechRecognitionSupported();
 
   // Explanations are only shown for wrong answers: always once the answer is
-  // revealed (and always in an exam); otherwise they count as hints and
+  // revealed (and always with a single attempt); otherwise they count as hints and
   // follow the hints setting.
   const showExplanations =
-    !!lastEvaluation && (isExam || settings.hintsEnabled || showAnswer);
-  // The exam (and multiple choice) shows the answer right away after a wrong answer
-  const answerVisible = !!lastEvaluation && (showAnswer || isExam || isChoice);
+    !!lastEvaluation && (isSingleAttempt || settings.hintsEnabled || showAnswer);
+  // A single attempt (and multiple choice) shows the answer right away after a wrong answer
+  const answerVisible = !!lastEvaluation && (showAnswer || isSingleAttempt || isChoice);
 
   const getSpeechStateLabel = () => {
     const labels: Record<string, MessageKey> = {
@@ -207,7 +207,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
       processing: 'practice.speech.processing',
       evaluating: 'practice.speech.evaluating',
       correct: 'practice.speech.correct',
-      retry: isExam ? 'practice.speech.answered' : 'practice.speech.retry',
+      retry: isSingleAttempt ? 'practice.speech.answered' : 'practice.speech.retry',
       error: 'practice.speech.error',
       unsupported: 'practice.speech.unsupported',
     };
@@ -426,7 +426,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                 <div className="feedback-title">
                   <RotateCcw size={20} /> {currentAttempts.length === 0
                     ? t('practice.answerRevealed')
-                    : isExam || isChoice
+                    : isSingleAttempt || isChoice
                       ? t('practice.incorrect')
                       : t('practice.notQuite')}
                 </div>

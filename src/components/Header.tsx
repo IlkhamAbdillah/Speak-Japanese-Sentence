@@ -1,17 +1,39 @@
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, History, Settings, Mic } from 'lucide-react';
+import { Home, History, Mic, Languages, ChevronDown, Check } from 'lucide-react';
 import type { MicPermission } from '../types';
-import { useI18n } from '../i18n';
+import type { InstructionLanguage } from '../i18n';
+import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
 
 interface HeaderProps {
   micPermission: MicPermission;
+  onLanguageChange: (lang: InstructionLanguage) => void;
 }
 
-export default function Header({ micPermission }: HeaderProps) {
+export default function Header({ micPermission, onLanguageChange }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname;
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close the language menu on an outside click or Escape
+  useEffect(() => {
+    if (!langMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!langMenuRef.current?.contains(e.target as Node)) setLangMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLangMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [langMenuOpen]);
 
   return (
     <header className="header">
@@ -24,33 +46,60 @@ export default function Header({ micPermission }: HeaderProps) {
         {micPermission === 'granted' && (
           <span className="mic-status granted">
             <Mic size={12} />
-            {t('header.micReady')}
+            <span className="header-nav-label">{t('header.micReady')}</span>
           </span>
         )}
 
         <button
           className={`header-nav-link ${path === '/' ? 'active' : ''}`}
           onClick={() => navigate('/')}
+          title={t('header.home')}
         >
           <Home size={16} />
-          {t('header.home')}
+          <span className="header-nav-label">{t('header.home')}</span>
         </button>
 
         <button
           className={`header-nav-link ${path === '/history' ? 'active' : ''}`}
           onClick={() => navigate('/history')}
+          title={t('header.history')}
         >
           <History size={16} />
-          {t('header.history')}
+          <span className="header-nav-label">{t('header.history')}</span>
         </button>
 
-        <button
-          className={`header-nav-link ${path === '/settings' ? 'active' : ''}`}
-          onClick={() => navigate('/settings')}
-        >
-          <Settings size={16} />
-          {t('header.settings')}
-        </button>
+        <div className="lang-switcher" ref={langMenuRef}>
+          <button
+            className={`header-nav-link ${langMenuOpen ? 'active' : ''}`}
+            onClick={() => setLangMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={langMenuOpen}
+            title={t('header.language')}
+          >
+            <Languages size={16} />
+            {lang.toUpperCase()}
+            <ChevronDown size={14} />
+          </button>
+          {langMenuOpen && (
+            <div className="lang-menu" role="menu">
+              {LANGUAGE_CODES.map((code) => (
+                <button
+                  key={code}
+                  role="menuitemradio"
+                  aria-checked={code === lang}
+                  className={`lang-menu-item ${code === lang ? 'active' : ''}`}
+                  onClick={() => {
+                    onLanguageChange(code);
+                    setLangMenuOpen(false);
+                  }}
+                >
+                  <span>{languageMeta(code).label}</span>
+                  {code === lang && <Check size={14} />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </nav>
     </header>
   );
