@@ -1,4 +1,4 @@
-import type { UserSettings, Session, SessionSummary } from '../types';
+import type { UserSettings, Session, SessionSummary, Attempt, EvaluationResponse } from '../types';
 import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS } from '../types';
 import { LANGUAGES } from '../i18n';
 
@@ -6,6 +6,7 @@ const KEYS = {
   settings: 'sjp_settings',
   sessions: 'sjp_sessions',
   version: 'sjp_schema_version',
+  active: 'sjp_active_session',
 } as const;
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -110,6 +111,46 @@ export function clearAllSessions(): boolean {
 
 export function getSessionById(sessionId: string): Session | null {
   return loadSessions().find((s) => s.sessionId === sessionId) ?? null;
+}
+
+// ─── Active session (survives a page reload) ────────────
+
+/** The session in progress plus the state of its current question. */
+export interface ActiveSession {
+  session: Session;
+  /** Attempts at the current question so far */
+  attempts: Attempt[];
+  /** Feedback shown for the current question, if any */
+  lastEvaluation: EvaluationResponse | null;
+  /** The expected answer is on screen */
+  answerShown?: boolean;
+  /** The answer was shown at some point for the current question */
+  answerRevealed?: boolean;
+}
+
+export function saveActiveSession(active: ActiveSession): boolean {
+  return safeSet(KEYS.active, active);
+}
+
+export function clearActiveSession(): void {
+  try {
+    localStorage.removeItem(KEYS.active);
+  } catch {
+    // ignore
+  }
+}
+
+/** The saved session in progress, if it was started with the current mode settings. */
+export function loadActiveSession(settings: UserSettings): ActiveSession | null {
+  const active = safeGet<ActiveSession | null>(KEYS.active, null);
+  const sess = active?.session;
+  if (!sess || sess.status !== 'in-progress') return null;
+  const sameMode = sess.appMode === settings.appMode && (
+    settings.appMode === 'jlpt'
+      ? sess.jlptSection === settings.jlptSection
+      : sess.mode === settings.exerciseMode
+  );
+  return sameMode ? { ...active, attempts: active.attempts ?? [], lastEvaluation: active.lastEvaluation ?? null } : null;
 }
 
 // ─── Session Summaries ──────────────────────────────────

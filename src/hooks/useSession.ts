@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type {
   Session,
   Question,
@@ -8,7 +8,8 @@ import type {
   EvaluationResponse,
 } from '../types';
 import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
-import { saveSession } from '../services/storage';
+import { saveSession, saveActiveSession, clearActiveSession } from '../services/storage';
+import type { ActiveSession } from '../services/storage';
 import { generateQuestions, evaluateAnswer, aiConfigFromSettings, isIncompleteKanjiAnswer } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
 import {
@@ -33,6 +34,8 @@ interface UseSessionReturn {
   evaluationError: string | null;
   elapsedMs: number;
   startSession: (settings: UserSettings) => Promise<void>;
+  /** Continue a session saved before the page was reloaded */
+  restoreSession: (settings: UserSettings, saved: ActiveSession) => void;
   startListening: () => void;
   stopListening: () => void;
   /** Push-to-talk released: submit what was heard */
@@ -42,11 +45,17 @@ interface UseSessionReturn {
   submitChoice: (choiceIndex: number) => void;
   nextQuestion: () => void;
   retryQuestion: () => void;
+  /**
+   * Show the expected answer, also before answering or while the AI is still
+   * evaluating. Kanji: gives up the question. Translation/situation: Try Again
+   * stays possible while attempts remain; moving on counts it as wrong.
+   */
   revealAnswer: () => void;
-  pauseSession: () => void;
-  resumeSession: () => void;
+  /** The expected answer is on screen */
+  answerShown: boolean;
   endSession: () => void;
-  isPaused: boolean;
+  /** Push-to-talk: the phone stopped listening while the mic is still held */
+  micStopped: boolean;
 }
 
 /** Attempts allowed per question — a multiple-choice question only gets one. */
@@ -64,7 +73,8 @@ export function useSession(): UseSessionReturn {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [micStopped, setMicStopped] = useState(false);
+  const [answerShown, setAnswerShown] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -74,6 +84,11 @@ export function useSession(): UseSessionReturn {
   // Id of the latest startSession call. A slower, older generation request must not
   // replace a session the user has already started answering (it would jump back to question 1).
   const generationIdRef = useRef(0);
+  // Id of the evaluation the UI is waiting for; revealing the answer bumps it so a
+  // result that arrives afterwards is dropped.
+  const evaluationIdRef = useRef(0);
+  // The answer was shown at some point for the current question (kept through retries)
+  const revealedRef = useRef(false);
 
   // Keep sessionRef in sync
   const updateSession = useCallback((updater: (prev: Session) => Session) => {
@@ -155,6 +170,8 @@ export function useSession(): UseSessionReturn {
 
         sessionRef.current = newSession;
         setSession(newSession);
+        revealedRef.current = false;
+        setAnswerShown(false);
         setCurrentAttempts([]);
         setLastEvaluation(null);
         setFinalTranscript('');
@@ -174,6 +191,37 @@ export function useSession(): UseSessionReturn {
     [resetTimer, startTimer]
   );
 
+  const restoreSession = useCallback(
+    (settings: UserSettings, saved: ActiveSession) => {
+      settingsRef.current = settings;
+      sessionRef.current = saved.session;
+      setSession(saved.session);
+      setCurrentAttempts(saved.attempts);
+      revealedRef.current = saved.answerRevealed ?? false;
+      setAnswerShown(saved.answerShown ?? false);
+      setLastEvaluation(saved.lastEvaluation);
+      setSpeechState(saved.lastEvaluation ? (saved.lastEvaluation.correct ? 'correct' : 'retry') : 'idle');
+      resetTimer();
+      startTimer();
+    },
+    [resetTimer, startTimer]
+  );
+
+  // Keep the session in progress in storage so a reload can continue it
+  useEffect(() => {
+    if (session?.status === 'in-progress') {
+      saveActiveSession({
+        session,
+        attempts: currentAttempts,
+        lastEvaluation,
+        answerShown,
+        answerRevealed: revealedRef.current,
+      });
+    } else if (session) {
+      clearActiveSession();
+    }
+  }, [session, currentAttempts, lastEvaluation, answerShown]);
+
   // Speech recognition
   const startListening = useCallback(() => {
     if (!isSpeechRecognitionSupported()) {
@@ -186,6 +234,7 @@ export function useSession(): UseSessionReturn {
     setLastEvaluation(null);
     setEvaluationError(null);
     setSpeechState('listening');
+    setMicStopped(false);
 
     const kanji = !!settingsRef.current && isKanjiMode(settingsRef.current);
     const started = startRecognition({
@@ -201,6 +250,7 @@ export function useSession(): UseSessionReturn {
         setSpeechState('error');
         setEvaluationError(error);
       },
+      onStopped: () => setMicStopped(true),
       onEnd: () => {
         // Only change to idle if we weren't processing
         setSpeechState((prev) =>
@@ -209,7 +259,7 @@ export function useSession(): UseSessionReturn {
       },
     }, prefersPushToTalk()
       // Phone: push-to-talk, the answer is submitted when the mic is released
-      ? { untilStopped: true }
+      ? { untilStopped: true, restartOnEnd: false }
       : kanji
       // A kanji reading is a single word: submit as soon as it's recognised,
       // unless only the start of 「それは … です」 has been said so far
@@ -225,11 +275,15 @@ export function useSession(): UseSessionReturn {
   // Stop button: cancel the recording and discard what was heard
   const stopListeningFn = useCallback(() => {
     stopRecognition();
+    setMicStopped(false);
     setInterimTranscript('');
     setSpeechState((prev) => (prev === 'listening' ? 'idle' : prev));
   }, []);
 
-  const releaseListening = useCallback(() => finishRecognition(), []);
+  const releaseListening = useCallback(() => {
+    finishRecognition();
+    setMicStopped(false);
+  }, []);
 
   // Submit transcript for evaluation
   const submitTranscript = useCallback(
@@ -243,10 +297,10 @@ export function useSession(): UseSessionReturn {
 
       setSpeechState('evaluating');
       setEvaluationError(null);
+      const evaluationId = ++evaluationIdRef.current;
+      const attemptNumber = currentAttempts.length + 1;
 
       try {
-        const attemptNumber = currentAttempts.length + 1;
-
         const result = await evaluateAnswer(
           aiConfigFromSettings(settings),
           question,
@@ -256,8 +310,6 @@ export function useSession(): UseSessionReturn {
           getMaxAttempts(settings),
           isSingleAttemptMode(settings)
         );
-
-        setLastEvaluation(result);
 
         const attempt: Attempt = {
           attemptNumber,
@@ -271,9 +323,13 @@ export function useSession(): UseSessionReturn {
           timestamp: Date.now(),
         };
 
+        // The answer was revealed while waiting: drop this result
+        if (evaluationId !== evaluationIdRef.current) return;
+        setLastEvaluation(result);
         setCurrentAttempts((prev) => [...prev, attempt]);
         setSpeechState(result.correct ? 'correct' : 'retry');
       } catch (err) {
+        if (evaluationId !== evaluationIdRef.current) return;
         setSpeechState('error');
         setEvaluationError(
           err instanceof Error ? err.message : 'Evaluation failed'
@@ -297,7 +353,7 @@ export function useSession(): UseSessionReturn {
       totalTimeMs: elapsedMs,
       // Typed answers never set finalTranscript, so prefer the last attempt
       finalTranscript: currentAttempts[currentAttempts.length - 1]?.transcript ?? finalTranscript,
-      revealedAnswer: lastEvaluation?.nextAction === 'reveal_answer',
+      revealedAnswer: revealedRef.current || lastEvaluation?.nextAction === 'reveal_answer',
     };
 
     const newIndex = sess.currentQuestionIndex + 1;
@@ -324,6 +380,8 @@ export function useSession(): UseSessionReturn {
       saveSession(finalSession);
     } else {
       // Reset for next question
+      revealedRef.current = false;
+      setAnswerShown(false);
       setCurrentAttempts([]);
       setLastEvaluation(null);
       setFinalTranscript('');
@@ -336,6 +394,7 @@ export function useSession(): UseSessionReturn {
 
   // Retry
   const retryQuestion = useCallback(() => {
+    setAnswerShown(false);
     setFinalTranscript('');
     setInterimTranscript('');
     setLastEvaluation(null);
@@ -376,10 +435,19 @@ export function useSession(): UseSessionReturn {
   // Give up on the question: show the answer and only allow moving on
   const revealAnswer = useCallback(() => {
     stopRecognition();
+    evaluationIdRef.current++; // an evaluation still running is no longer wanted
+    revealedRef.current = true;
+    setAnswerShown(true);
     setInterimTranscript('');
+    setEvaluationError(null);
     setSpeechState('idle');
+
+    const settings = settingsRef.current;
+    // Kanji: showing the reading means giving up, so only Next is offered
+    const giveUp = !settings || isKanjiMode(settings);
+    const attemptsLeft = !!settings && currentAttempts.length < getMaxAttempts(settings);
     setLastEvaluation((prev) => prev
-      ? { ...prev, nextAction: 'reveal_answer', hint: null }
+      ? { ...prev, hint: null, nextAction: giveUp ? 'reveal_answer' : prev.nextAction }
       : {
           correct: false,
           transcript: '',
@@ -387,22 +455,9 @@ export function useSession(): UseSessionReturn {
           grammarNotes: [],
           vocabularyNotes: [],
           hint: null,
-          nextAction: 'reveal_answer',
+          nextAction: !giveUp && attemptsLeft ? 'retry' : 'reveal_answer',
         });
-  }, []);
-
-  // Pause / Resume
-  const pauseSession = useCallback(() => {
-    setIsPaused(true);
-    stopTimer();
-    stopRecognition();
-    setSpeechState('idle');
-  }, [stopTimer]);
-
-  const resumeSession = useCallback(() => {
-    setIsPaused(false);
-    startTimer();
-  }, [startTimer]);
+  }, [currentAttempts]);
 
   // End session
   const endSession = useCallback(() => {
@@ -422,6 +477,7 @@ export function useSession(): UseSessionReturn {
     } else {
       setSession(null);
       sessionRef.current = null;
+      clearActiveSession();
     }
   }, [stopTimer]);
 
@@ -438,17 +494,17 @@ export function useSession(): UseSessionReturn {
     evaluationError,
     elapsedMs,
     startSession,
+    restoreSession,
     startListening,
     stopListening: stopListeningFn,
     releaseListening,
+    micStopped,
     submitTranscript,
     submitChoice,
     nextQuestion,
     retryQuestion,
     revealAnswer,
-    pauseSession,
-    resumeSession,
+    answerShown,
     endSession,
-    isPaused,
   };
 }

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import type { UserSettings, MicPermission } from './types';
 import { isConversationMode } from './types';
-import { loadSettings, saveSettings } from './services/storage';
+import { loadSettings, saveSettings, loadActiveSession, clearActiveSession } from './services/storage';
 import { LanguageContext } from './i18n';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
@@ -16,7 +16,9 @@ function AppInner() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<UserSettings>(() => loadSettings());
   const [micPermission, setMicPermission] = useState<MicPermission>('not-requested');
-  const [practiceActive, setPracticeActive] = useState(false);
+  // A session still in progress when the page was reloaded is continued
+  const [resuming, setResuming] = useState(() => loadActiveSession(settings) !== null);
+  const [practiceActive, setPracticeActive] = useState(resuming);
   const [recapSessionId, setRecapSessionId] = useState<string | null>(null);
 
   const handleSettingsChange = useCallback((newSettings: UserSettings) => {
@@ -25,6 +27,8 @@ function AppInner() {
   }, []);
 
   const handleStartPractice = useCallback(() => {
+    clearActiveSession();
+    setResuming(false);
     setPracticeActive(true);
     setRecapSessionId(null);
   }, []);
@@ -44,6 +48,8 @@ function AppInner() {
   }, [navigate]);
 
   const handlePracticeAgain = useCallback(() => {
+    clearActiveSession();
+    setResuming(false);
     setPracticeActive(true);
     setRecapSessionId(null);
   }, []);
@@ -57,12 +63,14 @@ function AppInner() {
           {isConversation ? (
             <ConversationPage
               settings={settings}
+              resume={resuming}
               onFinish={handleFinishPractice}
               onExit={handleExitPractice}
             />
           ) : (
             <PracticePage
               settings={settings}
+              resume={resuming}
               onFinish={handleFinishPractice}
               onExit={handleExitPractice}
             />

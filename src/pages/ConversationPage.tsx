@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, Square, Send, X, Shuffle, MessageCircle, AlertCircle, RotateCcw } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useConversation } from '../hooks/useConversation';
+import { loadActiveSession } from '../services/storage';
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import ChatBubble from '../components/ChatBubble';
 import { useI18n } from '../i18n';
@@ -17,15 +18,30 @@ interface ConversationPageProps {
   settings: UserSettings;
   onFinish: (sessionId: string) => void;
   onExit: () => void;
+  /** Continue the conversation saved before a page reload */
+  resume?: boolean;
 }
 
-export default function ConversationPage({ settings, onFinish, onExit }: ConversationPageProps) {
+export default function ConversationPage({ settings, onFinish, onExit, resume: resumeSaved }: ConversationPageProps) {
   const { t } = useI18n();
-  const { session, messages, isWaitingForAI, error, start, send, retry, end } = useConversation(settings);
+  const { session, messages, isWaitingForAI, error, start, resume, send, retry, end } = useConversation(settings);
+
+  // Continue the conversation that was open when the page was reloaded
+  // (once: React StrictMode runs mount effects twice in dev)
+  const resumedRef = useRef(false);
+  useEffect(() => {
+    if (resumedRef.current || !resumeSaved) return;
+    resumedRef.current = true;
+    const saved = loadActiveSession(settings);
+    if (saved?.session.conversation) resume(saved.session);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [topicInput, setTopicInput] = useState('');
   const [draft, setDraft] = useState('');
   const [isListening, setIsListening] = useState(false);
+  // Push-to-talk: the phone stopped listening while the mic is still held
+  const [micStopped, setMicStopped] = useState(false);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -37,10 +53,13 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
   // Stop the microphone when leaving the page
   useEffect(() => () => stopRecognition(), []);
 
+  const pushToTalk = prefersPushToTalk();
+
   // The mic stays on until the user turns it off. Spoken text goes after whatever
   // was already typed; `base` is that typed text.
   const listen = (base: string) => {
     const prefix = base ? `${base} ` : '';
+    setMicStopped(false);
     const started = startRecognition({
       onInterimResult: (t) => setDraft(prefix + t),
       // Push-to-talk released
@@ -50,7 +69,8 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
       },
       onError: () => setIsListening(false),
       onEnd: () => setIsListening(false),
-    }, { untilStopped: true });
+      onStopped: () => setMicStopped(true),
+    }, { untilStopped: true, restartOnEnd: !pushToTalk });
     setIsListening(started);
   };
 
@@ -74,7 +94,6 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
 
   // Phones: hold the mic to talk, release to stop (the text stays in the box),
   // slide away and release to cancel (the box goes back to what was typed before)
-  const pushToTalk = prefersPushToTalk();
   const draftBeforeHold = useRef('');
   const ptt = usePushToTalk({
     onStart: () => {
@@ -201,7 +220,9 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
 
       {pushToTalk && ptt.isHolding && (
         <div className={`ptt-hint ${ptt.cancelArmed ? 'cancel-armed' : ''}`}>
-          {ptt.cancelArmed ? t('common.releaseToCancel') : t('common.slideToCancel')}
+          {ptt.cancelArmed
+            ? t('common.releaseToCancel')
+            : micStopped ? t('common.micStoppedHold') : t('common.slideToCancel')}
         </div>
       )}
 

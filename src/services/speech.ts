@@ -55,6 +55,8 @@ export interface SpeechCallbacks {
   onError?: (error: string) => void;
   onStart?: () => void;
   onEnd?: () => void;
+  /** With restartOnEnd false: the browser stopped listening; waiting for finish/stop */
+  onStopped?: () => void;
 }
 
 // ─── Service ────────────────────────────────────────────
@@ -123,6 +125,12 @@ export interface RecognitionOptions {
    * delivered yet, e.g. 「それは」 said before the answer word itself.
    */
   isIncomplete?: (text: string) => boolean;
+  /**
+   * With untilStopped: restart recognition when the browser ends it (default true).
+   * Push-to-talk passes false: on Android every restart plays the system's mic
+   * sound, so after the browser stops the mic stays off until the user releases.
+   */
+  restartOnEnd?: boolean;
 }
 
 /** Errors after which the browser won't recognise anything, so restarting is pointless. */
@@ -148,7 +156,7 @@ function mergeSegments(segments: string[]): string {
 /** Start listening. Interim results carry the full text heard so far. */
 export function startRecognition(
   callbacks: SpeechCallbacks,
-  { waitForSilence = true, untilStopped = false, isIncomplete }: RecognitionOptions = {}
+  { waitForSilence = true, untilStopped = false, isIncomplete, restartOnEnd = true }: RecognitionOptions = {}
 ): boolean {
   const SpeechRecognitionClass = getSpeechRecognitionClass();
   if (!SpeechRecognitionClass) return false;
@@ -170,6 +178,8 @@ export function startRecognition(
   let heard = '';
   let finished = false;
   let releasing = false;
+  // The browser ended the session and we didn't restart it (restartOnEnd false)
+  let ended = false;
   let releaseTimer: ReturnType<typeof setTimeout> | null = null;
   let silenceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -200,6 +210,10 @@ export function startRecognition(
   // Push-to-talk released: let the browser finalise what it heard, then deliver
   finishCurrent = () => {
     if (finished || releasing) return;
+    if (ended) {
+      finish();
+      return;
+    }
     releasing = true;
     clearSilenceTimer();
     releaseTimer = setTimeout(finish, RELEASE_GRACE_MS);
@@ -268,6 +282,12 @@ export function startRecognition(
     if (finished) return;
     const keepListening = !releasing &&
       (untilStopped || (heard.trim() !== '' && (waitForSilence || !!isIncomplete?.(heard))));
+    if (keepListening && untilStopped && !restartOnEnd) {
+      ended = true;
+      isListening = false;
+      callbacks.onStopped?.();
+      return;
+    }
     if (keepListening) {
       earlierSegments.push(...currentSegments);
       currentSegments = [];

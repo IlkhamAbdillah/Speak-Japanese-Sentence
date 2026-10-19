@@ -11,6 +11,11 @@ interface PushToTalkCallbacks {
   onRelease: () => void;
   /** Released after sliding away: throw away what was heard */
   onCancel: () => void;
+  /**
+   * Ignore new presses. Needed because Chrome sends pointer events even to a
+   * disabled button, so pressing the busy mic (while evaluating) would start listening.
+   */
+  disabled?: boolean;
 }
 
 interface UsePushToTalkReturn {
@@ -31,7 +36,7 @@ interface UsePushToTalkReturn {
 }
 
 /** Hold to talk, release to finish, slide away (any direction) and release to cancel. */
-export function usePushToTalk({ onStart, onRelease, onCancel }: PushToTalkCallbacks): UsePushToTalkReturn {
+export function usePushToTalk({ onStart, onRelease, onCancel, disabled = false }: PushToTalkCallbacks): UsePushToTalkReturn {
   const [isHolding, setIsHolding] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const startRef = useRef({ x: 0, y: 0 });
@@ -60,7 +65,7 @@ export function usePushToTalk({ onStart, onRelease, onCancel }: PushToTalkCallba
   return {
     handlers: {
       onPointerDown: (e) => {
-        if (holdingRef.current) return;
+        if (holdingRef.current || disabled) return;
         // Keep receiving move/up events even when the finger slides off the button
         e.currentTarget.setPointerCapture(e.pointerId);
         startRef.current = { x: e.clientX, y: e.clientY };

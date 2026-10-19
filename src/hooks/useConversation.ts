@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { Session, UserSettings, ConversationMessage } from '../types';
-import { saveSession, deleteSession } from '../services/storage';
+import { saveSession, deleteSession, saveActiveSession, clearActiveSession } from '../services/storage';
 import { getConversationReply, aiConfigFromSettings } from '../services/ai';
 import { stopSpeaking } from '../services/speech';
 
@@ -11,6 +11,8 @@ interface UseConversationReturn {
   error: string | null;
   /** Start a new conversation; a null topic lets the AI pick one */
   start: (topic: string | null) => Promise<void>;
+  /** Continue a conversation saved before the page was reloaded */
+  resume: (saved: Session) => void;
   send: (text: string) => Promise<void>;
   /** Retry the last AI request after an error */
   retry: () => Promise<void>;
@@ -33,6 +35,9 @@ export function useConversation(settings: UserSettings): UseConversationReturn {
     // Save every turn so the conversation survives a closed tab, but only once
     // the user has said something — an unanswered greeting isn't worth keeping
     if (next.conversation?.messages.some((m) => m.role === 'user')) saveSession(next);
+    // Keep the open conversation so a page reload can continue it
+    if (next.status === 'in-progress') saveActiveSession({ session: next, attempts: [], lastEvaluation: null });
+    else clearActiveSession();
   }, []);
 
   // Ask the AI for its next message based on the current history
@@ -98,6 +103,14 @@ export function useConversation(settings: UserSettings): UseConversationReturn {
     await requestReply();
   }, [settings.jlptLevel, settings.instructionLanguage, requestReply]);
 
+  const resume = useCallback((saved: Session) => {
+    sessionRef.current = saved;
+    setSession(saved);
+    // Reloaded while waiting for the AI's reply (or before its greeting): ask again
+    const messages = saved.conversation?.messages ?? [];
+    if (messages.length === 0 || messages[messages.length - 1].role === 'user') requestReply();
+  }, [requestReply]);
+
   const send = useCallback(async (text: string) => {
     const sess = sessionRef.current;
     const trimmed = text.trim();
@@ -124,6 +137,7 @@ export function useConversation(settings: UserSettings): UseConversationReturn {
     const userMessages = sess.conversation?.messages.filter((m) => m.role === 'user').length ?? 0;
     if (userMessages === 0) {
       deleteSession(sess.sessionId);
+      clearActiveSession();
       return null;
     }
     commit({ ...sess, status: 'completed', endedAt: Date.now() });
@@ -139,6 +153,7 @@ export function useConversation(settings: UserSettings): UseConversationReturn {
     isWaitingForAI,
     error,
     start,
+    resume,
     send,
     retry: requestReply,
     end,
