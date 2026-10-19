@@ -396,6 +396,13 @@ const JLPT_ORDER: JLPTLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
 const langNameOf = (lang: InstructionLanguage) => languageMeta(lang).promptName;
 
+/**
+ * Closing rule for every prompt: the reply is parsed as JSON, so anything around it
+ * (a greeting, "Here are your questions:", notes) is useless and can break parsing.
+ */
+const JSON_ONLY_RULE = (opening: '[' | '{') =>
+  `Your entire reply must be the JSON itself: start with "${opening}" and end with "${opening === '[' ? ']' : '}'}". No introduction, no description, no explanation, no notes, no markdown, no code blocks before or after it.`;
+
 function buildQuestionGenerationPrompt(
   kind: PracticeKind,
   level: JLPTLevel,
@@ -409,30 +416,48 @@ function buildQuestionGenerationPrompt(
     situation: `Create real-world situations described in ${langName} that the user must respond to in Japanese. The situations should use JLPT ${level} appropriate scenarios.`,
   };
 
+  // The app shows "prompt" as-is and already tells the user what to do, so the
+  // field must hold only the content itself, never an instruction around it.
+  const promptField: Record<PracticeKind, string> = {
+    translation: `"prompt" is ONLY the ${langName} sentence to translate, e.g. "I drink coffee every morning." Do NOT add any instruction or label such as "Translate this sentence into Japanese:", no quotes around it, no romaji, no Japanese`,
+    situation: `"prompt" is ONLY the situation, written in ${langName} in 1–2 sentences, e.g. "You are at a restaurant and want to order water." Do NOT add any instruction or label such as "Respond in Japanese:" or "Situation:"`,
+  };
+
+  const contextField: Record<PracticeKind, string> = {
+    translation: `"context" is an empty string "" unless the sentence is ambiguous without it (e.g. who is speaking, polite or casual); then give that detail in a few ${langName} words`,
+    situation: `"context" is an empty string "" unless an extra detail is needed (e.g. who you are talking to); then give it in a few ${langName} words`,
+  };
+
   const system = `You are a Japanese language education expert. Generate exactly ${count} practice questions.
 
 Rules:
 - ${modeInstructions[kind]}
 - Each question must be appropriate for JLPT ${level} level
-- Prompts must be in ${langName}
-- Provide clear expected answers using natural Japanese
-- Include relevant vocabulary and grammar points
 - Avoid ambiguous questions
 - Each question should focus on one learning objective
 - Do NOT repeat similar questions
 
-Respond ONLY with a valid JSON array. Each element must have exactly these fields:
+Field rules:
+- ${promptField[kind]}
+- ${contextField[kind]}
+- "intendedMeaning": what the answer should convey, in ${langName}, one short sentence
+- "expectedAnswer": ONLY one natural Japanese answer, with no romaji, reading, translation or comment
+- "acceptableAnswerGuidelines": what variations are acceptable, one short sentence
+- "relevantVocabulary": the key Japanese words, each as a plain string
+- "relevantGrammar": the key grammar points, each as a short plain string
+
+Respond ONLY with a valid JSON array of exactly ${count} elements. Each element must have exactly these fields and no others:
 {
-  "prompt": "The question/instruction text in ${langName}",
-  "context": "Optional context or scenario details",
-  "intendedMeaning": "What the answer should convey",
-  "expectedAnswer": "A natural Japanese answer",
-  "acceptableAnswerGuidelines": "What variations are acceptable",
-  "relevantVocabulary": ["word1", "word2"],
-  "relevantGrammar": ["grammar point 1"]
+  "prompt": "string",
+  "context": "string",
+  "intendedMeaning": "string",
+  "expectedAnswer": "string",
+  "acceptableAnswerGuidelines": "string",
+  "relevantVocabulary": ["string"],
+  "relevantGrammar": ["string"]
 }
 
-Output ONLY the JSON array, no markdown formatting, no code blocks, no explanation.`;
+${JSON_ONLY_RULE('[')}`;
 
   return [
     { role: 'system', content: system },
@@ -466,8 +491,9 @@ ${levelRule}
 - Give one short JLPT ${level} level example sentence using the word, with its ${langName} translation
 - In "sameSoundSpellings", list other common ways the same reading can be written (homophones, kana-mixed spellings). Speech recognition may write the learner's answer that way, so it is accepted as correct. Use [] if none
 - Do NOT repeat words
+- Each field holds only its value: "kanji" is only the word itself (no reading, brackets, number or label), "reading" and "alternativeReadings" are only hiragana
 
-Respond ONLY with a valid JSON array. Each element must have exactly these fields:
+Respond ONLY with a valid JSON array of exactly ${count} elements. Each element must have exactly these fields and no others:
 {
   "kanji": "the word as written with kanji",
   "kanjiLevel": "N5" | "N4" | "N3" | "N2" | "N1",
@@ -479,7 +505,7 @@ Respond ONLY with a valid JSON array. Each element must have exactly these field
   "exampleTranslation": "translation of the example in ${langName}"
 }
 
-Output ONLY the JSON array, no markdown formatting, no code blocks, no explanation.`;
+${JSON_ONLY_RULE('[')}`;
 
   return [
     { role: 'system', content: system },
@@ -499,7 +525,7 @@ const EVALUATION_SCHEMA = (langName: string) => `IMPORTANT: Respond ONLY with va
 }
 
 Set nextAction to "next_question" if correct, "retry" if incorrect and attempts remain, "reveal_answer" if this is the last allowed attempt and incorrect.
-Output ONLY the JSON, no markdown, no code blocks.`;
+${JSON_ONLY_RULE('{')}`;
 
 function buildEvaluationPrompt(
   question: Question,
@@ -584,6 +610,8 @@ Rules:
 - The choices are in Japanese
 - Every question has exactly 4 choices and exactly ONE correct answer; the other 3 must be clearly wrong to someone who understood the text, but plausible to a learner
 - "answerIndex" is the 0-based index of the correct choice
+- "passage" is only the Japanese text itself, with no title, label or instruction such as 「次の文章を読んで…」
+- "question" is only the question sentence, and each choice is only its text, with no numbering such as "1." or "A)"
 - "explanation" is in ${langName}: explain why the correct choice is right and briefly why the others are wrong, pointing to the relevant part of the text
 
 Respond ONLY with valid JSON matching this exact schema:
@@ -599,7 +627,7 @@ Respond ONLY with valid JSON matching this exact schema:
   ]
 }
 
-Output ONLY the JSON, no markdown formatting, no code blocks, no explanation.`;
+${JSON_ONLY_RULE('{')}`;
 
   return [
     { role: 'system', content: system },
@@ -639,7 +667,7 @@ Respond ONLY with valid JSON matching this exact schema:
   "translation": "translation of your reply in ${langName}",
   "correction": null | { "corrected": "corrected Japanese of the learner's latest message", "explanation": "short explanation in ${langName}" }
 }
-Output ONLY the JSON, no markdown, no code blocks.`;
+${JSON_ONLY_RULE('{')}`;
 
   const transcript = history.length > 0
     ? history.map((m) => `${m.role === 'ai' ? 'You' : 'Learner'}: ${m.text}`).join('\n')
@@ -701,21 +729,50 @@ function normalizeReading(text: string): string {
     .replace(/[\s　、。．.,!?！？「」]/g, '');
 }
 
+// Speech recognition often misses a reading of one or two kana said on its own, so
+// the learner may wrap it in a phrase: 「それは やま です」, or for one kana the
+// kana row plus the kana, the way it is spelled out on the phone: 「それは はひふへほ の ひ」.
+const KANA_ROWS = [
+  'あいうえお', 'かきくけこ', 'がぎぐげご', 'さしすせそ', 'ざじずぜぞ', 'たちつてと', 'だぢづでど',
+  'なにぬねの', 'はひふへほ', 'ばびぶべぼ', 'ぱぴぷぺぽ', 'まみむめも', 'やゆよ', 'らりるれろ', 'わをん',
+];
+// "はひふへほ", "はぎょう" and "は行" all name the same row
+const ROW_NAMES = KANA_ROWS.flatMap((row) => [row, `${row[0]}ぎょう`, `${row[0]}行`]);
+const TEMPLATE_PREFIX = /^(それは|それわ)/;
+const TEMPLATE_SUFFIX = /です$/;
+
+/** Strip the 「それは … です」 / 「それは はひふへほ の ひ」 phrase; returns the normalised answer. */
+function stripKanjiTemplate(answer: string): string {
+  const text = normalizeReading(answer).replace(TEMPLATE_PREFIX, '').replace(TEMPLATE_SUFFIX, '');
+  const row = ROW_NAMES.find((name) => text.startsWith(`${name}の`) && text.length > name.length + 1);
+  return row ? text.slice(row.length + 1) : text;
+}
+
+/**
+ * True while a spoken kanji answer is still only the start of a template
+ * (「それは」, 「それは はひふへほ」, 「それは はひふへほ の」), so the mic keeps listening.
+ */
+export function isIncompleteKanjiAnswer(answer: string): boolean {
+  const text = normalizeReading(answer).replace(TEMPLATE_PREFIX, '');
+  return text === '' || text.endsWith('の') || ROW_NAMES.includes(text);
+}
+
 /**
  * Fast local check for kanji answers. Typed hiragana is compared with the known
  * readings; spoken answers usually come back from speech recognition written as
  * the kanji word itself, which also counts as correct.
  */
 function isKanjiAnswerCorrect(question: Question, answer: string): boolean {
-  const given = normalizeReading(answer);
-  if (!given) return false;
   const accepted = [
     question.expectedAnswer,
     ...(question.alternativeAnswers ?? []),
     question.prompt,
     ...(question.acceptedSpellings ?? []),
   ].map(normalizeReading);
-  return accepted.includes(given);
+  // Check the answer as given too, in case a real reading looks like a template part
+  return [stripKanjiTemplate(answer), normalizeReading(answer)].some(
+    (given) => given !== '' && accepted.includes(given)
+  );
 }
 
 // ─── Public API ─────────────────────────────────────────
@@ -859,7 +916,7 @@ export function evaluateKanjiAnswer(
 
   return {
     correct,
-    transcript: answer,
+    transcript: stripKanjiTemplate(answer) || answer,
     feedback: correct
       ? translate(lang, 'kanji.correct', { word: question.prompt, reading: question.expectedAnswer })
       : translate(lang, 'kanji.wrong'),

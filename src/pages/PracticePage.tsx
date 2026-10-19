@@ -17,9 +17,10 @@ import {
 } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useSession, getMaxAttempts } from '../hooks/useSession';
+import { usePushToTalk } from '../hooks/usePushToTalk';
 import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
-import { isSpeechRecognitionSupported, SILENCE_SUBMIT_MS } from '../services/speech';
+import { isSpeechRecognitionSupported, prefersPushToTalk, SILENCE_SUBMIT_MS } from '../services/speech';
 import { useI18n } from '../i18n';
 import type { MessageKey } from '../i18n';
 
@@ -48,6 +49,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     startSession,
     startListening,
     stopListening,
+    releaseListening,
     submitTranscript,
     submitChoice,
     nextQuestion,
@@ -64,6 +66,14 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const [editedTranscript, setEditedTranscript] = useState('');
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
+  // Phones: hold the mic to talk, release to submit, slide away and release to cancel
+  const pushToTalk = prefersPushToTalk();
+  const ptt = usePushToTalk({
+    onStart: startListening,
+    onRelease: releaseListening,
+    onCancel: stopListening,
+  });
+
   const { lang, t } = useI18n();
   const isSingleAttempt = isSingleAttemptMode(settings);
   const isKanji = isKanjiMode(settings);
@@ -78,8 +88,12 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
     nextQuestion();
   }, [nextQuestion]);
 
-  // Start session on mount
+  // Start session on mount. React StrictMode runs mount effects twice in dev; without
+  // this guard two question sets were generated and the slower one reset the session.
+  const sessionStartedRef = useRef(false);
   useEffect(() => {
+    if (sessionStartedRef.current) return;
+    sessionStartedRef.current = true;
     startSession(settings);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -191,6 +205,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
   const questionNum = session.currentQuestionIndex + 1;
 
   const speechSupported = isSpeechRecognitionSupported();
+  const micHandlers = pushToTalk
+    ? ptt.handlers
+    : { onClick: speechState === 'listening' ? stopListening : startListening };
 
   // Explanations are only shown for wrong answers: always once the answer is
   // revealed (and always with a single attempt); otherwise they count as hints and
@@ -202,8 +219,10 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
 
   const getSpeechStateLabel = () => {
     const labels: Record<string, MessageKey> = {
-      idle: 'practice.speech.idle',
-      listening: isKanji ? 'practice.speech.listeningKanji' : 'practice.speech.listening',
+      idle: pushToTalk ? 'practice.speech.idleHold' : 'practice.speech.idle',
+      listening: pushToTalk
+        ? ptt.cancelArmed ? 'common.releaseToCancel' : 'practice.speech.listeningHold'
+        : isKanji ? 'practice.speech.listeningKanji' : 'practice.speech.listening',
       processing: 'practice.speech.processing',
       evaluating: 'practice.speech.evaluating',
       correct: 'practice.speech.correct',
@@ -273,6 +292,7 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                   {t('practice.kanjiInstruction')}
                 </p>
                 <p className="kanji-display">{currentQuestion.prompt}</p>
+                {speechSupported && <p className="kanji-voice-tip">{t('practice.kanjiVoiceTip')}</p>}
               </>
             ) : isChoice ? (
               <>
@@ -369,11 +389,14 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
             <div className="game-controls">
               {speechSupported ? (
                 <button
-                  className={`mic-button ${speechState === 'listening' ? 'listening' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
-                  onClick={speechState === 'listening' ? stopListening : startListening}
-                  title={speechState === 'listening'
-                    ? t('common.cancelRecording')
-                    : t('common.speak')}
+                  className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${speechState === 'listening' ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${speechState === 'correct' ? 'correct' : ''}`}
+                  style={pushToTalk ? ptt.buttonStyle : undefined}
+                  {...micHandlers}
+                  title={pushToTalk
+                    ? t('common.holdToTalk')
+                    : speechState === 'listening'
+                      ? t('common.cancelRecording')
+                      : t('common.speak')}
                   disabled={
                     speechState === 'evaluating' ||
                     speechState === 'processing' ||
@@ -381,7 +404,9 @@ export default function PracticePage({ settings, onFinish, onExit }: PracticePag
                     !!lastEvaluation
                   }
                 >
-                  {speechState === 'listening' ? (
+                  {ptt.cancelArmed ? (
+                    <X size={28} />
+                  ) : speechState === 'listening' ? (
                     <Square size={28} />
                   ) : speechState === 'evaluating' || speechState === 'processing' ? (
                     <Loader2 size={28} style={{ animation: 'spin 0.8s linear infinite' }} />

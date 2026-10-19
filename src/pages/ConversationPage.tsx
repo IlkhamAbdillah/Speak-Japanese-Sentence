@@ -2,12 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, Square, Send, X, Shuffle, MessageCircle, AlertCircle, RotateCcw } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useConversation } from '../hooks/useConversation';
+import { usePushToTalk } from '../hooks/usePushToTalk';
 import ChatBubble from '../components/ChatBubble';
 import { useI18n } from '../i18n';
 import {
   startRecognition,
   stopRecognition,
+  finishRecognition,
   isSpeechRecognitionSupported,
+  prefersPushToTalk,
 } from '../services/speech';
 
 interface ConversationPageProps {
@@ -25,7 +28,6 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
   const [isListening, setIsListening] = useState(false);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const draftBeforeListening = useRef('');
 
   // Keep the newest message in view
   useEffect(() => {
@@ -35,36 +37,58 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
   // Stop the microphone when leaving the page
   useEffect(() => () => stopRecognition(), []);
 
-  const handleSend = () => {
-    if (!draft.trim() || isWaitingForAI) return;
-    stopRecognition();
-    setIsListening(false);
-    send(draft);
-    setDraft('');
-  };
-
-  const toggleListening = () => {
-    if (isListening) {
-      // Cancel: drop what was heard and restore the message as it was before speaking
-      stopRecognition();
-      setIsListening(false);
-      setDraft(draftBeforeListening.current);
-      return;
-    }
-    // Spoken text is appended to whatever is already typed, so it can be checked before sending
-    draftBeforeListening.current = draft;
-    const base = draft ? `${draft} ` : '';
+  // The mic stays on until the user turns it off. Spoken text goes after whatever
+  // was already typed; `base` is that typed text.
+  const listen = (base: string) => {
+    const prefix = base ? `${base} ` : '';
     const started = startRecognition({
-      onInterimResult: (t) => setDraft(base + t),
+      onInterimResult: (t) => setDraft(prefix + t),
+      // Push-to-talk released
       onFinalResult: (t) => {
-        setDraft(base + t);
+        setDraft(prefix + t);
         setIsListening(false);
       },
       onError: () => setIsListening(false),
       onEnd: () => setIsListening(false),
-    });
+    }, { untilStopped: true });
     setIsListening(started);
   };
+
+  const handleSend = () => {
+    if (!draft.trim() || isWaitingForAI) return;
+    send(draft);
+    setDraft('');
+    // Keep the mic on for the next message, starting from an empty box
+    if (isListening) listen('');
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      // Stop only turns the mic off: what was heard stays in the box
+      stopRecognition();
+      setIsListening(false);
+      return;
+    }
+    listen(draft);
+  };
+
+  // Phones: hold the mic to talk, release to stop (the text stays in the box),
+  // slide away and release to cancel (the box goes back to what was typed before)
+  const pushToTalk = prefersPushToTalk();
+  const draftBeforeHold = useRef('');
+  const ptt = usePushToTalk({
+    onStart: () => {
+      draftBeforeHold.current = draft;
+      listen(draft);
+    },
+    onRelease: finishRecognition,
+    onCancel: () => {
+      stopRecognition();
+      setIsListening(false);
+      setDraft(draftBeforeHold.current);
+    },
+  });
+  const micHandlers = pushToTalk ? ptt.handlers : { onClick: toggleListening };
 
   const handleEnd = () => {
     stopRecognition();
@@ -175,14 +199,21 @@ export default function ConversationPage({ settings, onFinish, onExit }: Convers
         )}
       </div>
 
+      {pushToTalk && ptt.isHolding && (
+        <div className={`ptt-hint ${ptt.cancelArmed ? 'cancel-armed' : ''}`}>
+          {ptt.cancelArmed ? t('common.releaseToCancel') : t('common.slideToCancel')}
+        </div>
+      )}
+
       <div className="chat-composer">
         {isSpeechRecognitionSupported() && (
           <button
-            className={`chat-composer-btn ${isListening ? 'listening' : ''}`}
-            onClick={toggleListening}
-            title={isListening ? t('common.cancelRecording') : t('common.speak')}
+            className={`chat-composer-btn ${pushToTalk ? 'push-to-talk' : ''} ${isListening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''}`}
+            style={pushToTalk ? ptt.buttonStyle : undefined}
+            {...micHandlers}
+            title={pushToTalk ? t('common.holdToTalk') : isListening ? t('common.stopMic') : t('common.speak')}
           >
-            {isListening ? <Square size={18} /> : <Mic size={18} />}
+            {ptt.cancelArmed ? <X size={18} /> : isListening ? <Square size={18} /> : <Mic size={18} />}
           </button>
         )}
         <input

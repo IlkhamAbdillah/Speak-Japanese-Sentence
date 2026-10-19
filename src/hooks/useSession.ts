@@ -9,12 +9,14 @@ import type {
 } from '../types';
 import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
 import { saveSession } from '../services/storage';
-import { generateQuestions, evaluateAnswer, aiConfigFromSettings } from '../services/ai';
+import { generateQuestions, evaluateAnswer, aiConfigFromSettings, isIncompleteKanjiAnswer } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
 import {
   startRecognition,
   stopRecognition,
+  finishRecognition,
   isSpeechRecognitionSupported,
+  prefersPushToTalk,
 } from '../services/speech';
 import type { SpeechState } from '../types';
 
@@ -33,6 +35,8 @@ interface UseSessionReturn {
   startSession: (settings: UserSettings) => Promise<void>;
   startListening: () => void;
   stopListening: () => void;
+  /** Push-to-talk released: submit what was heard */
+  releaseListening: () => void;
   submitTranscript: (transcript: string) => Promise<void>;
   /** Answer a multiple-choice question with the index of the chosen option */
   submitChoice: (choiceIndex: number) => void;
@@ -67,6 +71,9 @@ export function useSession(): UseSessionReturn {
   const startTimeRef = useRef<number>(0);
   const settingsRef = useRef<UserSettings | null>(null);
   const sessionRef = useRef<Session | null>(null);
+  // Id of the latest startSession call. A slower, older generation request must not
+  // replace a session the user has already started answering (it would jump back to question 1).
+  const generationIdRef = useRef(0);
 
   // Keep sessionRef in sync
   const updateSession = useCallback((updater: (prev: Session) => Session) => {
@@ -109,6 +116,7 @@ export function useSession(): UseSessionReturn {
   // Start session
   const startSession = useCallback(
     async (settings: UserSettings) => {
+      const generationId = ++generationIdRef.current;
       settingsRef.current = settings;
       setIsGenerating(true);
       setGenerationError(null);
@@ -126,6 +134,7 @@ export function useSession(): UseSessionReturn {
           settings.instructionLanguage,
           settings.questionCount
         );
+        if (generationId !== generationIdRef.current) return;
 
         const newSession: Session = {
           sessionId: `session-${Date.now()}`,
@@ -154,11 +163,12 @@ export function useSession(): UseSessionReturn {
         resetTimer();
         startTimer();
       } catch (err) {
+        if (generationId !== generationIdRef.current) return;
         setGenerationError(
           err instanceof Error ? err.message : 'Failed to generate questions'
         );
       } finally {
-        setIsGenerating(false);
+        if (generationId === generationIdRef.current) setIsGenerating(false);
       }
     },
     [resetTimer, startTimer]
@@ -177,6 +187,7 @@ export function useSession(): UseSessionReturn {
     setEvaluationError(null);
     setSpeechState('listening');
 
+    const kanji = !!settingsRef.current && isKanjiMode(settingsRef.current);
     const started = startRecognition({
       onInterimResult: (transcript) => {
         setInterimTranscript(transcript);
@@ -196,10 +207,14 @@ export function useSession(): UseSessionReturn {
           prev === 'listening' ? 'idle' : prev
         );
       },
-    }, {
-      // A kanji reading is a single word: submit as soon as it's recognised
-      waitForSilence: !(settingsRef.current && isKanjiMode(settingsRef.current)),
-    });
+    }, prefersPushToTalk()
+      // Phone: push-to-talk, the answer is submitted when the mic is released
+      ? { untilStopped: true }
+      : kanji
+      // A kanji reading is a single word: submit as soon as it's recognised,
+      // unless only the start of 「それは … です」 has been said so far
+      ? { waitForSilence: false, isIncomplete: isIncompleteKanjiAnswer }
+      : { waitForSilence: true });
 
     if (!started) {
       setSpeechState('error');
@@ -213,6 +228,8 @@ export function useSession(): UseSessionReturn {
     setInterimTranscript('');
     setSpeechState((prev) => (prev === 'listening' ? 'idle' : prev));
   }, []);
+
+  const releaseListening = useCallback(() => finishRecognition(), []);
 
   // Submit transcript for evaluation
   const submitTranscript = useCallback(
@@ -423,6 +440,7 @@ export function useSession(): UseSessionReturn {
     startSession,
     startListening,
     stopListening: stopListeningFn,
+    releaseListening,
     submitTranscript,
     submitChoice,
     nextQuestion,

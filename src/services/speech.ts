@@ -61,6 +61,8 @@ export interface SpeechCallbacks {
 
 let recognition: SpeechRecognitionInstance | null = null;
 let isListening = false;
+// Delivers the running recognition's text (see finishRecognition)
+let finishCurrent: (() => void) | null = null;
 
 function getSpeechRecognitionClass(): SpeechRecognitionConstructor | null {
   const w = window as unknown as Record<string, unknown>;
@@ -88,6 +90,18 @@ export async function requestMicPermission(): Promise<MicPermission> {
   }
 }
 
+/**
+ * Phones get push-to-talk (hold the mic, release to finish): their browsers end and
+ * restart recognition after every phrase, so waiting for silence there is unreliable.
+ * A touch screen as the main pointer is the sign of a phone or tablet.
+ */
+export function prefersPushToTalk(): boolean {
+  return typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
+}
+
+/** After push-to-talk is released, how long to wait for the browser's last result. */
+const RELEASE_GRACE_MS = 1500;
+
 /** How long the user may pause before their answer is submitted automatically. */
 export const SILENCE_SUBMIT_MS = 3000;
 
@@ -99,12 +113,42 @@ export interface RecognitionOptions {
    * false: deliver the first final result right away — best for single words.
    */
   waitForSilence?: boolean;
+  /**
+   * Keep listening through any pause and never deliver on its own: the user ends it
+   * with stopRecognition() (discard) or finishRecognition() (deliver, push-to-talk).
+   */
+  untilStopped?: boolean;
+  /**
+   * With waitForSilence false: a final result for which this returns true is not
+   * delivered yet, e.g. 「それは」 said before the answer word itself.
+   */
+  isIncomplete?: (text: string) => boolean;
+}
+
+/** Errors after which the browser won't recognise anything, so restarting is pointless. */
+const FATAL_ERRORS = new Set(['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported']);
+
+/**
+ * Join the results of a continuous session into one text. Chrome (especially on
+ * Android) often repeats earlier speech in later results: either the whole text so
+ * far again ("こんにち", "こんにちは") or the same segment twice. Plain concatenation
+ * turned one spoken word into "こんにちこんにちは", which was then graded wrong.
+ */
+function mergeSegments(segments: string[]): string {
+  let text = '';
+  for (const raw of segments) {
+    const seg = raw.trim();
+    if (!seg) continue;
+    if (seg.startsWith(text)) text = seg; // cumulative result: it already contains everything so far
+    else if (!text.endsWith(seg)) text += seg; // otherwise skip an exact repeat of the last part
+  }
+  return text;
 }
 
 /** Start listening. Interim results carry the full text heard so far. */
 export function startRecognition(
   callbacks: SpeechCallbacks,
-  { waitForSilence = true }: RecognitionOptions = {}
+  { waitForSilence = true, untilStopped = false, isIncomplete }: RecognitionOptions = {}
 ): boolean {
   const SpeechRecognitionClass = getSpeechRecognitionClass();
   if (!SpeechRecognitionClass) return false;
@@ -113,12 +157,20 @@ export function startRecognition(
 
   const rec = new SpeechRecognitionClass();
   recognition = rec;
-  rec.continuous = waitForSilence;
+  rec.continuous = waitForSilence || untilStopped;
   rec.interimResults = true;
   rec.lang = 'ja-JP';
 
+  // The browser ends a recognition session on its own after a pause (Chrome on
+  // Android after every phrase, desktop Chrome on silence or after about a minute).
+  // We restart it then, so only our silence timer or the user decides when to stop.
+  // Segments from the earlier browser sessions are kept here.
+  const earlierSegments: string[] = [];
+  let currentSegments: string[] = [];
   let heard = '';
   let finished = false;
+  let releasing = false;
+  let releaseTimer: ReturnType<typeof setTimeout> | null = null;
   let silenceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const clearSilenceTimer = () => {
@@ -126,44 +178,74 @@ export function startRecognition(
     silenceTimer = null;
   };
 
+  const restartSilenceTimer = () => {
+    clearSilenceTimer();
+    silenceTimer = setTimeout(finish, SILENCE_SUBMIT_MS);
+  };
+
   // Deliver what was heard (if anything) exactly once, then shut down
-  const finish = () => {
+  function finish() {
     if (finished) return;
     finished = true;
     clearSilenceTimer();
+    if (releaseTimer) clearTimeout(releaseTimer);
     // Cancelled (or replaced by a new session) in the meantime: deliver nothing
     if (recognition !== rec) return;
     const text = heard.trim();
     stopRecognition();
     if (text) callbacks.onFinalResult?.(text);
     else callbacks.onEnd?.();
+  }
+
+  // Push-to-talk released: let the browser finalise what it heard, then deliver
+  finishCurrent = () => {
+    if (finished || releasing) return;
+    releasing = true;
+    clearSilenceTimer();
+    releaseTimer = setTimeout(finish, RELEASE_GRACE_MS);
+    try {
+      rec.stop();
+    } catch {
+      finish();
+    }
   };
 
   rec.onstart = () => {
+    // Released while a restart was still starting up: there is nothing more to hear
+    if (releasing) {
+      finish();
+      return;
+    }
+    if (isListening) return; // a restart, not a new start
     isListening = true;
     callbacks.onStart?.();
   };
 
   rec.onresult = (event: SpeechRecognitionEvent) => {
-    // In continuous mode event.results holds the whole session, so rebuild from the start
-    let text = '';
+    // In continuous mode event.results holds the whole browser session, so rebuild from the start
+    const segments: string[] = [];
     let hasFinal = false;
     for (let i = 0; i < event.results.length; i++) {
-      text += event.results[i][0].transcript;
+      segments.push(event.results[i][0].transcript);
       hasFinal ||= event.results[i].isFinal;
     }
-    heard = text;
-    callbacks.onInterimResult?.(text);
+    currentSegments = segments;
+    heard = mergeSegments([...earlierSegments, ...segments]);
+    callbacks.onInterimResult?.(heard);
 
+    if (untilStopped || releasing) return;
     if (!waitForSilence) {
-      if (hasFinal) finish();
+      if (!hasFinal) return;
+      if (isIncomplete?.(heard)) restartSilenceTimer(); // wait for the rest, but not forever
+      else finish();
       return;
     }
-    clearSilenceTimer();
-    silenceTimer = setTimeout(finish, SILENCE_SUBMIT_MS);
+    restartSilenceTimer();
   };
 
   rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+    // "no-speech" and the like just end this browser session; onend restarts it if needed
+    if (!FATAL_ERRORS.has(event.error) && (untilStopped || releasing || heard.trim())) return;
     // If we already heard something, submit it instead of failing
     if (heard.trim()) {
       finish();
@@ -182,8 +264,20 @@ export function startRecognition(
     callbacks.onError?.(errorMap[event.error] ?? `Recognition error: ${event.error}`);
   };
 
-  // The browser can end the session on its own (e.g. long silence); submit what we have
   rec.onend = () => {
+    if (finished) return;
+    const keepListening = !releasing &&
+      (untilStopped || (heard.trim() !== '' && (waitForSilence || !!isIncomplete?.(heard))));
+    if (keepListening) {
+      earlierSegments.push(...currentSegments);
+      currentSegments = [];
+      try {
+        rec.start();
+        return;
+      } catch {
+        // fall through and deliver what we have
+      }
+    }
     isListening = false;
     finish();
   };
@@ -198,13 +292,22 @@ export function startRecognition(
 
 /** Stop listening and throw away anything heard (the "cancel" button). */
 export function stopRecognition(): void {
+  finishCurrent = null;
   if (recognition) {
     const rec = recognition;
     recognition = null;
     rec.onresult = null;
     rec.onerror = null;
     rec.onend = null;
-    rec.onstart = null;
+    // A start() still in progress can ignore abort() (Chrome on Android), and the mic
+    // would then come back on after the answer was submitted. Abort it once it starts.
+    rec.onstart = () => {
+      try {
+        rec.abort();
+      } catch {
+        // ignore
+      }
+    };
     try {
       rec.abort();
     } catch {
@@ -212,6 +315,11 @@ export function stopRecognition(): void {
     }
     isListening = false;
   }
+}
+
+/** Stop listening and deliver what was heard (push-to-talk released). */
+export function finishRecognition(): void {
+  finishCurrent?.();
 }
 
 export function getIsListening(): boolean {

@@ -1888,3 +1888,58 @@ button.mode-card {
     padding: var(--space-sm);
   }
 }
+
+/* ─── Kanji voice tip ─────────────────────────────────── */
+
+.kanji-voice-tip {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-sm);
+  line-height: 1.6;
+}
+
+/* ─── Push-to-talk (phones) ───────────────────────────── */
+
+/* Holding the mic must not scroll, select text or open the long-press menu */
+.push-to-talk {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Slide away to cancel: the mic follows the finger, then turns grey with an X */
+.mic-button.push-to-talk,
+.chat-composer-btn.push-to-talk {
+  transition: transform 0.05s linear;
+}
+
+.mic-button.cancel-armed,
+.chat-composer-btn.cancel-armed {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-tertiary);
+  animation: none;
+}
+
+/* Like a messaging app: on phones the mic sits right of the box */
+.chat-composer .chat-composer-btn.push-to-talk {
+  order: 1;
+}
+
+.chat-composer .chat-composer-send {
+  order: 2;
+}
+
+.ptt-hint {
+  padding: var(--space-xs) var(--space-md);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ptt-hint.cancel-armed {
+  color: var(--color-error);
+}
