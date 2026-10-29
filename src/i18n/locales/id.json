@@ -98,7 +98,22 @@
     "questionCount": "Jumlah Soal",
     "readingQuestionCount": "Satu teks bacaan dengan {count} soal.",
     "maxAttempts": "Percobaan per Soal",
-    "hints": "Petunjuk"
+    "hints": "Petunjuk",
+    "format": "Format",
+    "formatStory": "Cerita",
+    "formatSentences": "Kalimat lepas",
+    "paragraphs": "Jumlah Paragraf",
+    "topic": "Topik",
+    "storyDesc": "Terjemahkan cerita pendek ke bahasa Jepang, satu kalimat demi satu kalimat",
+    "tense": "Waktu Cerita",
+    "customTopicPlaceholder": "Tulis topik Anda, mis. jalan-jalan ke Kyoto bersama teman",
+    "kanjiSessionType": "Jenis Sesi",
+    "kanjiNew": "Kanji baru",
+    "kanjiReview": "Ulang",
+    "kanjiProgress": "{level}: {studied}/{total} kanji sudah dilatih · {known} dikuasai · {due} perlu diulang",
+    "kanjiFewNew": "Tinggal {count} kanji baru di level ini; sisa sesi diisi kanji untuk diulang.",
+    "kanjiNothingToReview": "Belum ada kanji untuk diulang di level ini. Mulai dengan Kanji baru.",
+    "kanjiSource": "Daftar kanji: {source}"
   },
   "settings": {
     "title": "Pengaturan AI",
@@ -180,6 +195,45 @@
       "answered": "Sudah dijawab",
       "error": "Terjadi kesalahan",
       "unsupported": "Tidak didukung"
+    },
+    "hint": "Petunjuk",
+    "hintVocabulary": "Kosakata",
+    "hintGrammar": "Tata bahasa",
+    "correctedAnswer": "Jawaban Anda yang diperbaiki",
+    "alternatives": "Cara lain mengatakannya",
+    "correctNextSentence": "Benar! 🎉 Lanjut ke kalimat berikutnya...",
+    "nextSentence": "Kalimat Berikutnya",
+    "verdict": {
+      "natural": "Benar dan alami",
+      "slightly_unnatural": "Benar, tapi kurang alami",
+      "grammar_errors": "Bisa dipahami, tapi ada kesalahan",
+      "partial": "Sebagian benar",
+      "incorrect": "Artinya berbeda"
+    },
+    "fewerQuestions": "Kali ini hanya {count} dari {requested} soal yang bisa dibuat."
+  },
+  "story": {
+    "generatingTitle": "Menulis cerita...",
+    "generatingText": "AI sedang menulis cerita sesuai level Anda.",
+    "sentenceOf": "Kalimat {current} dari {total}",
+    "position": "Paragraf {paragraph} · Kalimat {sentence}",
+    "topics": {
+      "random": "Acak",
+      "dailyLife": "Kehidupan sehari-hari",
+      "university": "Kuliah",
+      "shopping": "Belanja",
+      "travel": "Jalan-jalan",
+      "food": "Makanan",
+      "hobbies": "Hobi",
+      "work": "Pekerjaan",
+      "friends": "Teman & keluarga",
+      "custom": "Tulis sendiri…"
+    },
+    "tenses": {
+      "random": "Acak",
+      "past": "Lampau",
+      "present": "Sekarang",
+      "future": "Akan datang"
     }
   },
   "kanji": {
@@ -236,7 +290,22 @@
     "messagesSent": "Pesan Terkirim",
     "corrections": "Koreksi",
     "chatTranscript": "Riwayat Chat",
-    "chatAgain": "Ngobrol Lagi"
+    "chatAgain": "Ngobrol Lagi",
+    "wholeStory": "Cerita Lengkap",
+    "paragraph": "Paragraf {number}",
+    "storyJapanese": "Dalam bahasa Jepang",
+    "grammarPracticed": "Tata Bahasa yang Dilatih",
+    "vocabReview": "Kosakata untuk Diulang",
+    "correctUnaided": "Benar tanpa bantuan",
+    "correctHelped": "Benar dengan bantuan",
+    "wrong": "Salah",
+    "retryWrong": "Ulangi yang Salah",
+    "correction": "Koreksi",
+    "naturalVersion": "Lebih alami",
+    "alternatives": "Cara lain",
+    "hintUsed": "Pakai petunjuk",
+    "sentenceDetails": "Detail Kalimat",
+    "sentenceLabel": "P{paragraph}·K{sentence}"
   },
   "history": {
     "clearAll": "Hapus Semua",

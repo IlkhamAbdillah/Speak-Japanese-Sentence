@@ -15,8 +15,9 @@ import {
 } from 'lucide-react';
 import type { UserSettings } from '../types';
 import { useSession, getMaxAttempts } from '../hooks/useSession';
+import type { PresetQuestions } from '../hooks/useSession';
 import { usePushToTalk } from '../hooks/usePushToTalk';
-import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
+import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode, isStoryMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
 import { isSpeechRecognitionSupported, prefersPushToTalk, SILENCE_SUBMIT_MS } from '../services/speech';
 import { loadActiveSession } from '../services/storage';
@@ -29,12 +30,14 @@ interface PracticePageProps {
   onExit: () => void;
   /** Continue the session saved before a page reload instead of starting a new one */
   resume?: boolean;
+  /** Practise these questions again instead of generating new ones */
+  preset?: PresetQuestions;
 }
 
 /** How long "Correct!" stays on screen before the next question appears. */
 const CORRECT_ADVANCE_MS = 1200;
 
-export default function PracticePage({ settings, onFinish, onExit, resume }: PracticePageProps) {
+export default function PracticePage({ settings, onFinish, onExit, resume, preset }: PracticePageProps) {
   const {
     session,
     speechState,
@@ -60,6 +63,8 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
     revealAnswer,
     answerShown,
     endSession,
+    hintsUsed,
+    openHint,
   } = useSession();
 
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
@@ -102,7 +107,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
     sessionStartedRef.current = true;
     const saved = resume ? loadActiveSession(settings) : null;
     if (saved) restoreSession(settings, saved);
-    else startSession(settings);
+    else startSession(settings, preset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -167,10 +172,10 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
         <div className="empty-state">
           <div className="spinner spinner-lg" style={{ margin: '0 auto var(--space-lg)' }}></div>
           <p className="empty-state-title">
-            {t('practice.generatingTitle')}
+            {t(isStoryMode(settings) ? 'story.generatingTitle' : 'practice.generatingTitle')}
           </p>
           <p className="empty-state-text">
-            {t('practice.generatingText')}
+            {t(isStoryMode(settings) ? 'story.generatingText' : 'practice.generatingText')}
           </p>
         </div>
       </div>
@@ -207,6 +212,22 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
 
   const progress = session.currentQuestionIndex / session.questionCount;
   const questionNum = session.currentQuestionIndex + 1;
+  const isLast = questionNum >= session.questionCount;
+
+  // Story translation: where this sentence is, and the sentences before it in its paragraph
+  const story = session.story;
+  const inStory = !!story && currentQuestion.paragraphIndex !== undefined && currentQuestion.sentenceIndex !== undefined;
+  const storyParagraph = inStory ? story.paragraphs[currentQuestion.paragraphIndex!] ?? [] : [];
+  const storyBefore = inStory ? storyParagraph.slice(0, currentQuestion.sentenceIndex) : [];
+
+  // Hints before answering, opened one step at a time: vocabulary, then grammar.
+  // Show Answer stays the last step.
+  const hintSteps = [
+    { label: t('practice.hintVocabulary'), items: currentQuestion.relevantVocabulary },
+    { label: t('practice.hintGrammar'), items: currentQuestion.relevantGrammar },
+  ].filter((step) => step.items.length > 0);
+  const hintsAllowed = settings.hintsEnabled && !isSingleAttempt && !isKanji && !isChoice;
+  const openedHints = hintsAllowed ? hintSteps.slice(0, hintsUsed) : [];
 
   const speechSupported = isSpeechRecognitionSupported();
   const micHandlers = pushToTalk
@@ -250,7 +271,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
             {getSessionModeLabel(session, lang)}
           </span>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            {t('practice.questionOf', { current: questionNum, total: session.questionCount })}
+            {t(story ? 'story.sentenceOf' : 'practice.questionOf', { current: questionNum, total: session.questionCount })}
           </span>
         </div>
         <div className="session-controls">
@@ -264,6 +285,14 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
           </button>
         </div>
       </div>
+
+      {/* Fewer questions than asked for (kanji: not enough kanji, or AI items rejected) */}
+      {session.requestedCount && session.currentQuestionIndex === 0 && !lastEvaluation && (
+        <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)' }}>
+          <AlertCircle size={16} />
+          <span>{t('practice.fewerQuestions', { count: session.questionCount, requested: session.requestedCount })}</span>
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="progress-bar" style={{ marginBottom: 'var(--space-xl)' }}>
@@ -293,10 +322,32 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
             </>
           ) : (
             <>
+              {inStory && (
+                <>
+                  <div className="story-meta">
+                    {story.title && <span className="story-title">{story.title}</span>}
+                    <span>
+                      {t('story.position', {
+                        paragraph: currentQuestion.paragraphIndex! + 1,
+                        sentence: currentQuestion.sentenceIndex! + 1,
+                      })}
+                    </span>
+                  </div>
+                  {storyBefore.length > 0 && (
+                    <p className="story-context">{storyBefore.map((s) => s.source).join(' ')}</p>
+                  )}
+                </>
+              )}
               <p className="question-prompt">{currentQuestion.prompt}</p>
               {currentQuestion.context && (
                 <p className="question-context">{currentQuestion.context}</p>
               )}
+              {openedHints.map((step) => (
+                <div key={step.label} className="hint-box story-hint">
+                  <Lightbulb size={14} style={{ display: 'inline', marginRight: 4 }} />
+                  <strong>{step.label}:</strong> <span className="story-hint-items">{step.items.join('、')}</span>
+                </div>
+              ))}
             </>
           )}
           {currentAttempts.length > 0 && maxAttempts > 1 && (
@@ -400,9 +451,16 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
             {/* See the answer without answering. Kanji: that gives up the question.
                 Practice: Try Again or Next (counted wrong) follow. */}
             {!isChoice && !lastEvaluation && speechState !== 'processing' && speechState !== 'listening' && speechState !== 'evaluating' && (
-              <button className="btn btn-ghost btn-sm" onClick={revealAnswer}>
-                <Eye size={14} /> {t('practice.showAnswer')}
-              </button>
+              <div className="answer-help-actions">
+                {hintsAllowed && hintsUsed < hintSteps.length && (
+                  <button className="btn btn-ghost btn-sm" onClick={openHint}>
+                    <Lightbulb size={14} /> {t('practice.hint')}
+                  </button>
+                )}
+                <button className="btn btn-ghost btn-sm" onClick={revealAnswer}>
+                  <Eye size={14} /> {t('practice.showAnswer')}
+                </button>
+              </div>
             )}
           </div>
           </>
@@ -420,9 +478,9 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
         {lastEvaluation?.correct && (
           <div className="correct-flash animate-in">
             <Check size={20} />
-            {questionNum >= session.questionCount
+            {isLast
               ? t('practice.correctDone')
-              : t('practice.correctNext')}
+              : t(story ? 'practice.correctNextSentence' : 'practice.correctNext')}
           </div>
         )}
 
@@ -433,6 +491,8 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
               <div className="feedback-title">
                 <RotateCcw size={20} /> {currentAttempts.length === 0
                   ? t('practice.answerRevealed')
+                  : lastEvaluation.verdict
+                    ? t(`practice.verdict.${lastEvaluation.verdict}`)
                   : isSingleAttempt || isChoice
                     ? t('practice.incorrect')
                     : t('practice.notQuite')}
@@ -475,6 +535,21 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
                 <div className="answer-reveal-text">
                   {isKanji ? `${currentQuestion.prompt}（${currentQuestion.expectedAnswer}）` : currentQuestion.expectedAnswer}
                 </div>
+                {/* Shown with the answer only: before that they would give it away */}
+                {lastEvaluation.correctedAnswer && (
+                  <div className="answer-reveal-extra">
+                    <div className="answer-reveal-label">{t('practice.correctedAnswer')}</div>
+                    <div className="jp-text jp-text-sm">{lastEvaluation.correctedAnswer}</div>
+                  </div>
+                )}
+                {lastEvaluation.alternatives && lastEvaluation.alternatives.length > 0 && (
+                  <div className="answer-reveal-extra">
+                    <div className="answer-reveal-label">{t('practice.alternatives')}</div>
+                    {lastEvaluation.alternatives.map((a, i) => (
+                      <div key={i} className="jp-text jp-text-sm">{a}</div>
+                    ))}
+                  </div>
+                )}
                 {isKanji && (
                   <>
                     {currentQuestion.alternativeAnswers && currentQuestion.alternativeAnswers.length > 0 && (
@@ -514,9 +589,9 @@ export default function PracticePage({ settings, onFinish, onExit, resume }: Pra
                   onClick={goToNextQuestion}
                 >
                   <SkipForward size={16} />
-                  {questionNum >= session.questionCount
+                  {isLast
                     ? t('practice.finish')
-                    : t('practice.nextQuestion')}
+                    : t(story ? 'practice.nextSentence' : 'practice.nextQuestion')}
                 </button>
               )}
               {!answerVisible && (

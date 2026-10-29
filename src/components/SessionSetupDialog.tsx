@@ -1,9 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, X } from 'lucide-react';
 import type { UserSettings } from '../types';
-import { JLPT_LEVELS, READING_QUESTION_COUNT, hasAttemptChoice, isConversationMode, isMultipleChoiceMode } from '../types';
+import {
+  JLPT_LEVELS,
+  READING_QUESTION_COUNT,
+  STORY_PARAGRAPHS,
+  STORY_TOPICS,
+  STORY_TENSES,
+  STORY_CUSTOM_TOPIC_MAX_LENGTH,
+  TRANSLATION_FORMATS,
+  KANJI_SESSION_TYPES,
+  hasAttemptChoice,
+  isConversationMode,
+  isKanjiMode,
+  isMultipleChoiceMode,
+  isStoryMode,
+} from '../types';
 import { useI18n } from '../i18n';
+import { getCurriculum } from '../services/kanjiCurriculum';
+import { summarizeKanjiProgress } from '../services/kanjiProgress';
+import { loadKanjiProgress } from '../services/storage';
 
 interface SessionSetupDialogProps {
   settings: UserSettings;
@@ -43,11 +60,26 @@ export default function SessionSetupDialog({
 
   const isConversation = isConversationMode(settings);
   const isReading = isMultipleChoiceMode(settings);
+  const isTranslation = settings.appMode === 'practice' && settings.exerciseMode === 'translation';
+  const isStory = isStoryMode(settings);
+  const missingCustomTopic = isStory && settings.storyTopic === 'custom' && !settings.storyCustomTopic.trim();
+
+  // Kanji: how far the learner is in this level's curriculum
+  const isKanji = isKanjiMode(settings);
+  const [openedAt] = useState(() => Date.now());
+  const curriculum = getCurriculum(settings.jlptLevel);
+  const kanjiSummary = useMemo(
+    () => (isKanji ? summarizeKanjiProgress(curriculum, loadKanjiProgress(), openedAt) : null),
+    [isKanji, curriculum, openedAt]
+  );
+  const nothingToReview = !!kanjiSummary && settings.kanjiSessionType === 'review' && kanjiSummary.studied === 0;
 
   const title = settings.appMode === 'practice'
     ? t(`modes.exercise.${settings.exerciseMode}.label`)
     : `JLPT · ${t(`modes.jlptSection.${settings.jlptSection}.label`)}`;
-  const desc = settings.appMode === 'practice'
+  const desc = isStory
+    ? t('setup.storyDesc')
+    : settings.appMode === 'practice'
     ? t(`modes.exercise.${settings.exerciseMode}.desc`)
     : t(`modes.jlptSection.${settings.jlptSection}.desc`);
 
@@ -85,7 +117,81 @@ export default function SessionSetupDialog({
           </div>
         </div>
 
-        {!isConversation && (
+        {isTranslation && (
+          <div className="setup-field">
+            <div className="setup-field-label">{t('setup.format')}</div>
+            <div className="option-group">
+              {TRANSLATION_FORMATS.map((format) => (
+                <button
+                  key={format}
+                  className={`option-pill ${settings.translationFormat === format ? 'active' : ''}`}
+                  onClick={() => update({ translationFormat: format })}
+                >
+                  {t(format === 'story' ? 'setup.formatStory' : 'setup.formatSentences')}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isStory && (
+          <>
+            <div className="setup-field">
+              <div className="setup-field-label">{t('setup.paragraphs')}</div>
+              <div className="option-group">
+                {STORY_PARAGRAPHS.map((n) => (
+                  <button
+                    key={n}
+                    className={`option-pill ${settings.storyParagraphs === n ? 'active' : ''}`}
+                    onClick={() => update({ storyParagraphs: n })}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="setup-field">
+              <div className="setup-field-label" id="story-topic-label">{t('setup.topic')}</div>
+              <select
+                aria-labelledby="story-topic-label"
+                className="form-select"
+                value={settings.storyTopic}
+                onChange={(e) => update({ storyTopic: e.target.value as typeof settings.storyTopic })}
+              >
+                {STORY_TOPICS.map((topic) => (
+                  <option key={topic} value={topic}>{t(`story.topics.${topic}`)}</option>
+                ))}
+              </select>
+              {settings.storyTopic === 'custom' && (
+                <input
+                  className="form-input story-custom-topic"
+                  autoFocus
+                  maxLength={STORY_CUSTOM_TOPIC_MAX_LENGTH}
+                  aria-label={t('story.topics.custom')}
+                  placeholder={t('setup.customTopicPlaceholder')}
+                  value={settings.storyCustomTopic}
+                  onChange={(e) => update({ storyCustomTopic: e.target.value })}
+                />
+              )}
+            </div>
+            <div className="setup-field">
+              <div className="setup-field-label">{t('setup.tense')}</div>
+              <div className="option-group">
+                {STORY_TENSES.map((tense) => (
+                  <button
+                    key={tense}
+                    className={`option-pill ${settings.storyTense === tense ? 'active' : ''}`}
+                    onClick={() => update({ storyTense: tense })}
+                  >
+                    {t(`story.tenses.${tense}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {!isConversation && !isStory && (
           <div className="setup-field">
             <div className="setup-field-label">{t('setup.questionCount')}</div>
             {isReading ? (
@@ -103,6 +209,41 @@ export default function SessionSetupDialog({
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {kanjiSummary && (
+          <div className="setup-field">
+            <div className="setup-field-label">{t('setup.kanjiSessionType')}</div>
+            <div className="option-group">
+              {KANJI_SESSION_TYPES.map((type) => (
+                <button
+                  key={type}
+                  className={`option-pill ${settings.kanjiSessionType === type ? 'active' : ''}`}
+                  onClick={() => update({ kanjiSessionType: type })}
+                >
+                  {t(type === 'new' ? 'setup.kanjiNew' : 'setup.kanjiReview')}
+                </button>
+              ))}
+            </div>
+            <p className="setup-field-help">
+              {t('setup.kanjiProgress', {
+                level: settings.jlptLevel,
+                studied: kanjiSummary.studied,
+                total: kanjiSummary.total,
+                known: kanjiSummary.known,
+                due: kanjiSummary.due,
+              })}
+            </p>
+            {settings.kanjiSessionType === 'new' && kanjiSummary.fresh < settings.questionCount && (
+              <p className="setup-field-help setup-field-note">
+                {t('setup.kanjiFewNew', { count: kanjiSummary.fresh })}
+              </p>
+            )}
+            {nothingToReview && (
+              <p className="setup-field-help setup-field-note">{t('setup.kanjiNothingToReview')}</p>
+            )}
+            <p className="setup-field-help">{t('setup.kanjiSource', { source: curriculum.source })}</p>
           </div>
         )}
 
@@ -151,7 +292,7 @@ export default function SessionSetupDialog({
           <button className="btn btn-secondary" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn btn-primary" onClick={onStart} disabled={!!blockedReason}>
+          <button className="btn btn-primary" onClick={onStart} disabled={!!blockedReason || missingCustomTopic || nothingToReview}>
             <Play size={16} /> {startLabel}
           </button>
         </div>

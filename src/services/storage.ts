@@ -1,12 +1,15 @@
 import type { UserSettings, Session, SessionSummary, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES } from '../types';
 import { LANGUAGES } from '../i18n';
+import type { KanjiProgressMap } from './kanjiProgress';
+import { progressFromSessions } from './kanjiProgress';
 
 const KEYS = {
   settings: 'sjp_settings',
   sessions: 'sjp_sessions',
   version: 'sjp_schema_version',
   active: 'sjp_active_session',
+  kanjiProgress: 'sjp_kanji_progress',
 } as const;
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -65,6 +68,12 @@ export function loadSettings(): UserSettings {
     settings.appMode = 'jlpt';
     settings.jlptSection = 'kanji';
   }
+  if (!TRANSLATION_FORMATS.includes(settings.translationFormat)) settings.translationFormat = DEFAULT_SETTINGS.translationFormat;
+  if (!STORY_PARAGRAPHS.includes(settings.storyParagraphs)) settings.storyParagraphs = DEFAULT_SETTINGS.storyParagraphs;
+  if (!STORY_TOPICS.includes(settings.storyTopic)) settings.storyTopic = DEFAULT_SETTINGS.storyTopic;
+  if (typeof settings.storyCustomTopic !== 'string') settings.storyCustomTopic = '';
+  if (!STORY_TENSES.includes(settings.storyTense)) settings.storyTense = DEFAULT_SETTINGS.storyTense;
+  if (!KANJI_SESSION_TYPES.includes(settings.kanjiSessionType)) settings.kanjiSessionType = DEFAULT_SETTINGS.kanjiSessionType;
   // A language that is no longer shipped
   if (!(settings.instructionLanguage in LANGUAGES)) settings.instructionLanguage = DEFAULT_SETTINGS.instructionLanguage;
   return settings;
@@ -126,6 +135,8 @@ export interface ActiveSession {
   answerShown?: boolean;
   /** The answer was shown at some point for the current question */
   answerRevealed?: boolean;
+  /** Hint steps opened for the current question */
+  hintsUsed?: number;
 }
 
 export function saveActiveSession(active: ActiveSession): boolean {
@@ -153,6 +164,21 @@ export function loadActiveSession(settings: UserSettings): ActiveSession | null 
   return sameMode ? { ...active, attempts: active.attempts ?? [], lastEvaluation: active.lastEvaluation ?? null } : null;
 }
 
+// ─── Kanji progress (across sessions) ───────────────────
+
+/** Progress per kanji. The first time, it is rebuilt from the saved kanji sessions. */
+export function loadKanjiProgress(): KanjiProgressMap {
+  const saved = safeGet<KanjiProgressMap | null>(KEYS.kanjiProgress, null);
+  if (saved && typeof saved === 'object') return saved;
+  const rebuilt = progressFromSessions(loadSessions());
+  safeSet(KEYS.kanjiProgress, rebuilt);
+  return rebuilt;
+}
+
+export function saveKanjiProgress(progress: KanjiProgressMap): boolean {
+  return safeSet(KEYS.kanjiProgress, progress);
+}
+
 // ─── Session Summaries ──────────────────────────────────
 
 export function getSessionSummaries(): SessionSummary[] {
@@ -177,6 +203,7 @@ export function sessionToSummary(session: Session): SessionSummary {
     mode: session.mode,
     jlptLevel: session.jlptLevel,
     questionCount: session.questionCount,
+    story: session.story && { title: session.story.title },
     messageCount: session.conversation?.messages.filter((m) => m.role === 'user').length,
     correctCount,
     accuracy: answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0,

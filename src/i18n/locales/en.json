@@ -98,7 +98,22 @@
     "questionCount": "Questions",
     "readingQuestionCount": "One reading text with {count} questions.",
     "maxAttempts": "Attempts per Question",
-    "hints": "Hints"
+    "hints": "Hints",
+    "format": "Format",
+    "formatStory": "Story",
+    "formatSentences": "Single sentences",
+    "paragraphs": "Paragraphs",
+    "topic": "Topic",
+    "storyDesc": "Translate a short story into Japanese, one sentence at a time",
+    "tense": "Time",
+    "customTopicPlaceholder": "Write your topic, e.g. a trip to Kyoto with a friend",
+    "kanjiSessionType": "Session",
+    "kanjiNew": "New kanji",
+    "kanjiReview": "Review",
+    "kanjiProgress": "{level}: {studied}/{total} kanji practised · {known} mastered · {due} due for review",
+    "kanjiFewNew": "Only {count} new kanji left at this level; the rest of the session will be review.",
+    "kanjiNothingToReview": "No kanji to review at this level yet. Start with New kanji.",
+    "kanjiSource": "Kanji list: {source}"
   },
   "settings": {
     "title": "AI Setup",
@@ -180,6 +195,45 @@
       "answered": "Answered",
       "error": "Error occurred",
       "unsupported": "Not supported"
+    },
+    "hint": "Hint",
+    "hintVocabulary": "Vocabulary",
+    "hintGrammar": "Grammar",
+    "correctedAnswer": "Your answer, corrected",
+    "alternatives": "Other ways to say it",
+    "correctNextSentence": "Correct! 🎉 Next sentence...",
+    "nextSentence": "Next Sentence",
+    "verdict": {
+      "natural": "Correct and natural",
+      "slightly_unnatural": "Correct, but a little unnatural",
+      "grammar_errors": "Understandable, but with mistakes",
+      "partial": "Partly correct",
+      "incorrect": "Different meaning"
+    },
+    "fewerQuestions": "Only {count} of {requested} questions could be made this time."
+  },
+  "story": {
+    "generatingTitle": "Writing your story...",
+    "generatingText": "AI is writing a story for your level.",
+    "sentenceOf": "Sentence {current} of {total}",
+    "position": "Paragraph {paragraph} · Sentence {sentence}",
+    "topics": {
+      "random": "Random",
+      "dailyLife": "Daily life",
+      "university": "University",
+      "shopping": "Shopping",
+      "travel": "Travel",
+      "food": "Food",
+      "hobbies": "Hobbies",
+      "work": "Work",
+      "friends": "Friends & family",
+      "custom": "Write my own…"
+    },
+    "tenses": {
+      "random": "Random",
+      "past": "Past",
+      "present": "Present",
+      "future": "Future"
     }
   },
   "kanji": {
@@ -236,7 +290,22 @@
     "messagesSent": "Messages Sent",
     "corrections": "Corrections",
     "chatTranscript": "Chat Transcript",
-    "chatAgain": "Chat Again"
+    "chatAgain": "Chat Again",
+    "wholeStory": "The Whole Story",
+    "paragraph": "Paragraph {number}",
+    "storyJapanese": "In Japanese",
+    "grammarPracticed": "Grammar Practised",
+    "vocabReview": "Vocabulary to Review",
+    "correctUnaided": "Correct without help",
+    "correctHelped": "Correct with help",
+    "wrong": "Wrong",
+    "retryWrong": "Retry Wrong Answers",
+    "correction": "Correction",
+    "naturalVersion": "More natural",
+    "alternatives": "Other ways to say it",
+    "hintUsed": "Hint used",
+    "sentenceDetails": "Sentence Details",
+    "sentenceLabel": "P{paragraph}·S{sentence}"
   },
   "history": {
     "clearAll": "Clear All",

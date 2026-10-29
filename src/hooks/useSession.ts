@@ -6,11 +6,14 @@ import type {
   Attempt,
   UserSettings,
   EvaluationResponse,
+  StoryInfo,
 } from '../types';
-import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode } from '../types';
-import { saveSession, saveActiveSession, clearActiveSession } from '../services/storage';
+import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode, isStoryMode } from '../types';
+import { saveSession, saveActiveSession, clearActiveSession, loadKanjiProgress, saveKanjiProgress } from '../services/storage';
+import { getCurriculum } from '../services/kanjiCurriculum';
+import { selectKanjiTargets, recordKanjiResult } from '../services/kanjiProgress';
 import type { ActiveSession } from '../services/storage';
-import { generateQuestions, evaluateAnswer, aiConfigFromSettings, isIncompleteKanjiAnswer } from '../services/ai';
+import { generateQuestions, generateKanjiQuestions, generateStory, evaluateAnswer, aiConfigFromSettings, isIncompleteKanjiAnswer } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
 import {
   startRecognition,
@@ -33,7 +36,8 @@ interface UseSessionReturn {
   generationError: string | null;
   evaluationError: string | null;
   elapsedMs: number;
-  startSession: (settings: UserSettings) => Promise<void>;
+  /** With `preset`, practise those questions again instead of generating new ones */
+  startSession: (settings: UserSettings, preset?: PresetQuestions) => Promise<void>;
   /** Continue a session saved before the page was reloaded */
   restoreSession: (settings: UserSettings, saved: ActiveSession) => void;
   startListening: () => void;
@@ -56,6 +60,48 @@ interface UseSessionReturn {
   endSession: () => void;
   /** Push-to-talk: the phone stopped listening while the mic is still held */
   micStopped: boolean;
+  /** Hint steps opened for the current question (before answering) */
+  hintsUsed: number;
+  openHint: () => void;
+}
+
+/** Questions from an earlier session, e.g. the ones answered wrong. */
+export interface PresetQuestions {
+  questions: Question[];
+  story?: StoryInfo;
+}
+
+/** The questions for a new session; kanji also says how many were asked for. */
+async function makeQuestions(
+  settings: UserSettings
+): Promise<{ questions: Question[]; story?: StoryInfo; requestedCount?: number }> {
+  const ai = aiConfigFromSettings(settings);
+  const { jlptLevel: level, instructionLanguage: lang } = settings;
+
+  if (isStoryMode(settings)) {
+    return generateStory(ai, level, lang, {
+      paragraphs: settings.storyParagraphs,
+      topic: settings.storyTopic,
+      customTopic: settings.storyCustomTopic,
+      tense: settings.storyTense,
+    });
+  }
+
+  if (isKanjiMode(settings)) {
+    // The app picks the kanji from the curriculum and the saved progress; the AI only writes the words
+    const progress = loadKanjiProgress();
+    const targets = selectKanjiTargets(getCurriculum(level), progress, settings.questionCount, settings.kanjiSessionType, Date.now());
+    if (targets.length === 0) throw new Error('There are no kanji to review at this level yet.');
+    const questions = await generateKanjiQuestions(ai, level, lang, targets.map((kanji) => ({
+      kanji,
+      avoidWords: progress[kanji]?.words ?? [],
+    })));
+    return { questions, requestedCount: settings.questionCount };
+  }
+
+  const kind: Exclude<QuestionSetKind, 'kanji'> =
+    settings.appMode === 'jlpt' ? 'reading' : settings.exerciseMode === 'situation' ? 'situation' : 'translation';
+  return { questions: await generateQuestions(ai, kind, level, lang, settings.questionCount) };
 }
 
 /** Attempts allowed per question — a multiple-choice question only gets one. */
@@ -75,6 +121,7 @@ export function useSession(): UseSessionReturn {
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
   const [micStopped, setMicStopped] = useState(false);
   const [answerShown, setAnswerShown] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -130,25 +177,15 @@ export function useSession(): UseSessionReturn {
 
   // Start session
   const startSession = useCallback(
-    async (settings: UserSettings) => {
+    async (settings: UserSettings, preset?: PresetQuestions) => {
       const generationId = ++generationIdRef.current;
       settingsRef.current = settings;
-      setIsGenerating(true);
+      setIsGenerating(!preset);
       setGenerationError(null);
 
       try {
-        const kind: QuestionSetKind =
-          settings.appMode === 'jlpt'
-            ? settings.jlptSection
-            : (settings.exerciseMode === 'situation' ? 'situation' : 'translation');
-
-        const questions = await generateQuestions(
-          aiConfigFromSettings(settings),
-          kind,
-          settings.jlptLevel,
-          settings.instructionLanguage,
-          settings.questionCount
-        );
+        const { questions, story, requestedCount }: Awaited<ReturnType<typeof makeQuestions>> =
+          preset ?? await makeQuestions(settings);
         if (generationId !== generationIdRef.current) return;
 
         const newSession: Session = {
@@ -166,12 +203,15 @@ export function useSession(): UseSessionReturn {
           questions,
           results: [],
           currentQuestionIndex: 0,
+          story,
+          requestedCount: requestedCount !== undefined && requestedCount > questions.length ? requestedCount : undefined,
         };
 
         sessionRef.current = newSession;
         setSession(newSession);
         revealedRef.current = false;
         setAnswerShown(false);
+        setHintsUsed(0);
         setCurrentAttempts([]);
         setLastEvaluation(null);
         setFinalTranscript('');
@@ -199,6 +239,7 @@ export function useSession(): UseSessionReturn {
       setCurrentAttempts(saved.attempts);
       revealedRef.current = saved.answerRevealed ?? false;
       setAnswerShown(saved.answerShown ?? false);
+      setHintsUsed(saved.hintsUsed ?? 0);
       setLastEvaluation(saved.lastEvaluation);
       setSpeechState(saved.lastEvaluation ? (saved.lastEvaluation.correct ? 'correct' : 'retry') : 'idle');
       resetTimer();
@@ -216,11 +257,12 @@ export function useSession(): UseSessionReturn {
         lastEvaluation,
         answerShown,
         answerRevealed: revealedRef.current,
+        hintsUsed,
       });
     } else if (session) {
       clearActiveSession();
     }
-  }, [session, currentAttempts, lastEvaluation, answerShown]);
+  }, [session, currentAttempts, lastEvaluation, answerShown, hintsUsed]);
 
   // Speech recognition
   const startListening = useCallback(() => {
@@ -308,7 +350,8 @@ export function useSession(): UseSessionReturn {
           currentAttempts,
           attemptNumber,
           getMaxAttempts(settings),
-          isSingleAttemptMode(settings)
+          isSingleAttemptMode(settings),
+          sess.story
         );
 
         const attempt: Attempt = {
@@ -321,6 +364,9 @@ export function useSession(): UseSessionReturn {
           hint: result.hint,
           responseTimeMs: elapsedMs,
           timestamp: Date.now(),
+          verdict: result.verdict,
+          correctedAnswer: result.correctedAnswer,
+          alternatives: result.alternatives,
         };
 
         // The answer was revealed while waiting: drop this result
@@ -354,7 +400,17 @@ export function useSession(): UseSessionReturn {
       // Typed answers never set finalTranscript, so prefer the last attempt
       finalTranscript: currentAttempts[currentAttempts.length - 1]?.transcript ?? finalTranscript,
       revealedAnswer: revealedRef.current || lastEvaluation?.nextAction === 'reveal_answer',
+      hintsUsed: hintsUsed || undefined,
     };
+
+    // Kanji: remember how this kanji went, across sessions
+    if (question.targetKanji) {
+      saveKanjiProgress(recordKanjiResult(loadKanjiProgress(), question.targetKanji, question.jlptLevel, {
+        correct: questionResult.isCorrect,
+        firstTry: !!currentAttempts[0]?.isCorrect && !questionResult.revealedAnswer,
+        word: question.prompt,
+      }, Date.now()));
+    }
 
     const newIndex = sess.currentQuestionIndex + 1;
     const isFinished = newIndex >= sess.questions.length;
@@ -382,6 +438,7 @@ export function useSession(): UseSessionReturn {
       // Reset for next question
       revealedRef.current = false;
       setAnswerShown(false);
+      setHintsUsed(0);
       setCurrentAttempts([]);
       setLastEvaluation(null);
       setFinalTranscript('');
@@ -390,7 +447,10 @@ export function useSession(): UseSessionReturn {
       resetTimer();
       startTimer();
     }
-  }, [currentAttempts, elapsedMs, finalTranscript, lastEvaluation, updateSession, stopTimer, resetTimer, startTimer]);
+  }, [currentAttempts, elapsedMs, finalTranscript, lastEvaluation, hintsUsed, updateSession, stopTimer, resetTimer, startTimer]);
+
+  // Open the next hint step (vocabulary, then grammar); shown by the page
+  const openHint = useCallback(() => setHintsUsed((n) => n + 1), []);
 
   // Retry
   const retryQuestion = useCallback(() => {
@@ -506,5 +566,7 @@ export function useSession(): UseSessionReturn {
     revealAnswer,
     answerShown,
     endSession,
+    hintsUsed,
+    openHint,
   };
 }

@@ -14,9 +14,10 @@ import {
   X,
   MessageCircle,
   PencilLine,
+  Lightbulb,
 } from 'lucide-react';
-import type { Session } from '../types';
-import { getSessionModeLabel } from '../types';
+import type { Session, QuestionResult } from '../types';
+import { getSessionModeLabel, APP_MODES, JLPT_SECTIONS } from '../types';
 import ChatBubble from '../components/ChatBubble';
 import { getSessionById } from '../services/storage';
 import { useI18n } from '../i18n';
@@ -24,9 +25,17 @@ import { useI18n } from '../i18n';
 interface RecapPageProps {
   sessionId?: string;
   onPracticeAgain: () => void;
+  /** Practise the questions answered wrong again, without generating new ones */
+  onRetryWrong: (session: Session) => void;
 }
 
-export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }: RecapPageProps) {
+/** Right on the first attempt, without hints or looking at the answer. */
+const isUnaided = (r: QuestionResult) =>
+  r.isCorrect && !!r.attempts[0]?.isCorrect && !r.hintsUsed && !r.revealedAnswer;
+
+const unique = (items: string[]) => [...new Set(items.map((i) => i.trim()).filter(Boolean))];
+
+export default function RecapPage({ sessionId: propSessionId, onPracticeAgain, onRetryWrong }: RecapPageProps) {
   const navigate = useNavigate();
   const { lang, t } = useI18n();
   const params = useParams();
@@ -70,9 +79,14 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
   const correctCount = session.results.filter((r) => r.isCorrect).length;
   const totalQuestions = session.results.length;
   const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
-  const firstAttemptCorrect = session.results.filter(
-    (r) => r.isCorrect && r.attempts.length > 0 && r.attempts[0].isCorrect
-  ).length;
+  const firstAttemptCorrect = session.results.filter(isUnaided).length;
+  const wrongCount = totalQuestions - correctCount;
+  // Sessions from modes that no longer exist can't be practised again
+  const canRetryWrong = wrongCount > 0 && (APP_MODES as string[]).includes(session.appMode ?? 'practice') &&
+    (session.appMode !== 'jlpt' || (!!session.jlptSection && JLPT_SECTIONS.includes(session.jlptSection)));
+  const story = session.story;
+  const grammarPracticed = unique(session.results.flatMap((r) => r.question.relevantGrammar));
+  const vocabToReview = unique(session.results.filter((r) => !isUnaided(r)).flatMap((r) => r.question.relevantVocabulary));
   const firstAttemptAccuracy = totalQuestions > 0
     ? Math.round((firstAttemptCorrect / totalQuestions) * 100)
     : 0;
@@ -159,12 +173,57 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
         </div>
       </div>
 
+      {/* Story: the whole text with its Japanese translation, and what to review */}
+      {story && (
+        <div className="card story-recap animate-in" style={{ marginBottom: 'var(--space-xl)', animationDelay: '175ms' }}>
+          <h3 className="card-title">
+            {t('recap.wholeStory')}{story.title ? `: ${story.title}` : ''}
+          </h3>
+          <div className="story-recap-summary">
+            <span className="badge badge-success">{t('recap.correctUnaided')}: {firstAttemptCorrect}</span>
+            <span className="badge badge-warning">{t('recap.correctHelped')}: {correctCount - firstAttemptCorrect}</span>
+            <span className="badge badge-error">{t('recap.wrong')}: {wrongCount}</span>
+          </div>
+          {story.paragraphs.map((paragraph, pi) => (
+            <div key={pi} className="story-recap-paragraph">
+              {story.paragraphs.length > 1 && (
+                <div className="review-detail-label">{t('recap.paragraph', { number: pi + 1 })}</div>
+              )}
+              <p className="story-recap-source">{paragraph.map((s) => s.source).join(' ')}</p>
+              <p className="story-recap-jp jp-text">{paragraph.map((s) => s.expectedAnswer).join('')}</p>
+            </div>
+          ))}
+          {grammarPracticed.length > 0 && (
+            <div className="review-detail">
+              <div className="review-detail-label">{t('recap.grammarPracticed')}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+                {grammarPracticed.map((g) => (
+                  <span key={g} className="badge badge-accent">{g}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {vocabToReview.length > 0 && (
+            <div className="review-detail">
+              <div className="review-detail-label">{t('recap.vocabReview')}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+                {vocabToReview.map((v) => (
+                  <span key={v} className="badge badge-info" style={{ fontFamily: 'var(--font-jp)' }}>{v}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Question Reviews */}
       <h3 className="card-title" style={{ marginBottom: 'var(--space-md)' }}>
-        {t('recap.questionDetails')}
+        {t(story ? 'recap.sentenceDetails' : 'recap.questionDetails')}
       </h3>
 
-      {session.results.map((result, idx) => (
+      {session.results.map((result, idx) => {
+        const last = result.attempts[result.attempts.length - 1];
+        return (
         <div key={idx} className="review-item animate-in" style={{ animationDelay: `${200 + idx * 50}ms` }}>
           <div className="review-item-header" onClick={() => toggleQuestion(idx)}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
@@ -172,7 +231,12 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
                 {result.isCorrect ? <Check size={12} /> : <X size={12} />}
               </span>
               <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-                Q{idx + 1}
+                {result.question.paragraphIndex !== undefined && result.question.sentenceIndex !== undefined
+                  ? t('recap.sentenceLabel', {
+                      paragraph: result.question.paragraphIndex + 1,
+                      sentence: result.question.sentenceIndex + 1,
+                    })
+                  : `Q${idx + 1}`}
               </span>
               <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>
                 {result.question.prompt.length > 60
@@ -181,6 +245,11 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+              {!!result.hintsUsed && (
+                <span title={t('recap.hintUsed')} style={{ color: 'var(--color-info)', display: 'inline-flex' }}>
+                  <Lightbulb size={12} />
+                </span>
+              )}
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>
                 {t('recap.attempts', { count: result.attempts.length })}
               </span>
@@ -216,6 +285,24 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
                 </div>
               </div>
 
+              {last?.correctedAnswer && (
+                <div className="review-detail">
+                  <div className="review-detail-label">
+                    {last.isCorrect ? t('recap.naturalVersion') : t('recap.correction')}
+                  </div>
+                  <div className="review-detail-value jp-text jp-text-sm">{last.correctedAnswer}</div>
+                </div>
+              )}
+
+              {last?.alternatives && last.alternatives.length > 0 && (
+                <div className="review-detail">
+                  <div className="review-detail-label">{t('recap.alternatives')}</div>
+                  {last.alternatives.map((a, i) => (
+                    <div key={i} className="review-detail-value jp-text jp-text-sm">{a}</div>
+                  ))}
+                </div>
+              )}
+
               {result.question.mode === 'kanji' && (
                 <div className="review-detail">
                   <div className="review-detail-label">{t('recap.meaning')}</div>
@@ -223,11 +310,11 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
                 </div>
               )}
 
-              {result.attempts.length > 0 && (
+              {last && (
                 <div className="review-detail">
                   <div className="review-detail-label">{t('recap.feedback')}</div>
                   <div className="review-detail-value" style={{ fontSize: 'var(--text-sm)' }}>
-                    {result.attempts[result.attempts.length - 1].feedback}
+                    {last.feedback}
                   </div>
                 </div>
               )}
@@ -256,13 +343,19 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain }:
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
         <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
           <RotateCcw size={16} /> {t('recap.practiceAgain')}
         </button>
+        {canRetryWrong && (
+          <button className="btn btn-secondary btn-lg" onClick={() => onRetryWrong(session)}>
+            <RotateCcw size={16} /> {t('recap.retryWrong')} ({wrongCount})
+          </button>
+        )}
         <button className="btn btn-secondary" onClick={() => navigate('/history')}>
           <History size={16} /> {t('common.sessionHistory')}
         </button>

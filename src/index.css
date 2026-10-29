@@ -1943,3 +1943,77 @@ button.mode-card {
 .ptt-hint.cancel-armed {
   color: var(--color-error);
 }
+
+/* ─── Story translation ──────────────────────────────── */
+
+.story-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs) var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-sm);
+}
+
+.story-title {
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+/* The sentences before this one in its paragraph */
+.story-context {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+}
+
+.story-hint {
+  text-align: left;
+}
+
+.story-hint-items {
+  font-family: var(--font-jp);
+}
+
+.answer-help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.story-recap-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: var(--space-md) 0;
+}
+
+.story-recap-paragraph {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.story-recap-source {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-xs);
+}
+
+.story-recap-jp {
+  color: var(--text-primary);
+  line-height: 1.8;
+}
+
+.story-custom-topic {
+  margin-top: var(--space-sm);
+}
+
+/* ─── Kanji curriculum (setup dialog) ────────────────── */
+
+.setup-field-note {
+  color: var(--color-warning);
+}
