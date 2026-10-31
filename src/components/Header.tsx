@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, History, BookA, PenLine, Mic, Languages, ChevronDown, Check } from 'lucide-react';
+import { Home, ListX, BookA, PenLine, Mic, Languages, ChevronDown, Check } from 'lucide-react';
 import type { MicPermission } from '../types';
 import type { InstructionLanguage } from '../i18n';
 import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
@@ -81,12 +81,12 @@ export default function Header({ micPermission, onLanguageChange }: HeaderProps)
         </button>
 
         <button
-          className={`header-nav-link ${path === '/history' ? 'active' : ''}`}
-          onClick={() => navigate('/history')}
-          title={t('header.history')}
+          className={`header-nav-link ${path === '/mistakes' ? 'active' : ''}`}
+          onClick={() => navigate('/mistakes')}
+          title={t('header.mistakes')}
         >
-          <History size={16} />
-          <span className="header-nav-label">{t('header.history')}</span>
+          <ListX size={16} />
+          <span className="header-nav-label">{t('header.mistakes')}</span>
         </button>
 
         <div className="lang-switcher" ref={langMenuRef}>

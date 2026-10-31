@@ -307,26 +307,6 @@ export interface Session {
   requestedCount?: number;
 }
 
-// ─── Session Summary (for history) ──────────────────────
-export interface SessionSummary {
-  sessionId: string;
-  startedAt: number;
-  endedAt: number | null;
-  status: SessionStatus;
-  appMode?: StoredAppMode;
-  jlptSection?: JLPTSection;
-  examMode?: boolean;
-  mode: ExerciseMode;
-  jlptLevel: JLPTLevel;
-  questionCount: number;
-  story?: { title: string };
-  /** Number of messages the user sent (conversation sessions only) */
-  messageCount?: number;
-  correctCount: number;
-  accuracy: number;
-  durationMs: number;
-}
-
 // ─── AI Provider ────────────────────────────────────────
 export type AIProvider = 'openai' | 'google' | 'anthropic' | 'ollama';
 

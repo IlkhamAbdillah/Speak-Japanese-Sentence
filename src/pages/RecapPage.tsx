@@ -9,7 +9,7 @@ import {
   ChevronUp,
   RotateCcw,
   Home,
-  History,
+  ListX,
   Check,
   X,
   MessageCircle,
@@ -356,8 +356,8 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain, o
             <RotateCcw size={16} /> {t('recap.retryWrong')} ({wrongCount})
           </button>
         )}
-        <button className="btn btn-secondary" onClick={() => navigate('/history')}>
-          <History size={16} /> {t('common.sessionHistory')}
+        <button className="btn btn-secondary" onClick={() => navigate('/mistakes')}>
+          <ListX size={16} /> {t('header.mistakes')}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>
           <Home size={16} /> {t('common.home')}
@@ -437,8 +437,8 @@ function ConversationRecap({ session, onPracticeAgain }: {
         <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
           <RotateCcw size={16} /> {t('recap.chatAgain')}
         </button>
-        <button className="btn btn-secondary" onClick={() => navigate('/history')}>
-          <History size={16} /> {t('common.sessionHistory')}
+        <button className="btn btn-secondary" onClick={() => navigate('/mistakes')}>
+          <ListX size={16} /> {t('header.mistakes')}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>
           <Home size={16} /> {t('common.home')}

@@ -19,17 +19,13 @@
     "listening": "Mendengarkan…",
     "noAnswer": "(tidak ada jawaban)",
     "randomTopic": "Topik acak",
-    "messageCount": "💬 {count} pesan",
-    "completed": "Selesai",
-    "incomplete": "Belum Selesai",
-    "sessionHistory": "Riwayat Sesi",
     "home": "Beranda",
     "aiSetup": "Pengaturan AI"
   },
   "header": {
     "micReady": "Siap",
     "home": "Beranda",
-    "history": "Riwayat",
+    "mistakes": "Kesalahan",
     "language": "Bahasa"
   },
   "modes": {
@@ -80,15 +76,8 @@
     "micDenied": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.",
     "enableMic": "Aktifkan Mikrofon",
     "apiKeyMissing": "API key belum dikonfigurasi. Buka Pengaturan AI untuk menambahkannya.",
-    "overview": "Ringkasan Belajar",
-    "noSessionsTitle": "Belum ada sesi latihan",
-    "noSessionsText": "Mulai sesi pertama Anda untuk melihat statistik di sini!",
-    "statSessions": "Sesi",
-    "statQuestions": "Soal",
     "statAccuracy": "Akurasi",
     "statCorrect": "Benar",
-    "recentSessions": "Sesi Terakhir",
-    "viewAll": "Lihat Semua",
     "select": "Pilih",
     "menu": {
       "words": "Daftar Kotoba",
@@ -313,14 +302,29 @@
     "sentenceDetails": "Detail Kalimat",
     "sentenceLabel": "P{paragraph}·K{sentence}"
   },
-  "history": {
-    "clearAll": "Hapus Semua",
-    "emptyTitle": "Belum ada riwayat sesi",
-    "emptyText": "Mulai sesi latihan pertama Anda!",
-    "view": "Lihat",
-    "clearTitle": "Hapus Semua Riwayat?",
-    "clearText": "Tindakan ini tidak dapat dibatalkan. Semua riwayat sesi akan dihapus secara permanen.",
-    "deleteAll": "Hapus Semua"
+  "mistakes": {
+    "title": "Kesalahan",
+    "intro": "Soal yang Anda jawab salah. Jawab dengan benar saat latihan, dan soal itu keluar dari daftar.",
+    "emptyTitle": "Tidak ada kesalahan untuk diulas",
+    "emptyText": "Soal yang Anda jawab salah dalam latihan atau tes simulasi akan muncul di sini.",
+    "kind": {
+      "translation": "Terjemahan",
+      "situation": "Situasi",
+      "story": "Cerita",
+      "kanji": "JLPT · Kanji",
+      "reading": "JLPT · Membaca",
+      "conversation": "Koreksi percakapan"
+    },
+    "storyTitle": "Cerita: {title}",
+    "practice": "Latihan ({count})",
+    "practiceNewest": "Latihan mengambil {count} soal terbaru.",
+    "showAll": "Tampilkan semua ({count})",
+    "showLess": "Tampilkan lebih sedikit",
+    "correct": "Jawaban benar",
+    "youWrote": "Anda menulis",
+    "gaveUp": "Jawaban dilihat",
+    "openSession": "Buka sesi",
+    "dismiss": "Saya sudah paham (hapus)"
   },
   "words": {
     "navLabel": "Kosakata",

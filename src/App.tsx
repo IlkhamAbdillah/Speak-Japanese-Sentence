@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import type { UserSettings, MicPermission, Session, AppMode } from './types';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import type { UserSettings, MicPermission, Session, AppMode, Question, StoryInfo } from './types';
 import { isConversationMode } from './types';
 import type { PresetQuestions } from './hooks/useSession';
+import type { MistakeGroup, MistakePracticeMode } from './services/mistakes';
+import { practiceQuestions } from './services/mistakes';
 import { loadSettings, saveSettings, loadActiveSession, clearActiveSession } from './services/storage';
 import { LanguageContext } from './i18n';
 import Header from './components/Header';
@@ -11,7 +13,7 @@ import SettingsPage from './pages/SettingsPage';
 import PracticePage from './pages/PracticePage';
 import ConversationPage from './pages/ConversationPage';
 import RecapPage from './pages/RecapPage';
-import HistoryPage from './pages/HistoryPage';
+import MistakesPage from './pages/MistakesPage';
 import WordsPage from './pages/WordsPage';
 import KanjiPage from './pages/KanjiPage';
 import ModePage from './pages/ModePage';
@@ -63,24 +65,40 @@ function AppInner() {
     setRecapSessionId(null);
   }, []);
 
-  // Practise the wrong answers of a finished session again, in that session's mode
-  const handleRetryWrong = useCallback((sess: Session) => {
-    const questions = sess.results.filter((r) => !r.isCorrect).map((r) => r.question);
+  // Practise saved questions again in their mode, without generating new ones
+  const practiseAgain = useCallback((mode: MistakePracticeMode, questions: Question[], story?: StoryInfo) => {
     if (questions.length === 0) return;
     handleSettingsChange({
       ...settings,
-      appMode: (sess.appMode ?? 'practice') as AppMode,
-      exerciseMode: sess.mode,
-      jlptSection: sess.jlptSection ?? settings.jlptSection,
-      jlptLevel: sess.jlptLevel,
-      translationFormat: sess.story ? 'story' : 'sentences',
+      appMode: mode.appMode,
+      exerciseMode: mode.exerciseMode,
+      jlptSection: mode.jlptSection ?? settings.jlptSection,
+      jlptLevel: mode.jlptLevel,
+      // Only translation has a format; keep the learner's choice for the other modes
+      translationFormat: mode.appMode === 'practice' && mode.exerciseMode === 'translation'
+        ? (story ? 'story' : 'sentences')
+        : settings.translationFormat,
     });
     clearActiveSession();
     setResuming(false);
-    setPreset({ questions, story: sess.story });
+    setPreset({ questions, story });
     setPracticeActive(true);
     setRecapSessionId(null);
   }, [settings, handleSettingsChange]);
+
+  // Recap: the wrong answers of that session
+  const handleRetryWrong = useCallback((sess: Session) => {
+    practiseAgain(
+      { appMode: (sess.appMode ?? 'practice') as AppMode, exerciseMode: sess.mode, jlptSection: sess.jlptSection, jlptLevel: sess.jlptLevel },
+      sess.results.filter((r) => !r.isCorrect).map((r) => r.question),
+      sess.story
+    );
+  }, [practiseAgain]);
+
+  // Mistakes page: one list (type, or one story)
+  const handlePracticeMistakes = useCallback((group: MistakeGroup) => {
+    practiseAgain(group.mode, practiceQuestions(group), group.story);
+  }, [practiseAgain]);
 
   // While practice is active, show the practice page full-screen (no nav)
   if (practiceActive) {
@@ -164,9 +182,11 @@ function AppInner() {
           />
           <Route path="/kanji" element={<KanjiPage />} />
           <Route
-            path="/history"
-            element={<HistoryPage />}
+            path="/mistakes"
+            element={<MistakesPage onPractice={handlePracticeMistakes} />}
           />
+          {/* The old History page became Mistakes */}
+          <Route path="/history" element={<Navigate to="/mistakes" replace />} />
           <Route
             path="/recap/:sessionId"
             element={

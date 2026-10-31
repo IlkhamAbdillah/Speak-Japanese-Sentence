@@ -1,4 +1,4 @@
-import type { UserSettings, Session, SessionSummary, Attempt, EvaluationResponse } from '../types';
+import type { UserSettings, Session, Attempt, EvaluationResponse } from '../types';
 import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
@@ -10,6 +10,7 @@ const KEYS = {
   version: 'sjp_schema_version',
   active: 'sjp_active_session',
   kanjiProgress: 'sjp_kanji_progress',
+  dismissedMistakes: 'sjp_dismissed_mistakes',
 } as const;
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -123,7 +124,13 @@ export function saveSession(session: Session): boolean {
   } else {
     sessions.unshift(session);
   }
-  return safeSet(KEYS.sessions, sessions);
+  // Newest first. When the browser's storage is full, the oldest sessions are dropped
+  // (a few at a time) so the new one can still be saved.
+  while (!safeSet(KEYS.sessions, sessions)) {
+    if (sessions.length <= 1) return false;
+    sessions.splice(Math.max(1, Math.floor(sessions.length * 0.9)));
+  }
+  return true;
 }
 
 export function deleteSession(sessionId: string): boolean {
@@ -131,9 +138,6 @@ export function deleteSession(sessionId: string): boolean {
   return safeSet(KEYS.sessions, sessions);
 }
 
-export function clearAllSessions(): boolean {
-  return safeSet(KEYS.sessions, []);
-}
 
 export function getSessionById(sessionId: string): Session | null {
   return loadSessions().find((s) => s.sessionId === sessionId) ?? null;
@@ -196,62 +200,14 @@ export function saveKanjiProgress(progress: KanjiProgressMap): boolean {
   return safeSet(KEYS.kanjiProgress, progress);
 }
 
-// ─── Session Summaries ──────────────────────────────────
+// ─── Mistakes removed from the Mistakes page ───────────
 
-export function getSessionSummaries(): SessionSummary[] {
-  return loadSessions().map(sessionToSummary);
+/** Keys of mistakes the learner removed (see services/mistakes.ts). */
+export function loadDismissedMistakes(): Set<string> {
+  const saved = safeGet<unknown>(KEYS.dismissedMistakes, []);
+  return new Set(Array.isArray(saved) ? saved.map(String) : []);
 }
 
-export function sessionToSummary(session: Session): SessionSummary {
-  const correctCount = session.results.filter((r) => r.isCorrect).length;
-  const answeredCount = session.results.length;
-  const durationMs = session.endedAt
-    ? session.endedAt - session.startedAt
-    : Date.now() - session.startedAt;
-
-  return {
-    sessionId: session.sessionId,
-    startedAt: session.startedAt,
-    endedAt: session.endedAt,
-    status: session.status,
-    appMode: session.appMode,
-    jlptSection: session.jlptSection,
-    examMode: session.examMode,
-    mode: session.mode,
-    jlptLevel: session.jlptLevel,
-    questionCount: session.questionCount,
-    story: session.story && { title: session.story.title },
-    messageCount: session.conversation?.messages.filter((m) => m.role === 'user').length,
-    correctCount,
-    accuracy: answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0,
-    durationMs,
-  };
-}
-
-// ─── Aggregated Stats ───────────────────────────────────
-
-export interface LearningStats {
-  totalSessions: number;
-  totalQuestions: number;
-  totalCorrect: number;
-  overallAccuracy: number;
-  recentSessions: SessionSummary[];
-}
-
-export function getLearningStats(): LearningStats {
-  const summaries = getSessionSummaries();
-  const completed = summaries.filter((s) => s.status === 'completed');
-  // Conversations have no questions, so they only count toward the session total
-  const graded = completed.filter((s) => s.messageCount === undefined);
-
-  const totalQuestions = graded.reduce((sum, s) => sum + s.questionCount, 0);
-  const totalCorrect = graded.reduce((sum, s) => sum + s.correctCount, 0);
-
-  return {
-    totalSessions: completed.length,
-    totalQuestions,
-    totalCorrect,
-    overallAccuracy: totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0,
-    recentSessions: summaries.slice(0, 3),
-  };
+export function saveDismissedMistakes(keys: Set<string>): boolean {
+  return safeSet(KEYS.dismissedMistakes, [...keys]);
 }

@@ -819,42 +819,6 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* ─── History ────────────────────────────────────────── */
-
-.history-item {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-sm);
-  transition: all var(--transition-fast);
-}
-
-.history-item:hover {
-  border-color: var(--border-default);
-  background: var(--bg-card-hover);
-}
-
-.history-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-  flex-wrap: wrap;
-}
-
-.history-meta-item {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-}
-
-.history-actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
 /* ─── Settings Page ──────────────────────────────────── */
 
 .settings-section {
@@ -1144,12 +1108,6 @@ a:hover {
   .session-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .history-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-md);
   }
 
   .mode-cards {
@@ -2583,5 +2541,164 @@ button.vocab-section-header .vocab-section-count {
 @media (max-width: 520px) {
   .home-menu {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Mistakes ───────────────────────────────────────── */
+
+.mistakes-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mistakes-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.mistakes-intro {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.mistakes-group {
+  margin-bottom: var(--space-xl);
+}
+
+.mistakes-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.mistakes-group-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.mistakes-group-note {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.mistakes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.mistakes-more {
+  margin-top: var(--space-sm);
+}
+
+.mistake-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.mistake-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.mistake-prompt {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+  overflow-wrap: anywhere;
+}
+
+.mistake-prompt.jp-text {
+  font-size: var(--text-xl);
+  line-height: 1.4;
+}
+
+.mistake-answers {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px var(--space-md);
+  font-size: var(--text-sm);
+}
+
+.mistake-answers dt {
+  color: var(--text-tertiary);
+}
+
+.mistake-answers dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mistake-answers dd.jp-text {
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+.mistake-answers .mistake-wrong {
+  color: var(--color-error);
+}
+
+.mistake-answers .mistake-right {
+  color: var(--color-success);
+}
+
+.mistake-meaning {
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.mistake-explanation {
+  margin-top: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.mistake-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.mistake-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-xs);
+}
+
+@media (max-width: 640px) {
+  .mistake-row {
+    padding: var(--space-md);
+  }
+
+  .mistake-answers {
+    grid-template-columns: 1fr;
+  }
+
+  .mistake-answers dd + dt {
+    margin-top: var(--space-xs);
   }
 }

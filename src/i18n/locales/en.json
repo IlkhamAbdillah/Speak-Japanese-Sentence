@@ -19,17 +19,13 @@
     "listening": "Listening…",
     "noAnswer": "(no answer)",
     "randomTopic": "Random topic",
-    "messageCount": "💬 {count} messages",
-    "completed": "Completed",
-    "incomplete": "Incomplete",
-    "sessionHistory": "Session History",
     "home": "Home",
     "aiSetup": "AI Setup"
   },
   "header": {
     "micReady": "Ready",
     "home": "Home",
-    "history": "History",
+    "mistakes": "Mistakes",
     "language": "Language"
   },
   "modes": {
@@ -80,15 +76,8 @@
     "micDenied": "Microphone access denied. Please allow microphone access in your browser settings.",
     "enableMic": "Enable Microphone",
     "apiKeyMissing": "API key not configured. Open AI Setup to add one.",
-    "overview": "Learning Overview",
-    "noSessionsTitle": "No practice sessions yet",
-    "noSessionsText": "Start your first session to see stats here!",
-    "statSessions": "Sessions",
-    "statQuestions": "Questions",
     "statAccuracy": "Accuracy",
     "statCorrect": "Correct",
-    "recentSessions": "Recent Sessions",
-    "viewAll": "View All",
     "select": "Select",
     "menu": {
       "words": "Kotoba List",
@@ -313,14 +302,29 @@
     "sentenceDetails": "Sentence Details",
     "sentenceLabel": "P{paragraph}·S{sentence}"
   },
-  "history": {
-    "clearAll": "Clear All",
-    "emptyTitle": "No session history yet",
-    "emptyText": "Start your first practice session!",
-    "view": "View",
-    "clearTitle": "Clear All History?",
-    "clearText": "This action cannot be undone. All session history will be permanently deleted.",
-    "deleteAll": "Delete All"
+  "mistakes": {
+    "title": "Mistakes",
+    "intro": "Questions you got wrong. Answer one right in a practice and it leaves the list.",
+    "emptyTitle": "No mistakes to review",
+    "emptyText": "Questions you answer wrong in a practice or mock test will show up here.",
+    "kind": {
+      "translation": "Translation",
+      "situation": "Situation",
+      "story": "Story",
+      "kanji": "JLPT · Kanji",
+      "reading": "JLPT · Reading",
+      "conversation": "Conversation corrections"
+    },
+    "storyTitle": "Story: {title}",
+    "practice": "Practice ({count})",
+    "practiceNewest": "Practice takes the {count} newest.",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less",
+    "correct": "Correct answer",
+    "youWrote": "You wrote",
+    "gaveUp": "Answer shown",
+    "openSession": "Open the session",
+    "dismiss": "I know this now (remove)"
   },
   "words": {
     "navLabel": "Words",
