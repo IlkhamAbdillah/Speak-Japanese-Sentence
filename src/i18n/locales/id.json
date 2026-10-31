@@ -329,7 +329,7 @@
   "words": {
     "navLabel": "Kosakata",
     "title": "Kosakata",
-    "subtitle": "Kata kerja, kata sifat, kata keterangan, kata sambung dan onomatope beserta artinya, dan kuis singkat untuk melatihnya. Tanpa AI.",
+    "subtitle": "Kosakata Jepang beserta artinya, dan kuis singkat.",
     "tabList": "Daftar kata",
     "tabQuiz": "Kuis",
     "category": {
@@ -340,7 +340,8 @@
       "adjective": "Kata sifat"
     },
     "categoryLabel": "Kata",
-    "searchPlaceholder": "Cari kata atau arti…",
+    "searchPlaceholder": "Cari semua kata: kana, kanji, romaji, atau arti…",
+    "searchAll": "Mencari di semua daftar",
     "count": "{count} kata",
     "noMatch": "Tidak ada kata yang cocok dengan “{query}”.",
     "see": "Lihat juga",
@@ -419,7 +420,8 @@
     },
     "showDetails": "Tampilkan detail",
     "hideDetails": "Sembunyikan detail",
-    "quizFilterHelp": "Pilih satu atau lebih di tiap baris; tidak memilih = semua."
+    "quizFilterHelp": "Pilih satu atau lebih di tiap baris; tidak memilih = semua.",
+    "advanced": "Pengaturan lanjutan"
   },
   "kanjiList": {
     "navLabel": "Kanji",

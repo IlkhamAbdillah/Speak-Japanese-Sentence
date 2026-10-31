@@ -105,7 +105,8 @@ export const VOCAB_FREQUENCY_FILTERS: VocabFrequencyFilter[] = ['all', ...VOCAB_
 // common at once. Within one filter any picked value matches; nothing picked = everything.
 export const VOCAB_JLPT_VALUES: VocabJlptValue[] = ['N5', 'N4', 'N3', 'N2', 'N1', 'none'];
 export type VerbGroupValue = Exclude<VerbGroupFilter, 'all'>;
-export const VERB_GROUP_VALUES: VerbGroupValue[] = ['1', '2', '3'];
+// The quiz has no group 3 button (user-requested): it is only する and 来る. The list dropdown keeps it.
+export const VERB_GROUP_VALUES: VerbGroupValue[] = ['1', '2'];
 export type AdjTypeValue = Exclude<AdjTypeFilter, 'all'>;
 export const ADJ_TYPE_VALUES: AdjTypeValue[] = ['i', 'na'];
 

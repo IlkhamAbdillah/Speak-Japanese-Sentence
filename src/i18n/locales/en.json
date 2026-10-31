@@ -329,7 +329,7 @@
   "words": {
     "navLabel": "Words",
     "title": "Vocabulary",
-    "subtitle": "Verbs, adjectives, adverbs, conjunctions and onomatopoeia with their meanings, and a quick quiz to practise them. No AI needed.",
+    "subtitle": "Japanese words with their meanings, and a quick quiz.",
     "tabList": "Word list",
     "tabQuiz": "Quiz",
     "category": {
@@ -340,7 +340,8 @@
       "adjective": "Adjectives"
     },
     "categoryLabel": "Words",
-    "searchPlaceholder": "Search a word or meaning…",
+    "searchPlaceholder": "Search all words: kana, kanji, romaji or meaning…",
+    "searchAll": "Searching every list",
     "count": "{count} words",
     "noMatch": "No word matches “{query}”.",
     "see": "See also",
@@ -419,7 +420,8 @@
     },
     "showDetails": "Show details",
     "hideDetails": "Hide details",
-    "quizFilterHelp": "Pick one or more in each row; nothing picked = all."
+    "quizFilterHelp": "Pick one or more in each row; nothing picked = all.",
+    "advanced": "Advanced settings"
   },
   "kanjiList": {
     "navLabel": "Kanji",

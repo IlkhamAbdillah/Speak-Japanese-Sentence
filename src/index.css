@@ -2027,7 +2027,7 @@ button.mode-card {
 
 .vocab-search {
   position: relative;
-  margin: var(--space-md) 0 var(--space-sm);
+  margin: var(--space-md) 0 var(--space-lg);
 }
 
 .vocab-search svg {
@@ -2229,7 +2229,7 @@ button.mode-card {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--space-sm);
-  margin-top: var(--space-md);
+  margin: var(--space-md) 0 var(--space-sm);
 }
 
 .vocab-filter {
@@ -2239,7 +2239,7 @@ button.mode-card {
 }
 
 .vocab-filter .setup-field-label {
-  margin-bottom: 0;
+  margin-bottom: 2;
 }
 
 .vocab-count {
@@ -2701,4 +2701,35 @@ button.vocab-section-header .vocab-section-count {
   .mistake-answers dd + dt {
     margin-top: var(--space-xs);
   }
+}
+
+/* ─── Words: search over every list, quiz advanced settings ─── */
+
+.vocab-search-note {
+  margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.vocab-advanced {
+  margin-bottom: var(--space-lg);
+}
+
+.vocab-advanced-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vocab-advanced-chevron {
+  transition: transform var(--transition-fast);
+}
+
+.vocab-advanced-chevron.open {
+  transform: rotate(180deg);
+}
+
+.vocab-advanced-body {
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--border-subtle);
 }

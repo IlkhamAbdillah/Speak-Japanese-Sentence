@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { BookA, ChevronDown, Eye, EyeOff, Info, Play, Search, Shuffle } from 'lucide-react';
+import { BookA, ChevronDown, Eye, EyeOff, Info, Play, Search, Shuffle, SlidersHorizontal } from 'lucide-react';
 import type { UserSettings } from '../types';
 import {
   ADJ_TYPE_FILTERS,
@@ -14,7 +14,7 @@ import {
   VOCAB_QUIZ_TYPES,
 } from '../types';
 import type { VocabEntry, VocabQuestion } from '../services/vocab';
-import { applyQuizFilters, applyVocabFilters, buildVocabQuiz, entriesOf, matchesSearch } from '../services/vocab';
+import { ALL_ENTRIES, applyQuizFilters, applyVocabFilters, buildVocabQuiz, entriesOf, matchesSearch } from '../services/vocab';
 import VocabRow from '../components/VocabRow';
 import VocabQuiz from '../components/VocabQuiz';
 import VocabInfoDialog from '../components/VocabInfoDialog';
@@ -36,6 +36,9 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
   // Each quiz (also a retry of the wrong words) starts with fresh quiz state
   const [quizNumber, setQuizNumber] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Sections closed while searching (the saved collapsed state is for the normal list)
+  const [searchCollapsed, setSearchCollapsed] = useState<string[]>([]);
 
   const update = (partial: Partial<UserSettings>) => onSettingsChange({ ...settings, ...partial });
   const category = settings.vocabCategory;
@@ -43,25 +46,44 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
   // The list uses the dropdown filters, the quiz its own multi-select buttons
   const filtered = useMemo(() => applyVocabFilters(entries, settings), [entries, settings]);
   const quizWords = useMemo(() => applyQuizFilters(entries, settings), [entries, settings]);
-  const visible = useMemo(() => filtered.filter((e) => matchesSearch(e, query)), [filtered, query]);
+  // Searching looks through every list (user-requested), without the category or list filters
+  const searching = query.trim() !== '';
+  const visible = useMemo(
+    () => (searching ? ALL_ENTRIES.filter((e) => matchesSearch(e, query)) : filtered),
+    [searching, filtered, query]
+  );
+  // Row numbers are the position in the word's own list
+  const numbers = useMemo(() => {
+    const result = new Map<string, number>();
+    const seen = new Map<string, number>();
+    for (const e of ALL_ENTRIES) {
+      const n = (seen.get(e.category) ?? 0) + 1;
+      seen.set(e.category, n);
+      result.set(e.id, n);
+    }
+    return result;
+  }, []);
   // The list is sorted by JLPT level, so each level is a section that can be collapsed
+  // (search results: one section per list and level)
   const sections = useMemo(() => {
     const result: { key: string; title: string; entries: VocabEntry[] }[] = [];
     for (const entry of visible) {
       const level = entry.jlpt ?? 'none';
       const key = `${entry.category}:${level}`;
       if (result.at(-1)?.key !== key) {
-        result.push({ key, title: level === 'none' ? t('words.jlptNoneTag') : level, entries: [] });
+        const levelTitle = level === 'none' ? t('words.jlptNoneTag') : level;
+        result.push({ key, title: searching ? `${t(`words.category.${entry.category}`)} · ${levelTitle}` : levelTitle, entries: [] });
       }
       result.at(-1)!.entries.push(entry);
     }
     return result;
-  }, [visible, t]);
-  const toggleSection = (key: string) => update({
-    vocabCollapsed: settings.vocabCollapsed.includes(key)
-      ? settings.vocabCollapsed.filter((k) => k !== key)
-      : [...settings.vocabCollapsed, key],
-  });
+  }, [visible, searching, t]);
+  const collapsed = searching ? searchCollapsed : settings.vocabCollapsed;
+  const toggleSection = (key: string) => {
+    const next = collapsed.includes(key) ? collapsed.filter((k) => k !== key) : [...collapsed, key];
+    if (searching) setSearchCollapsed(next);
+    else update({ vocabCollapsed: next });
+  };
 
   // Wrong options still come from the whole category
   const startQuiz = (words: VocabEntry[] = quizWords, count = settings.vocabQuizCount) => {
@@ -151,17 +173,25 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
       </div>
     </div>
   );
-  const quizFilters = (
+  // Shown by default: JLPT; how common, the verb group and い/な are under Advanced settings (user-requested)
+  const jlptPicks = (
     <div className="vocab-picks">
       {pickRow(t('words.filters.jlpt'), VOCAB_JLPT_VALUES, settings.vocabQuizJlpt,
         (l) => (l === 'none' ? t('words.jlptNoneTag') : l), (v) => update({ vocabQuizJlpt: v }))}
+      <p className="setup-field-help">{t('words.quizFilterHelp')}</p>
+    </div>
+  );
+  const advancedActive = settings.vocabQuizFrequency.length +
+    (category === 'verb' ? settings.vocabQuizVerbGroups.length : 0) +
+    (category === 'adjective' ? settings.vocabQuizAdjTypes.length : 0);
+  const advancedPicks = (
+    <div className="vocab-picks vocab-advanced-body">
       {pickRow(t('words.filters.frequency'), VOCAB_FREQUENCIES, settings.vocabQuizFrequency,
         (f) => t(`words.frequency.${f}`), (v) => update({ vocabQuizFrequency: v }))}
       {category === 'verb' && pickRow(t('words.filters.group'), VERB_GROUP_VALUES, settings.vocabQuizVerbGroups,
         (g) => t('words.verbGroup', { group: g }), (v) => update({ vocabQuizVerbGroups: v }))}
       {category === 'adjective' && pickRow(t('words.filters.type'), ADJ_TYPE_VALUES, settings.vocabQuizAdjTypes,
         (a) => t(a === 'i' ? 'words.adjI' : 'words.adjNa'), (v) => update({ vocabQuizAdjTypes: v }))}
-      <p className="setup-field-help">{t('words.quizFilterHelp')}</p>
     </div>
   );
 
@@ -184,8 +214,6 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
 
       {tab === 'list' ? (
         <section className="vocab-panel animate-in">
-          {categoryPills}
-          {filters}
           <div className="vocab-search">
             <Search size={16} />
             <input
@@ -196,6 +224,14 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          {searching ? (
+            <p className="vocab-search-note">{t('words.searchAll')}</p>
+          ) : (
+            <>
+              {categoryPills}
+              {filters}
+            </>
+          )}
           <div className="vocab-count">
             <span>{t('words.count', { count: visible.length })}</span>
             <div className="vocab-count-actions">
@@ -216,7 +252,7 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
             <p className="empty-state-text">{query.trim() ? t('words.noMatch', { query }) : t('words.noFilterMatch')}</p>
           ) : (
             sections.map((section) => {
-              const open = !settings.vocabCollapsed.includes(section.key);
+              const open = !collapsed.includes(section.key);
               return (
                 <section key={section.key} className={`vocab-section ${open ? 'open' : ''}`} aria-label={section.title}>
                   <button
@@ -234,7 +270,7 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
                         <VocabRow
                           key={entry.id}
                           entry={entry}
-                          number={entries.indexOf(entry) + 1}
+                          number={numbers.get(entry.id) ?? 0}
                           showDetails={settings.vocabShowDetails}
                         />
                       ))}
@@ -250,7 +286,7 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
           <div className="setup-field">
             <div className="setup-field-label">{t('words.categoryLabel')}</div>
             {categoryPills}
-            {quizFilters}
+            {jlptPicks}
           </div>
           <div className="setup-field">
             <div className="setup-field-label">{t('words.quizType')}</div>
@@ -279,6 +315,19 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
                 </button>
               ))}
             </div>
+          </div>
+          <div className="vocab-advanced">
+            <button
+              className="btn btn-ghost btn-sm vocab-advanced-toggle"
+              onClick={() => setShowAdvanced((open) => !open)}
+              aria-expanded={showAdvanced}
+            >
+              <SlidersHorizontal size={14} />
+              {t('words.advanced')}
+              {advancedActive > 0 && <span className="badge badge-accent">{advancedActive}</span>}
+              <ChevronDown size={14} className={`vocab-advanced-chevron ${showAdvanced ? 'open' : ''}`} />
+            </button>
+            {showAdvanced && advancedPicks}
           </div>
           {quizWords.length === 0 && <p className="setup-field-help setup-field-note">{t('words.noFilterMatch')}</p>}
           <div className="start-card-actions vocab-start">

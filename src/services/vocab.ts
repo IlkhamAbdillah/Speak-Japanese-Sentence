@@ -1,8 +1,10 @@
 import words from '../data/vocab/words.json';
 import verbs from '../data/vocab/verbs.json';
-import type { JLPTLevel, UserSettings, VocabCategory, VocabFrequency, VocabQuizType } from '../types';
+import type { JLPTLevel, UserSettings, VerbGroupValue, VocabCategory, VocabFrequency, VocabQuizType } from '../types';
 import type { InstructionLanguage } from '../i18n';
 import { normalizeReading } from './ai';
+import { kanaToRomaji, romajiMatches } from './romaji';
+import { VOCAB_CATEGORIES } from '../types';
 
 // ─── Word list ──────────────────────────────────────────
 // Onomatopoeia, adverbs, conjunctions, verbs and adjectives with their meanings
@@ -73,7 +75,7 @@ export function applyQuizFilters(entries: VocabEntry[], f: QuizFilters): VocabEn
   return entries.filter((e) =>
     picked(f.vocabQuizJlpt, e.jlpt ?? 'none') &&
     picked(f.vocabQuizFrequency, e.frequency) &&
-    (!e.verbGroup || picked(f.vocabQuizVerbGroups, String(e.verbGroup) as '1' | '2' | '3')) &&
+    (!e.verbGroup || picked(f.vocabQuizVerbGroups, String(e.verbGroup) as VerbGroupValue)) &&
     (!e.adjType || picked(f.vocabQuizAdjTypes, e.adjType)));
 }
 
@@ -100,7 +102,23 @@ export function meaningOf(entry: VocabEntry, lang: InstructionLanguage): string 
   return entry.meaning[lang] ?? entry.meaning.en;
 }
 
-/** Search the list by word, reading, spelling or meaning (in any language). */
+/** Every word, category by category (list order), for searching all lists at once. */
+export const ALL_ENTRIES: VocabEntry[] = VOCAB_CATEGORIES.flatMap(entriesOf);
+
+// Romaji of each word, worked out once: the reading (or the kana word) and its other spellings
+const romajiCache = new Map<string, string[]>();
+function romajiOf(entry: VocabEntry): string[] {
+  let romaji = romajiCache.get(entry.id);
+  if (!romaji) {
+    // Spellings with kanji don't convert; skip them
+    const fromKana = [entry.reading ?? entry.word, ...(entry.spellings ?? [])].map(kanaToRomaji).filter((r) => /^[a-z]+$/.test(r));
+    romaji = [...new Set(entry.romaji ? [...fromKana, entry.romaji] : fromKana)];
+    romajiCache.set(entry.id, romaji);
+  }
+  return romaji;
+}
+
+/** Search by word, reading, spelling, romaji (from the start: "tabe" finds たべる) or meaning (in any language). */
 export function matchesSearch(entry: VocabEntry, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
@@ -108,8 +126,9 @@ export function matchesSearch(entry: VocabEntry, query: string): boolean {
   const texts = [entry.word, entry.reading ?? '', ...(entry.spellings ?? [])];
   // Meanings match from the start of a word, so "eat" finds "Eat" but not "Repeat"
   const wordStart = new RegExp(`(^|[^\\p{L}])${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u');
+  const isRomaji = /^[a-zāīūēō\s'-]+$/.test(q);
   return texts.some((text) => text && normalizeReading(text).includes(kana)) ||
-    !!entry.romaji?.startsWith(q) ||
+    (isRomaji && romajiOf(entry).some((r) => romajiMatches(r, q))) ||
     Object.values(entry.meaning).some((m) => m && wordStart.test(m.toLowerCase()));
 }
 
