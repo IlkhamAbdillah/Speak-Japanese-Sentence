@@ -2733,3 +2733,590 @@ button.vocab-section-header .vocab-section-count {
   padding-left: var(--space-sm);
   border-left: 2px solid var(--border-subtle);
 }
+
+/* ─── Kanji list: tile grid by JLPT level, detail dialog ─── */
+
+:root {
+  --kanji-learning: var(--color-warning);
+  --kanji-known: var(--color-success);
+}
+
+.kanji-status-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+}
+
+.kanji-status-dot.kanji-status-learning { background: var(--kanji-learning); border-color: transparent; }
+.kanji-status-dot.kanji-status-known { background: var(--kanji-known); border-color: transparent; }
+
+.option-pill .kanji-status-dot {
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.kanji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.kanji-unit-label {
+  grid-column: 1 / -1;
+  margin-top: var(--space-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.kanji-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-xs) 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.kanji-tile:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.kanji-tile:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Progress: a coloured base line (learning / mastered); new tiles stay plain */
+.kanji-tile::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 0;
+  height: 3px;
+  border-radius: var(--radius-full) var(--radius-full) 0 0;
+}
+
+.kanji-tile.kanji-status-learning::after { background: var(--kanji-learning); }
+.kanji-tile.kanji-status-known::after { background: var(--kanji-known); }
+.kanji-tile.kanji-status-known { border-color: rgba(74, 222, 128, 0.25); }
+
+.kanji-tile-glyph {
+  font-size: 1.9rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.kanji-tile-meaning {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 640px) {
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 6px;
+  }
+
+  .kanji-tile-glyph {
+    font-size: 1.6rem;
+  }
+}
+
+/* Detail dialog: compact, fits without scrolling (user-requested) */
+.kanji-detail {
+  max-width: 400px;
+  max-height: calc(100dvh - 2 * var(--space-md));
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  touch-action: pan-y;
+}
+
+.kanji-detail-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.kanji-detail-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.kanji-detail-progress-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kanji-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kanji-detail-glyph {
+  font-size: 4.5rem;
+  line-height: 1.15;
+  font-weight: 500;
+  padding: 0 var(--space-lg) 2px;
+  border-bottom: 3px solid transparent;
+}
+
+.kanji-detail-glyph.kanji-status-learning { border-bottom-color: var(--kanji-learning); }
+.kanji-detail-glyph.kanji-status-known { border-bottom-color: var(--kanji-known); }
+
+/* Stepping to another kanji: the new one slides in from the side it came from */
+.kanji-slide-next { animation: kanjiSlideFromRight 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.kanji-slide-previous { animation: kanjiSlideFromLeft 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+@keyframes kanjiSlideFromRight {
+  from { opacity: 0; transform: translateX(48px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes kanjiSlideFromLeft {
+  from { opacity: 0; transform: translateX(-48px); }
+  to { opacity: 1; transform: none; }
+}
+
+.kanji-detail-meaning {
+  margin-top: var(--space-sm);
+  text-align: center;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.kanji-detail-note {
+  text-align: center;
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+}
+
+.kanji-detail-readings {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px var(--space-md);
+  align-items: baseline;
+  margin-top: var(--space-md);
+}
+
+.kanji-detail-readings dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.kanji-detail-readings dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+}
+
+.kanji-reading {
+  padding: 1px 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-japanese);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+button.kanji-reading {
+  cursor: pointer;
+}
+
+button.kanji-reading:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.kanji-okurigana {
+  color: var(--text-tertiary);
+}
+
+/* Example words: a dropdown, closed by default */
+.kanji-examples {
+  margin-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.kanji-examples-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-sm) 0 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kanji-examples-toggle:hover {
+  color: var(--text-primary);
+}
+
+.kanji-examples-toggle .vocab-advanced-chevron {
+  margin-left: auto;
+}
+
+.kanji-examples-count {
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+}
+
+.kanji-words {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+}
+
+.kanji-words li {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 30px;
+  font-size: var(--text-sm);
+}
+
+.kanji-word {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.kanji-word-reading {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.kanji-word-reading mark {
+  background: none;
+  color: var(--text-japanese);
+  font-weight: 600;
+}
+
+.kanji-word-meaning {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.kanji-word-listen {
+  width: 28px;
+  height: 28px;
+}
+
+.kanji-detail-practised {
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.kanji-practised-words {
+  font-family: var(--font-jp);
+}
+
+/* Kanji quiz */
+.kanji-quiz-prompt {
+  font-size: 4rem;
+}
+
+.kanji-quiz-choices .choice-text {
+  font-family: var(--font-jp);
+  font-size: var(--text-2xl);
+}
+
+/* Dropdowns: a dark native popup, and group headings (the radical picker's
+   "2-stroke parts") that don't fall back to the browser's white background */
+.form-select {
+  color-scheme: dark;
+}
+
+.form-select optgroup {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary-hover);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ─── Kanji list: radical (parts) picker ─────────────── */
+
+.radical-trigger {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radical-picker {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  max-height: calc(100dvh - 2 * var(--space-lg));
+  padding: var(--space-md);
+}
+
+.radical-picker-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.radical-picker-search {
+  flex: 1;
+  margin: 0;
+}
+
+.radical-picker-body {
+  overflow-y: auto;
+  margin-top: var(--space-sm);
+  padding-right: var(--space-xs);
+}
+
+.radical-picker-heading {
+  margin: var(--space-md) 0 var(--space-xs);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--accent-primary-hover);
+}
+
+.radical-all-row {
+  margin-top: var(--space-sm);
+}
+
+/* "All radicals": a chip like the parts, with a grid icon instead of a glyph
+   (.radical-chip sets `font: inherit` further down, hence the double class) */
+.radical-chip.radical-all {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.radical-all svg {
+  color: var(--text-secondary);
+}
+
+.radical-all.active,
+.radical-all.active svg {
+  color: var(--accent-primary);
+}
+
+.radical-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.radical-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.radical-chip.with-name {
+  padding: 0 10px 0 8px;
+}
+
+.radical-chip:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+.radical-chip.active {
+  background: var(--accent-primary-muted);
+  border-color: var(--accent-primary);
+}
+
+.radical-chip-glyph {
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.radical-chip-name {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.radical-row {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: var(--space-xs);
+  align-items: start;
+  padding: 6px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.radical-row-strokes {
+  padding-top: 9px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ─── Kanji quiz: compact, a question fits on screen without scrolling ─── */
+
+.kanji-quiz-main {
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-md);
+}
+
+.kanji-quiz .session-header {
+  /* One line, also on phones (the global rule stacks it below 768px) */
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 0;
+  margin-bottom: var(--space-sm);
+}
+
+.kanji-quiz .progress-bar {
+  margin-bottom: var(--space-md);
+}
+
+.kanji-quiz .game-area {
+  gap: var(--space-sm);
+}
+
+.kanji-quiz .question-card {
+  width: 100%;
+  max-width: 600px;
+  padding: var(--space-sm) var(--space-lg) var(--space-md);
+  border-radius: var(--radius-lg);
+}
+
+.kanji-quiz .question-card .question-context {
+  margin-bottom: 0 !important;
+}
+
+.kanji-quiz .question-prompt {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+
+.kanji-quiz .kanji-quiz-prompt {
+  font-size: 3rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.kanji-quiz .choice-item {
+  padding: 10px var(--space-md);
+}
+
+.kanji-quiz .vocab-tip {
+  margin: 0;
+}
+
+.kanji-quiz .game-controls {
+  gap: var(--space-sm);
+}
+
+.kanji-quiz .mic-button {
+  width: 64px;
+  height: 64px;
+}
+
+.kanji-quiz .feedback-panel {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 0;
+  padding: var(--space-md);
+}
+
+.kanji-quiz .correct-flash {
+  padding: var(--space-sm) var(--space-lg);
+}
+
+.kanji-quiz .vocab-answer {
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.kanji-quiz .vocab-answer-meaning {
+  margin-bottom: var(--space-xs);
+}
+
+.kanji-quiz .vocab-answer .btn-lg {
+  padding: var(--space-sm) var(--space-xl);
+  font-size: var(--text-base);
+}
+
+/* Short screens (small phones): tighter still, so the answer card fits too */
+@media (max-height: 700px) {
+  .kanji-quiz .kanji-quiz-prompt {
+    font-size: 2.25rem;
+  }
+
+  .kanji-quiz .choice-item {
+    padding: 6px var(--space-md);
+  }
+
+  .kanji-quiz .game-area {
+    gap: 6px;
+  }
+
+  .kanji-quiz .progress-bar {
+    margin-bottom: var(--space-sm);
+  }
+
+  .kanji-quiz .vocab-answer {
+    padding-top: var(--space-xs);
+  }
+
+  .kanji-quiz-choices .choice-text {
+    font-size: var(--text-xl);
+    line-height: 1.3;
+  }
+}

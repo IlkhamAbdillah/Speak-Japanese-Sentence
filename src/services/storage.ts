@@ -1,5 +1,5 @@
 import type { UserSettings, Session, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
@@ -92,6 +92,15 @@ export function loadSettings(): UserSettings {
   settings.vocabQuizFrequency = onlyValid(settings.vocabQuizFrequency, VOCAB_FREQUENCIES);
   settings.vocabQuizVerbGroups = onlyValid(settings.vocabQuizVerbGroups, VERB_GROUP_VALUES);
   settings.vocabQuizAdjTypes = onlyValid(settings.vocabQuizAdjTypes, ADJ_TYPE_VALUES);
+  if (!KANJI_STATUS_FILTERS.includes(settings.kanjiStatusFilter)) settings.kanjiStatusFilter = DEFAULT_SETTINGS.kanjiStatusFilter;
+  settings.kanjiCollapsed = onlyValid(settings.kanjiCollapsed, JLPT_LEVELS);
+  // The radical filter became a parts filter (a kanji counts under every part it contains)
+  delete (settings as { kanjiRadical?: unknown }).kanjiRadical;
+  if (typeof settings.kanjiPart !== 'string' || [...settings.kanjiPart].length > 1) settings.kanjiPart = '';
+  if (!KANJI_QUIZ_TYPES.includes(settings.kanjiQuizType)) settings.kanjiQuizType = DEFAULT_SETTINGS.kanjiQuizType;
+  if (!VOCAB_QUIZ_COUNTS.includes(settings.kanjiQuizCount)) settings.kanjiQuizCount = DEFAULT_SETTINGS.kanjiQuizCount;
+  settings.kanjiQuizJlpt = Array.isArray(settings.kanjiQuizJlpt) ? onlyValid(settings.kanjiQuizJlpt, JLPT_LEVELS) : DEFAULT_SETTINGS.kanjiQuizJlpt;
+  settings.kanjiQuizStatus = onlyValid(settings.kanjiQuizStatus, KANJI_STATUS_VALUES);
   // A language that is no longer shipped
   if (!(settings.instructionLanguage in LANGUAGES)) settings.instructionLanguage = DEFAULT_SETTINGS.instructionLanguage;
   return settings;

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import type { UserSettings, MicPermission, Session, AppMode, Question, StoryInfo } from './types';
 import { isConversationMode } from './types';
@@ -15,8 +15,10 @@ import ConversationPage from './pages/ConversationPage';
 import RecapPage from './pages/RecapPage';
 import MistakesPage from './pages/MistakesPage';
 import WordsPage from './pages/WordsPage';
-import KanjiPage from './pages/KanjiPage';
 import ModePage from './pages/ModePage';
+
+// The kanji details (readings, meanings of 2,000+ kanji) load only when the page is opened
+const KanjiPage = lazy(() => import('./pages/KanjiPage'));
 
 function AppInner() {
   const navigate = useNavigate();
@@ -180,7 +182,17 @@ function AppInner() {
               />
             }
           />
-          <Route path="/kanji" element={<KanjiPage />} />
+          <Route
+            path="/kanji"
+            element={
+              <Suspense fallback={null}>
+                <KanjiPage
+                  settings={settings}
+                  onSettingsChange={handleSettingsChange}
+                />
+              </Suspense>
+            }
+          />
           <Route
             path="/mistakes"
             element={<MistakesPage onPractice={handlePracticeMistakes} />}

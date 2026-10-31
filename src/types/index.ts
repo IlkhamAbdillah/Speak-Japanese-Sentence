@@ -26,6 +26,17 @@ export type KanjiSessionType = 'new' | 'review';
 
 export const KANJI_SESSION_TYPES: KanjiSessionType[] = ['new', 'review'];
 
+/** Kanji list filter by progress (see kanjiStatus in services/kanjiProgress.ts) */
+export type KanjiStatusFilter = 'all' | 'new' | 'learning' | 'known';
+export const KANJI_STATUS_FILTERS: KanjiStatusFilter[] = ['all', 'new', 'learning', 'known'];
+export type KanjiStatusValue = Exclude<KanjiStatusFilter, 'all'>;
+export const KANJI_STATUS_VALUES: KanjiStatusValue[] = ['new', 'learning', 'known'];
+
+// Kanji quiz (Kanji page, no AI): meaning: kanji → pick the meaning; kanji: meaning → pick
+// the kanji; reading: kanji → pick its readings; say: kanji → say or type any reading
+export type KanjiQuizType = 'mixed' | 'meaning' | 'kanji' | 'reading' | 'say';
+export const KANJI_QUIZ_TYPES: KanjiQuizType[] = ['mixed', 'meaning', 'kanji', 'reading', 'say'];
+
 /** Reading tests always have one passage with this many questions. */
 export const READING_QUESTION_COUNT = 3;
 
@@ -362,6 +373,18 @@ export interface UserSettings {
   vocabQuizFrequency: VocabFrequency[];
   vocabQuizVerbGroups: VerbGroupValue[];
   vocabQuizAdjTypes: AdjTypeValue[];
+  /** Kanji list: which kanji to show, by progress */
+  kanjiStatusFilter: KanjiStatusFilter;
+  /** Kanji list: collapsed JLPT sections */
+  kanjiCollapsed: JLPTLevel[];
+  /** Kanji list: only kanji containing this part (an id of PARTS in services/kanjiList.ts); '' = all */
+  kanjiPart: string;
+  /** Kanji quiz: question type and count (VOCAB_QUIZ_COUNTS; 0 = all) */
+  kanjiQuizType: KanjiQuizType;
+  kanjiQuizCount: number;
+  /** Kanji quiz filters (multi-select); empty = no filter */
+  kanjiQuizJlpt: JLPTLevel[];
+  kanjiQuizStatus: KanjiStatusValue[];
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -395,6 +418,13 @@ export const DEFAULT_SETTINGS: UserSettings = {
   vocabQuizFrequency: [],
   vocabQuizVerbGroups: [],
   vocabQuizAdjTypes: [],
+  kanjiStatusFilter: 'all',
+  kanjiCollapsed: [],
+  kanjiPart: '',
+  kanjiQuizType: 'mixed',
+  kanjiQuizCount: 10,
+  kanjiQuizJlpt: ['N5'],
+  kanjiQuizStatus: [],
 };
 
 // ─── Kanji progress ─────────────────────────────────────

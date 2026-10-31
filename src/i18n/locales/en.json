@@ -426,8 +426,80 @@
   "kanjiList": {
     "navLabel": "Kanji",
     "title": "Kanji",
-    "subtitle": "A list of kanji with their readings and meanings.",
-    "emptyTitle": "No kanji yet",
-    "emptyText": "The kanji list is coming soon."
+    "subtitle": "The JLPT kanji, N5 to N1, with their readings and meanings.",
+    "searchPlaceholder": "Search: kanji, reading (kana or romaji) or meaning…",
+    "searchAll": "Searching every kanji",
+    "count": "{count} kanji",
+    "noMatch": "No kanji matches “{query}”.",
+    "noFilterMatch": "No kanji matches these filters.",
+    "status": {
+      "all": "All",
+      "new": "New",
+      "learning": "Learning",
+      "known": "Mastered"
+    },
+    "statusCount": "{label} ({count})",
+    "unit": "Unit {unit}",
+    "onyomi": "On'yomi",
+    "kunyomi": "Kun'yomi",
+    "meaning": "Meaning",
+    "meaningNote": "Meanings are in English (KANJIDIC).",
+    "words": "Example words",
+    "practised": "Words you practised",
+    "notPractised": "Not practised yet",
+    "dueNow": "Due for review",
+    "nextReview": "Review {date}",
+    "listen": "Listen",
+    "previous": "Previous kanji",
+    "next": "Next kanji",
+    "close": "Close",
+    "info": {
+      "button": "About the list",
+      "title": "About this list",
+      "sourcesTitle": "Sources",
+      "sourceLevels": "JLPT levels:",
+      "sourceDetails": "Meanings and readings:",
+      "sourceOrder": "Order (most common first):",
+      "legendTitle": "How to read it",
+      "legendNew": "Not practised yet",
+      "legendLearning": "Practised, not mastered",
+      "legendKnown": "Right first try 3 times in a row",
+      "legendProgress": "Progress comes from the JLPT Mock Test kanji section. Tap a kanji for its readings and words.",
+      "via": "via",
+      "sourceRadicals": "Radicals (parts):"
+    },
+    "quiz": {
+      "tabList": "Kanji list",
+      "tabQuiz": "Quiz",
+      "levels": "JLPT",
+      "status": "Progress",
+      "types": {
+        "mixed": "Mixed",
+        "meaning": "Kanji → meaning",
+        "kanji": "Meaning → kanji",
+        "reading": "Kanji → reading",
+        "say": "Say or type a reading"
+      },
+      "instruction": {
+        "meaning": "What does this kanji mean?",
+        "kanji": "Which kanji means this?",
+        "reading": "How is this kanji read?",
+        "say": "Say or type a reading of this kanji"
+      },
+      "answerPlaceholder": "Type a reading…",
+      "wrongKanji": "Kanji to review",
+      "noFilterMatch": "No kanji matches these filters.",
+      "notSaved": "Quiz answers don't change your progress: that comes from the JLPT Mock Test."
+    },
+    "radical": "Radical",
+    "allRadicals": "All radicals",
+    "radicalOption": "{glyphs} · {name} ({count})",
+    "partStrokes": "{count}-stroke parts",
+    "radicalSearch": "Search: tera, temple, さんずい, 氵 or a kanji…",
+    "commonParts": "Common",
+    "byStrokes": "All parts, by stroke count",
+    "partsOf": "Parts of {kanji}",
+    "noPartMatch": "No part matches “{query}”.",
+    "largerParts": "Larger parts"
   }
 }

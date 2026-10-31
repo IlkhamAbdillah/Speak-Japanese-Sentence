@@ -426,8 +426,80 @@
   "kanjiList": {
     "navLabel": "Kanji",
     "title": "Kanji",
-    "subtitle": "Daftar kanji beserta cara baca dan artinya.",
-    "emptyTitle": "Belum ada kanji",
-    "emptyText": "Daftar kanji akan segera hadir."
+    "subtitle": "Kanji JLPT, N5 sampai N1, dengan cara baca dan artinya.",
+    "searchPlaceholder": "Cari: kanji, cara baca (kana atau romaji) atau arti…",
+    "searchAll": "Mencari di semua kanji",
+    "count": "{count} kanji",
+    "noMatch": "Tidak ada kanji yang cocok dengan “{query}”.",
+    "noFilterMatch": "Tidak ada kanji yang cocok dengan filter ini.",
+    "status": {
+      "all": "Semua",
+      "new": "Baru",
+      "learning": "Dipelajari",
+      "known": "Dikuasai"
+    },
+    "statusCount": "{label} ({count})",
+    "unit": "Unit {unit}",
+    "onyomi": "On'yomi",
+    "kunyomi": "Kun'yomi",
+    "meaning": "Arti",
+    "meaningNote": "Arti dalam bahasa Inggris (KANJIDIC).",
+    "words": "Contoh kata",
+    "practised": "Kata yang sudah kamu latih",
+    "notPractised": "Belum dilatih",
+    "dueNow": "Waktunya diulang",
+    "nextReview": "Diulang {date}",
+    "listen": "Dengarkan",
+    "previous": "Kanji sebelumnya",
+    "next": "Kanji berikutnya",
+    "close": "Tutup",
+    "info": {
+      "button": "Tentang daftar ini",
+      "title": "Tentang daftar ini",
+      "sourcesTitle": "Sumber",
+      "sourceLevels": "Level JLPT:",
+      "sourceDetails": "Arti dan cara baca:",
+      "sourceOrder": "Urutan (paling umum dulu):",
+      "legendTitle": "Cara membacanya",
+      "legendNew": "Belum dilatih",
+      "legendLearning": "Sudah dilatih, belum dikuasai",
+      "legendKnown": "Benar di percobaan pertama 3 kali berturut-turut",
+      "legendProgress": "Progres diambil dari bagian kanji di Simulasi JLPT. Ketuk kanji untuk melihat cara baca dan katanya.",
+      "via": "lewat",
+      "sourceRadicals": "Radikal (bagian):"
+    },
+    "quiz": {
+      "tabList": "Daftar kanji",
+      "tabQuiz": "Kuis",
+      "levels": "JLPT",
+      "status": "Progres",
+      "types": {
+        "mixed": "Campuran",
+        "meaning": "Kanji → arti",
+        "kanji": "Arti → kanji",
+        "reading": "Kanji → cara baca",
+        "say": "Ucapkan atau ketik cara baca"
+      },
+      "instruction": {
+        "meaning": "Apa arti kanji ini?",
+        "kanji": "Kanji mana yang artinya ini?",
+        "reading": "Bagaimana kanji ini dibaca?",
+        "say": "Ucapkan atau ketik salah satu cara baca kanji ini"
+      },
+      "answerPlaceholder": "Ketik cara bacanya…",
+      "wrongKanji": "Kanji yang perlu diulang",
+      "noFilterMatch": "Tidak ada kanji yang cocok dengan filter ini.",
+      "notSaved": "Jawaban kuis tidak mengubah progres: progres hanya dari Simulasi JLPT."
+    },
+    "radical": "Radikal",
+    "allRadicals": "Semua radikal",
+    "radicalOption": "{glyphs} · {name} ({count})",
+    "partStrokes": "Bagian {count} goresan",
+    "radicalSearch": "Cari: tera, temple, さんずい, 氵 atau sebuah kanji…",
+    "commonParts": "Umum",
+    "byStrokes": "Semua bagian, menurut jumlah goresan",
+    "partsOf": "Bagian dari {kanji}",
+    "noPartMatch": "Tidak ada bagian yang cocok dengan “{query}”.",
+    "largerParts": "Bagian yang lebih besar"
   }
 }

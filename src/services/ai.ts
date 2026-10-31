@@ -880,7 +880,7 @@ const TEMPLATE_PREFIX = /^(それは|それわ)/;
 const TEMPLATE_SUFFIX = /です$/;
 
 /** Strip the 「それは … です」 / 「それは はひふへほ の ひ」 phrase; returns the normalised answer. */
-function stripKanjiTemplate(answer: string): string {
+export function stripKanjiTemplate(answer: string): string {
   const text = normalizeReading(answer).replace(TEMPLATE_PREFIX, '').replace(TEMPLATE_SUFFIX, '');
   const row = ROW_NAMES.find((name) => text.startsWith(`${name}の`) && text.length > name.length + 1);
   return row ? text.slice(row.length + 1) : text;
