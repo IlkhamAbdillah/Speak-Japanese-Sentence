@@ -1,5 +1,5 @@
 import type { AppMode, ExerciseMode, JLPTSection, UserSettings } from '../types';
-import { APP_MODES, EXERCISE_MODES, JLPT_SECTIONS } from '../types';
+import { EXERCISE_MODES, JLPT_SECTIONS } from '../types';
 import { useI18n } from '../i18n';
 
 interface ModePickerProps {
@@ -12,17 +12,10 @@ interface ModePickerProps {
 // Only labels here: each mode's description is shown in the setup dialog
 type Option = { key: string; label: string; active: boolean; select: () => void };
 
+/** The cards of one mode's page: practice types on /practice, test sections on /jlpt. */
 export default function ModePicker({ appMode, exerciseMode, jlptSection, onChange }: ModePickerProps) {
   const { t } = useI18n();
-  const modeOptions: Option[] = APP_MODES.map((mode) => ({
-    key: mode,
-    label: t(`modes.app.${mode}.label`),
-    active: appMode === mode,
-    select: () => onChange({ appMode: mode }),
-  }));
-
-  // The second row depends on the mode: practice types, or JLPT test sections
-  const subOptions: Option[] = appMode === 'practice'
+  const options: Option[] = appMode === 'practice'
     ? EXERCISE_MODES.map((mode) => ({
         key: mode,
         label: t(`modes.exercise.${mode}.label`),
@@ -35,29 +28,22 @@ export default function ModePicker({ appMode, exerciseMode, jlptSection, onChang
         active: jlptSection === section,
         select: () => onChange({ jlptSection: section }),
       }));
-  const subTitle = appMode === 'practice' ? t('modes.practiceType') : t('modes.testSection');
-
-  const cards = (options: Option[]) => (
-    <div className="mode-cards">
-      {options.map((o) => (
-        <button
-          key={o.key}
-          type="button"
-          className={`mode-card ${o.active ? 'active' : ''}`}
-          aria-pressed={o.active}
-          onClick={o.select}
-        >
-          <div className="mode-card-title">{o.label}</div>
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <div className="mode-picker">
-      {cards(modeOptions)}
-      <h3 className="mode-picker-subtitle">{subTitle}</h3>
-      {cards(subOptions)}
+      <div className="mode-cards">
+        {options.map((o) => (
+          <button
+            key={o.key}
+            type="button"
+            className={`mode-card ${o.active ? 'active' : ''}`}
+            aria-pressed={o.active}
+            onClick={o.select}
+          >
+            <div className="mode-card-title">{o.label}</div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

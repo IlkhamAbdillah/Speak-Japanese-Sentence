@@ -9,13 +9,12 @@ import {
   VOCAB_CATEGORIES,
   VOCAB_FREQUENCIES,
   VOCAB_FREQUENCY_FILTERS,
-  VOCAB_JLPT_FILTERS,
   VOCAB_JLPT_VALUES,
   VOCAB_QUIZ_COUNTS,
   VOCAB_QUIZ_TYPES,
 } from '../types';
 import type { VocabEntry, VocabQuestion } from '../services/vocab';
-import { applyQuizFilters, applyVocabFilters, buildVocabQuiz, entriesOf, matchesSearch, VERB_SOURCE } from '../services/vocab';
+import { applyQuizFilters, applyVocabFilters, buildVocabQuiz, entriesOf, matchesSearch } from '../services/vocab';
 import VocabRow from '../components/VocabRow';
 import VocabQuiz from '../components/VocabQuiz';
 import VocabInfoDialog from '../components/VocabInfoDialog';
@@ -28,7 +27,7 @@ interface WordsPageProps {
 
 type Tab = 'list' | 'quiz';
 
-/** The word list (onomatopoeia, adverbs, verbs, adjectives), and a quiz on it that needs no AI. */
+/** The word list (verbs, adjectives, adverbs, conjunctions, onomatopoeia), and a quiz on it that needs no AI. */
 export default function WordsPage({ settings, onSettingsChange }: WordsPageProps) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>('list');
@@ -114,11 +113,9 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
     </label>
   );
 
-  // List filters (dropdowns): JLPT and how common for every list; the group for verbs, い/な for adjectives
+  // List filters (dropdowns): how common for every list (no JLPT one: each level is a section); the group for verbs, い/な for adjectives
   const filters = (
     <div className="vocab-filters">
-      {filterSelect(t('words.filters.jlpt'), settings.vocabJlpt, VOCAB_JLPT_FILTERS,
-        (l) => (l === 'none' ? t('words.filters.jlptNone') : l), (v) => update({ vocabJlpt: v }))}
       {filterSelect(t('words.filters.frequency'), settings.vocabFrequency, VOCAB_FREQUENCY_FILTERS,
         (f) => t(`words.frequency.${f as Exclude<typeof f, 'all'>}`), (v) => update({ vocabFrequency: v }))}
       {category === 'verb' && filterSelect(t('words.filters.group'), settings.vocabVerbGroup, VERB_GROUP_FILTERS,
@@ -221,7 +218,7 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
             sections.map((section) => {
               const open = !settings.vocabCollapsed.includes(section.key);
               return (
-                <section key={section.key} aria-label={section.title}>
+                <section key={section.key} className={`vocab-section ${open ? 'open' : ''}`} aria-label={section.title}>
                   <button
                     className={`vocab-section-header ${open ? 'open' : ''}`}
                     onClick={() => toggleSection(section.key)}
@@ -246,12 +243,6 @@ export default function WordsPage({ settings, onSettingsChange }: WordsPageProps
                 </section>
               );
             })
-          )}
-          {category === 'verb' && (
-            <p className="vocab-credit">
-              {t('words.creditVerbs')}{' '}
-              <a href={VERB_SOURCE.url} target="_blank" rel="noopener noreferrer">{VERB_SOURCE.name}</a>
-            </p>
           )}
         </section>
       ) : (

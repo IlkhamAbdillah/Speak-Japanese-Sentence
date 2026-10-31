@@ -2265,18 +2265,6 @@ button.mode-card {
   }
 }
 
-.vocab-credit {
-  margin-top: var(--space-md);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  text-align: center;
-}
-
-.vocab-credit a {
-  color: var(--text-secondary);
-  text-decoration: underline;
-}
-
 /* ─── Word list: tags, filters, info dialog ──────────── */
 
 .vocab-filters {
@@ -2355,12 +2343,16 @@ button.mode-card {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-sm);
-  margin: var(--space-lg) 0 var(--space-sm);
   padding: 0 var(--space-xs);
 }
 
-.vocab-section-header:first-of-type {
-  margin-top: 0;
+/* Space between the JLPT level sections: more after an open list than between collapsed headers */
+.vocab-section + .vocab-section {
+  margin-top: var(--space-md);
+}
+
+.vocab-section.open + .vocab-section {
+  margin-top: var(--space-xl);
 }
 
 .vocab-section-title {
@@ -2483,7 +2475,7 @@ button.mode-card {
 /* Collapsible JLPT sections */
 button.vocab-section-header {
   width: 100%;
-  margin: var(--space-sm) 0 var(--space-xs);
+  margin: 0 0 var(--space-xs);
   background: none;
   border: none;
   cursor: pointer;
@@ -2527,4 +2519,69 @@ button.vocab-section-header .vocab-section-count {
 /* "Hide details": keep the bars' space so the row layout doesn't move */
 .vocab-details-hidden {
   visibility: hidden;
+}
+
+/* ─── Home: the four section cards ───────────────────── */
+
+.home-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  max-width: 640px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.home-menu-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--surface-1);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.home-menu-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--surface-2);
+}
+
+.home-menu-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.home-menu-glyph {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary-muted);
+  color: var(--accent-primary);
+  font-family: var(--font-jp);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.home-menu-label {
+  flex: 1;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.home-menu-chevron {
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 520px) {
+  .home-menu {
+    grid-template-columns: 1fr;
+  }
 }

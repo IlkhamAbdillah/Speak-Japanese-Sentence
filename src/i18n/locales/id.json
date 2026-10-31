@@ -75,7 +75,7 @@
     "startMockTest": "Mulai Simulasi",
     "startPractice": "Mulai Latihan",
     "welcomeTitle": "Siap Berbicara Bahasa Jepang?",
-    "welcomeSubtitle": "Latihan satu kalimat dalam satu waktu, tingkatkan bahasa Jepang Anda, dan lacak progres belajar.",
+    "welcomeSubtitle": "Pelajari kata dan kanji, latihan berbicara, dan ikuti simulasi tes JLPT.",
     "speechUnsupported": "Browser Anda tidak mendukung Speech Recognition. Gunakan Chrome atau Edge untuk fitur penuh.",
     "micDenied": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.",
     "enableMic": "Aktifkan Mikrofon",
@@ -89,9 +89,15 @@
     "statCorrect": "Benar",
     "recentSessions": "Sesi Terakhir",
     "viewAll": "Lihat Semua",
-    "chooseMode": "Pilih Mode",
-    "chooseModeSubtitle": "Pilih apa yang ingin Anda latih, lalu tekan Pilih untuk mengaturnya.",
-    "select": "Pilih"
+    "select": "Pilih",
+    "menu": {
+      "words": "Daftar Kotoba",
+      "kanji": "Daftar Kanji",
+      "practice": "Latihan Berbicara",
+      "jlpt": "Simulasi JLPT"
+    },
+    "pickPractice": "Pilih jenis latihan, lalu tekan Pilih untuk mengaturnya.",
+    "pickSection": "Pilih bagian tes, lalu tekan Pilih untuk mengaturnya."
   },
   "setup": {
     "jlptLevel": "Level JLPT",
@@ -319,12 +325,13 @@
   "words": {
     "navLabel": "Kosakata",
     "title": "Kosakata",
-    "subtitle": "Onomatope, kata keterangan, kata kerja dan kata sifat beserta artinya, dan kuis singkat untuk melatihnya. Tanpa AI.",
+    "subtitle": "Kata kerja, kata sifat, kata keterangan, kata sambung dan onomatope beserta artinya, dan kuis singkat untuk melatihnya. Tanpa AI.",
     "tabList": "Daftar kata",
     "tabQuiz": "Kuis",
     "category": {
       "onomatopoeia": "Onomatope",
-      "adverb": "Kata keterangan & sambung",
+      "adverb": "Kata keterangan",
+      "conjunction": "Kata sambung",
       "verb": "Kata kerja",
       "adjective": "Kata sifat"
     },
@@ -336,7 +343,6 @@
     "verbGroup": "Golongan {group}",
     "adjI": "Adj-い",
     "adjNa": "Adj-な",
-    "creditVerbs": "Daftar kata kerja berdasarkan",
     "listen": "Dengarkan",
     "quizType": "Jenis soal",
     "quizTypes": {
@@ -375,9 +381,8 @@
       "group": "Golongan",
       "type": "Jenis",
       "jlpt": "JLPT",
-      "frequency": "Seberapa umum",
-      "all": "Semua",
-      "jlptNone": "Tidak ada di daftar JLPT"
+      "frequency": "Frekuensi kemunculan",
+      "all": "Semua"
     },
     "jlptNoneTag": "Non-JLPT",
     "frequency": {
@@ -391,11 +396,12 @@
       "button": "Tentang daftar dan label",
       "title": "Tentang daftar ini",
       "sourcesTitle": "Sumber",
-      "sourceVocab": "Onomatope & kata keterangan:",
-      "sourceAdjectives": "Kata sifat: dipilih untuk aplikasi ini",
+      "sourceVocab": "Onomatope, kata keterangan & kata sambung:",
+      "sourceAdjectives": "Kata sifat: dipilih untuk aplikasi ini, daftar JLPT +",
       "sourceVerbs": "Kata kerja:",
       "sourceJlpt": "Level JLPT:",
-      "sourceFrequency": "Seberapa umum:",
+      "sourceWordClass": "Jenis kata (い/な):",
+      "sourceFrequency": "Frekuensi kemunculan:",
       "legendTitle": "Keterangan",
       "sections": "Bagian = level JLPT (Non-JLPT: tidak ada di daftar)",
       "group1": "Golongan 1 · godan",
@@ -410,5 +416,12 @@
     "showDetails": "Tampilkan detail",
     "hideDetails": "Sembunyikan detail",
     "quizFilterHelp": "Pilih satu atau lebih di tiap baris; tidak memilih = semua."
+  },
+  "kanjiList": {
+    "navLabel": "Kanji",
+    "title": "Kanji",
+    "subtitle": "Daftar kanji beserta cara baca dan artinya.",
+    "emptyTitle": "Belum ada kanji",
+    "emptyText": "Daftar kanji akan segera hadir."
   }
 }

@@ -10,7 +10,9 @@ interface VocabInfoDialogProps {
 }
 
 const VOCAB_SOURCE = { name: 'Kotoba Onomatope (Scribd)', url: 'https://www.scribd.com/document/485472399/kotoba-onomatope' };
+const ADJECTIVE_SOURCE = { name: 'JLPT Sensei', url: 'https://jlptsensei.com/jlpt-n5-i-adjectives-list/' };
 const JLPT_SOURCE = { name: 'open-anki-jlpt-decks', url: 'https://github.com/jamsinclair/open-anki-jlpt-decks' };
+const WORD_CLASS_SOURCE = { name: 'JMdict (EDRDG)', url: 'https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project' };
 const FREQUENCY_SOURCE = { name: 'wordfreq', url: 'https://github.com/rspeer/wordfreq' };
 
 const link = (source: { name: string; url: string }) => (
@@ -56,8 +58,9 @@ export default function VocabInfoDialog({ onClose }: VocabInfoDialogProps) {
         <ul className="vocab-info-list">
           <li>{t('words.info.sourceVocab')} {link(VOCAB_SOURCE)}</li>
           <li>{t('words.info.sourceVerbs')} {link(VERB_SOURCE)}</li>
-          <li>{t('words.info.sourceAdjectives')}</li>
+          <li>{t('words.info.sourceAdjectives')} {link(ADJECTIVE_SOURCE)}</li>
           <li>{t('words.info.sourceJlpt')} {link(JLPT_SOURCE)}</li>
+          <li>{t('words.info.sourceWordClass')} {link(WORD_CLASS_SOURCE)}</li>
           <li>{t('words.info.sourceFrequency')} {link(FREQUENCY_SOURCE)}</li>
         </ul>
 

@@ -5,7 +5,7 @@ import type { InstructionLanguage } from '../i18n';
 import { normalizeReading } from './ai';
 
 // ─── Word list ──────────────────────────────────────────
-// Onomatopoeia, adverbs/conjunctions, verbs and adjectives with their meanings
+// Onomatopoeia, adverbs, conjunctions, verbs and adjectives with their meanings
 // (src/data/vocab/words.json; verbs from the Japanese Verb Conjugator list in verbs.json).
 // The quiz is built and checked here, without any AI call.
 
@@ -47,6 +47,7 @@ function withIds(category: VocabEntryCategory, list: RawEntry[]): VocabEntry[] {
 export const VOCAB_ENTRIES: VocabEntry[] = [
   ...withIds('onomatopoeia', words.onomatopoeia as RawEntry[]),
   ...withIds('adverb', words.adverb as RawEntry[]),
+  ...withIds('conjunction', words.conjunction as RawEntry[]),
   ...withIds('verb', verbs.verbs as RawEntry[]),
   ...withIds('adjective', words.adjective as RawEntry[]),
 ];
@@ -54,12 +55,11 @@ export const VOCAB_ENTRIES: VocabEntry[] = [
 /** Where the verb list comes from, credited on the Words page */
 export const VERB_SOURCE = { name: 'Japanese Verb Conjugator', url: verbs.url };
 
-type VocabFilters = Pick<UserSettings, 'vocabCategory' | 'vocabVerbGroup' | 'vocabAdjType' | 'vocabJlpt' | 'vocabFrequency'>;
+type VocabFilters = Pick<UserSettings, 'vocabCategory' | 'vocabVerbGroup' | 'vocabAdjType' | 'vocabFrequency'>;
 
-/** JLPT and how common apply to every list; the group to verbs, い/な to adjectives. */
+/** How common applies to every list (JLPT levels are the list's sections); the group to verbs, い/な to adjectives. */
 export function applyVocabFilters(entries: VocabEntry[], f: VocabFilters): VocabEntry[] {
   return entries.filter((e) =>
-    (f.vocabJlpt === 'all' || (e.jlpt ?? 'none') === f.vocabJlpt) &&
     (f.vocabFrequency === 'all' || e.frequency === f.vocabFrequency) &&
     (f.vocabCategory !== 'verb' || f.vocabVerbGroup === 'all' || String(e.verbGroup) === f.vocabVerbGroup) &&
     (f.vocabCategory !== 'adjective' || f.vocabAdjType === 'all' || e.adjType === f.vocabAdjType));

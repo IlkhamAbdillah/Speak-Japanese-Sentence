@@ -1,69 +1,28 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Mic,
-  BookOpen,
-  Target,
-  BarChart3,
-  ChevronRight,
-  Bot,
-} from 'lucide-react';
-import type { UserSettings, MicPermission } from '../types';
-import { isConversationMode } from '../types';
+import { BookOpen, Target, BarChart3, ChevronRight } from 'lucide-react';
+import type { MessageKey } from '../i18n';
 import { useI18n } from '../i18n';
-import ModePicker from '../components/ModePicker';
-import SessionSetupDialog from '../components/SessionSetupDialog';
 import { getLearningStats } from '../services/storage';
 import type { LearningStats } from '../services/storage';
-import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
-import { aiHostOf } from '../services/ai';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
-interface HomePageProps {
-  settings: UserSettings;
-  micPermission: MicPermission;
-  onMicPermissionChange: (perm: MicPermission) => void;
-  onSettingsChange: (settings: UserSettings) => void;
-  onStartPractice: () => void;
-}
+// Landing page menu: one card per section of the app
+const HOME_MENU: { path: string; glyph: string; label: MessageKey }[] = [
+  { path: '/words', glyph: '語', label: 'home.menu.words' },
+  { path: '/kanji', glyph: '字', label: 'home.menu.kanji' },
+  { path: '/practice', glyph: '話', label: 'home.menu.practice' },
+  { path: '/jlpt', glyph: '試', label: 'home.menu.jlpt' },
+];
 
-export default function HomePage({
-  settings,
-  micPermission,
-  onMicPermissionChange,
-  onSettingsChange,
-  onStartPractice,
-}: HomePageProps) {
+/** Landing page: the four sections, then the learning overview. */
+export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [stats, setStats] = useState<LearningStats | null>(null);
-  const [showSetup, setShowSetup] = useState(false);
-  const closeSetup = useCallback(() => setShowSetup(false), []);
 
   useEffect(() => {
     setStats(getLearningStats());
   }, []);
-
-  const handleRequestMic = async () => {
-    const perm = await requestMicPermission();
-    onMicPermissionChange(perm);
-  };
-
-  const hasValidAuth = settings.aiProvider === 'ollama' || settings.apiKey.trim().length > 0;
-  const blockedReason = !hasValidAuth
-    ? t('home.apiKeyMissing')
-    : !isSpeechRecognitionSupported()
-      ? t('home.speechUnsupported')
-      : micPermission === 'granted' || micPermission === 'not-requested'
-        ? null
-        : t('home.micDenied');
-
-  const isConversation = isConversationMode(settings);
-
-  const startLabel = isConversation
-    ? t('home.startConversation')
-    : settings.appMode === 'jlpt'
-      ? t('home.startMockTest')
-      : t('home.startPractice');
 
   return (
     <div className="app-main">
@@ -77,81 +36,16 @@ export default function HomePage({
         </p>
       </section>
 
-      {/* Mic Status */}
-      {!isSpeechRecognitionSupported() && (
-        <div className="alert alert-warning" style={{ maxWidth: 560, margin: '0 auto var(--space-lg)' }}>
-          ⚠️ {t('home.speechUnsupported')}
-        </div>
-      )}
-
-      {micPermission === 'denied' && (
-        <div className="alert alert-error" style={{ maxWidth: 560, margin: '0 auto var(--space-lg)' }}>
-          🎤 {t('home.micDenied')}
-        </div>
-      )}
-
-      {micPermission === 'not-requested' && isSpeechRecognitionSupported() && (
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
-          <button className="btn btn-secondary" onClick={handleRequestMic}>
-            <Mic size={16} />
-            {t('home.enableMic')}
+      {/* The four sections of the app */}
+      <nav className="home-menu animate-in" style={{ animationDelay: '100ms' }}>
+        {HOME_MENU.map((item) => (
+          <button key={item.path} className="home-menu-card" onClick={() => navigate(item.path)}>
+            <span className="home-menu-glyph" lang="ja" aria-hidden="true">{item.glyph}</span>
+            <span className="home-menu-label">{t(item.label)}</span>
+            <ChevronRight size={18} className="home-menu-chevron" />
           </button>
-        </div>
-      )}
-
-      {/* Mode selection: pick a mode, then Select opens its options */}
-      <section className="start-card mode-select-card animate-in" style={{ animationDelay: '100ms' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
-          <BookOpen size={20} style={{ color: 'var(--accent-primary)' }} />
-          <h2 className="card-title">
-            {t('home.chooseMode')}
-          </h2>
-        </div>
-        <p className="card-subtitle">
-          {t('home.chooseModeSubtitle')}
-        </p>
-
-        <ModePicker
-          appMode={settings.appMode}
-          exerciseMode={settings.exerciseMode}
-          jlptSection={settings.jlptSection}
-          onChange={(partial) => onSettingsChange({ ...settings, ...partial })}
-        />
-
-        {!hasValidAuth && (
-          <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)' }}>
-            {t('home.apiKeyMissing')}
-          </div>
-        )}
-
-        {hasValidAuth && (
-          <div className="alert alert-info" style={{ marginBottom: 'var(--space-md)' }}>
-            {settings.aiModel} · {aiHostOf(settings)}
-          </div>
-        )}
-
-        <div className="start-card-actions">
-          <button className="btn btn-secondary btn-lg" onClick={() => navigate('/settings')}>
-            <Bot size={18} />
-            {t('common.aiSetup')}
-          </button>
-          <button className="btn btn-primary btn-lg" onClick={() => setShowSetup(true)}>
-            {t('home.select')}
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      </section>
-
-      {showSetup && (
-        <SessionSetupDialog
-          settings={settings}
-          onSettingsChange={onSettingsChange}
-          blockedReason={blockedReason}
-          startLabel={startLabel}
-          onStart={onStartPractice}
-          onClose={closeSetup}
-        />
-      )}
+        ))}
+      </nav>
 
       {/* Stats */}
       {stats && (

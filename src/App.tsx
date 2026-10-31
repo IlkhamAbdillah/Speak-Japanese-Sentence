@@ -13,6 +13,8 @@ import ConversationPage from './pages/ConversationPage';
 import RecapPage from './pages/RecapPage';
 import HistoryPage from './pages/HistoryPage';
 import WordsPage from './pages/WordsPage';
+import KanjiPage from './pages/KanjiPage';
+import ModePage from './pages/ModePage';
 
 function AppInner() {
   const navigate = useNavigate();
@@ -47,10 +49,11 @@ function AppInner() {
     [navigate]
   );
 
+  // Back to the page of the mode that was being practised
   const handleExitPractice = useCallback(() => {
     setPracticeActive(false);
-    navigate('/');
-  }, [navigate]);
+    navigate(settings.appMode === 'jlpt' ? '/jlpt' : '/practice');
+  }, [navigate, settings.appMode]);
 
   const handlePracticeAgain = useCallback(() => {
     clearActiveSession();
@@ -114,10 +117,25 @@ function AppInner() {
           onLanguageChange={(lang) => handleSettingsChange({ ...settings, instructionLanguage: lang })}
         />
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route
-            path="/"
+            path="/practice"
             element={
-              <HomePage
+              <ModePage
+                mode="practice"
+                settings={settings}
+                micPermission={micPermission}
+                onMicPermissionChange={setMicPermission}
+                onSettingsChange={handleSettingsChange}
+                onStartPractice={handleStartPractice}
+              />
+            }
+          />
+          <Route
+            path="/jlpt"
+            element={
+              <ModePage
+                mode="jlpt"
                 settings={settings}
                 micPermission={micPermission}
                 onMicPermissionChange={setMicPermission}
@@ -144,6 +162,7 @@ function AppInner() {
               />
             }
           />
+          <Route path="/kanji" element={<KanjiPage />} />
           <Route
             path="/history"
             element={<HistoryPage />}

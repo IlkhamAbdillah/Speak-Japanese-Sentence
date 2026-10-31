@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, History, BookA, Mic, Languages, ChevronDown, Check } from 'lucide-react';
+import { Home, History, BookA, PenLine, Mic, Languages, ChevronDown, Check } from 'lucide-react';
 import type { MicPermission } from '../types';
 import type { InstructionLanguage } from '../i18n';
 import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
+
+// Speaking Practice and JLPT Mock Test are opened from Home, so Home stays highlighted there
+const HOME_PATHS = ['/', '/practice', '/jlpt'];
 
 interface HeaderProps {
   micPermission: MicPermission;
@@ -51,7 +54,7 @@ export default function Header({ micPermission, onLanguageChange }: HeaderProps)
         )}
 
         <button
-          className={`header-nav-link ${path === '/' ? 'active' : ''}`}
+          className={`header-nav-link ${HOME_PATHS.includes(path) ? 'active' : ''}`}
           onClick={() => navigate('/')}
           title={t('header.home')}
         >
@@ -66,6 +69,15 @@ export default function Header({ micPermission, onLanguageChange }: HeaderProps)
         >
           <BookA size={16} />
           <span className="header-nav-label">{t('words.navLabel')}</span>
+        </button>
+
+        <button
+          className={`header-nav-link ${path === '/kanji' ? 'active' : ''}`}
+          onClick={() => navigate('/kanji')}
+          title={t('kanjiList.navLabel')}
+        >
+          <PenLine size={16} />
+          <span className="header-nav-label">{t('kanjiList.navLabel')}</span>
         </button>
 
         <button

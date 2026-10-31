@@ -1,5 +1,5 @@
 import type { UserSettings, Session, SessionSummary, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_JLPT_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
@@ -79,7 +79,8 @@ export function loadSettings(): UserSettings {
   if (!VOCAB_QUIZ_COUNTS.includes(settings.vocabQuizCount)) settings.vocabQuizCount = DEFAULT_SETTINGS.vocabQuizCount;
   if (!VERB_GROUP_FILTERS.includes(settings.vocabVerbGroup)) settings.vocabVerbGroup = DEFAULT_SETTINGS.vocabVerbGroup;
   if (!ADJ_TYPE_FILTERS.includes(settings.vocabAdjType)) settings.vocabAdjType = DEFAULT_SETTINGS.vocabAdjType;
-  if (!VOCAB_JLPT_FILTERS.includes(settings.vocabJlpt)) settings.vocabJlpt = DEFAULT_SETTINGS.vocabJlpt;
+  // The list's JLPT dropdown was removed (the list has a section per level)
+  delete (settings as { vocabJlpt?: unknown }).vocabJlpt;
   if (!VOCAB_FREQUENCY_FILTERS.includes(settings.vocabFrequency)) settings.vocabFrequency = DEFAULT_SETTINGS.vocabFrequency;
   if (typeof settings.vocabShowDetails !== 'boolean') settings.vocabShowDetails = DEFAULT_SETTINGS.vocabShowDetails;
   // Lists of picked values: keep only the valid ones

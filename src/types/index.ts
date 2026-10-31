@@ -68,13 +68,13 @@ export type StoryTense = 'random' | 'past' | 'present' | 'future';
 
 export const STORY_TENSES: StoryTense[] = ['random', 'past', 'present', 'future'];
 
-// ─── Word list (onomatopoeia / adverbs / verbs / adjectives) ─
+// ─── Word list (verbs / adjectives / adverbs / conjunctions / onomatopoeia) ─
 // A fixed list (src/data/vocab/words.json) with its own quiz, checked locally (no AI)
 // No "all": the lists cover completely different areas (user-requested)
-export type VocabCategory = 'onomatopoeia' | 'adverb' | 'verb' | 'adjective';
+export type VocabCategory = 'onomatopoeia' | 'adverb' | 'conjunction' | 'verb' | 'adjective';
 
 // Order of the list buttons (user-requested)
-export const VOCAB_CATEGORIES: VocabCategory[] = ['verb', 'adjective', 'adverb', 'onomatopoeia'];
+export const VOCAB_CATEGORIES: VocabCategory[] = ['verb', 'adjective', 'adverb', 'conjunction', 'onomatopoeia'];
 
 // meaning: word → pick the meaning; word: meaning → pick the word;
 // say: meaning → say or type the word; mixed: a random one of those per question
@@ -92,9 +92,8 @@ export const VERB_GROUP_FILTERS: VerbGroupFilter[] = ['all', '1', '2', '3'];
 export type AdjTypeFilter = 'all' | 'i' | 'na';
 export const ADJ_TYPE_FILTERS: AdjTypeFilter[] = ['all', 'i', 'na'];
 
-/** A verb's JLPT level, or 'none' for verbs on no JLPT list */
-export type VocabJlptFilter = 'all' | JLPTLevel | 'none';
-export const VOCAB_JLPT_FILTERS: VocabJlptFilter[] = ['all', 'N5', 'N4', 'N3', 'N2', 'N1', 'none'];
+/** A word's JLPT level, or 'none' for words on no JLPT list */
+export type VocabJlptValue = JLPTLevel | 'none';
 
 /** How common a verb is in everyday Japanese (from word frequency data) */
 export type VocabFrequency = 'veryCommon' | 'common' | 'uncommon' | 'rare';
@@ -104,7 +103,6 @@ export const VOCAB_FREQUENCY_FILTERS: VocabFrequencyFilter[] = ['all', ...VOCAB_
 
 // Quiz filters are multi-select buttons (user-requested), e.g. N5 + N4 and very common +
 // common at once. Within one filter any picked value matches; nothing picked = everything.
-export type VocabJlptValue = Exclude<VocabJlptFilter, 'all'>;
 export const VOCAB_JLPT_VALUES: VocabJlptValue[] = ['N5', 'N4', 'N3', 'N2', 'N1', 'none'];
 export type VerbGroupValue = Exclude<VerbGroupFilter, 'all'>;
 export const VERB_GROUP_VALUES: VerbGroupValue[] = ['1', '2', '3'];
@@ -373,7 +371,6 @@ export interface UserSettings {
   vocabQuizCount: number;
   vocabVerbGroup: VerbGroupFilter;
   vocabAdjType: AdjTypeFilter;
-  vocabJlpt: VocabJlptFilter;
   vocabFrequency: VocabFrequencyFilter;
   /** Word list: show the group / い・な stripe and the frequency bars */
   vocabShowDetails: boolean;
@@ -410,7 +407,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
   vocabQuizCount: 10,
   vocabVerbGroup: 'all',
   vocabAdjType: 'all',
-  vocabJlpt: 'all',
   vocabFrequency: 'all',
   vocabShowDetails: true,
   vocabCollapsed: [],

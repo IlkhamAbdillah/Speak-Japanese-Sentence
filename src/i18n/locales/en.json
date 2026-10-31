@@ -75,7 +75,7 @@
     "startMockTest": "Start Mock Test",
     "startPractice": "Start Practice",
     "welcomeTitle": "Ready to Speak Japanese?",
-    "welcomeSubtitle": "Practice one sentence at a time, improve your Japanese, and track your progress.",
+    "welcomeSubtitle": "Learn words and kanji, practise speaking, and take JLPT mock tests.",
     "speechUnsupported": "Your browser does not support Speech Recognition. Use Chrome or Edge for full features.",
     "micDenied": "Microphone access denied. Please allow microphone access in your browser settings.",
     "enableMic": "Enable Microphone",
@@ -89,9 +89,15 @@
     "statCorrect": "Correct",
     "recentSessions": "Recent Sessions",
     "viewAll": "View All",
-    "chooseMode": "Choose a Mode",
-    "chooseModeSubtitle": "Pick what you want to practice, then press Select to set it up.",
-    "select": "Select"
+    "select": "Select",
+    "menu": {
+      "words": "Kotoba List",
+      "kanji": "Kanji List",
+      "practice": "Speaking Practice",
+      "jlpt": "JLPT Mock Test"
+    },
+    "pickPractice": "Pick a practice type, then press Select to set it up.",
+    "pickSection": "Pick a test section, then press Select to set it up."
   },
   "setup": {
     "jlptLevel": "JLPT Level",
@@ -319,12 +325,13 @@
   "words": {
     "navLabel": "Words",
     "title": "Vocabulary",
-    "subtitle": "Onomatopoeia, adverbs, verbs and adjectives with their meanings, and a quick quiz to practise them. No AI needed.",
+    "subtitle": "Verbs, adjectives, adverbs, conjunctions and onomatopoeia with their meanings, and a quick quiz to practise them. No AI needed.",
     "tabList": "Word list",
     "tabQuiz": "Quiz",
     "category": {
       "onomatopoeia": "Onomatopoeia",
-      "adverb": "Adverbs & conjunctions",
+      "adverb": "Adverbs",
+      "conjunction": "Conjunctions",
       "verb": "Verbs",
       "adjective": "Adjectives"
     },
@@ -336,7 +343,6 @@
     "verbGroup": "Group {group}",
     "adjI": "い-adj",
     "adjNa": "な-adj",
-    "creditVerbs": "Verb list based on",
     "listen": "Listen",
     "quizType": "Question type",
     "quizTypes": {
@@ -375,9 +381,8 @@
       "group": "Group",
       "type": "Type",
       "jlpt": "JLPT",
-      "frequency": "How common",
-      "all": "All",
-      "jlptNone": "Not on JLPT lists"
+      "frequency": "Appearance frequency",
+      "all": "All"
     },
     "jlptNoneTag": "Non-JLPT",
     "frequency": {
@@ -391,11 +396,12 @@
       "button": "About the list and tags",
       "title": "About this list",
       "sourcesTitle": "Sources",
-      "sourceVocab": "Onomatopoeia & adverbs:",
-      "sourceAdjectives": "Adjectives: picked for this app",
+      "sourceVocab": "Onomatopoeia, adverbs & conjunctions:",
+      "sourceAdjectives": "Adjectives: picked for this app, the JLPT lists +",
       "sourceVerbs": "Verbs:",
       "sourceJlpt": "JLPT levels:",
-      "sourceFrequency": "How common:",
+      "sourceWordClass": "Word class (い/な):",
+      "sourceFrequency": "Appearance frequency:",
       "legendTitle": "Legend",
       "sections": "Sections = JLPT level (Non-JLPT: on no list)",
       "group1": "Group 1 · godan",
@@ -410,5 +416,12 @@
     "showDetails": "Show details",
     "hideDetails": "Hide details",
     "quizFilterHelp": "Pick one or more in each row; nothing picked = all."
+  },
+  "kanjiList": {
+    "navLabel": "Kanji",
+    "title": "Kanji",
+    "subtitle": "A list of kanji with their readings and meanings.",
+    "emptyTitle": "No kanji yet",
+    "emptyText": "The kanji list is coming soon."
   }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Eye,
   EyeOff,
@@ -23,6 +23,7 @@ interface SettingsPageProps {
 
 export default function SettingsPage({ settings, onSettingsChange }: SettingsPageProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showKey, setShowKey] = useState(false);
   const [connStatus, setConnStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connError, setConnError] = useState('');
@@ -93,7 +94,9 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
 
   const handleSave = () => {
     saveSettings(settings);
-    navigate('/');
+    // Back to the page AI Setup was opened from (Speaking Practice / JLPT Mock Test)
+    const from = (location.state as { from?: string } | null)?.from;
+    navigate(from ?? '/');
   };
 
   const handleClearKey = () => {

@@ -3,12 +3,37 @@
 `words.json` is the word list used by the **Words** page
 (`src/pages/WordsPage.tsx`) and its quiz.
 
-- `onomatopoeia` and `adverb` (adverbs, time expressions, conjunctions) were
+- `onomatopoeia`, `adverb` (adverbs, time expressions) and `conjunction` were
   transcribed from the user's PDF `material/pdf-kotoba-onomatope_compress.pdf`
   (git-ignored), originally from https://www.scribd.com/document/485472399/kotoba-onomatope
-  (credited in the Words page's ⓘ dialog).
+  (credited in the Words page's ⓘ dialog). Conjunctions were split out of the
+  adverbs into their own list (user-requested), grouped by `topic` (result,
+  contrast, addition, explanation, topic-change); もし and とにかく are adverbs
+  (副詞) in Japanese grammar, so they stay in `adverb`.
 - `adjective` (in `words.json`) are common JLPT N5–N4 adjectives written with
-  kanji, chosen for the app (not from a textbook). `adjType` is `i` / `na`.
+  kanji, chosen for the app (not from a textbook), plus the adjectives of the
+  **JLPT Sensei** い/な-adjective lists N5–N2 (https://jlptsensei.com, e.g.
+  /jlpt-n5-i-adjectives-list/, read 2026-10-31; N1 is empty on the site),
+  credited in the ⓘ dialog. `adjType` is `i` / `na`. From JLPT Sensei only the
+  words were taken; meanings (en, id) were written for the app, and `jlpt` is
+  worked out from the Waller lists like every other word (so it can differ from
+  the site's level, e.g. 優しい). Left out because they are adverbs or nouns, not
+  adjectives: 多分, たいてい, 随分, 発明, 海外, 一般. 硬い/堅い are spellings of 固い.
+  いっぱい matched 一杯 (N4) in the JLPT list; 十分 was set to common by hand
+  (wordfreq splits it). New topic `judgement` (正しい, 変, 駄目, 有利…).
+  Then every other adjective on the JLPT N5–N1 lists (open-anki-jlpt-decks,
+  see below) was added: a word counts as an adjective when the first sense of
+  its JMdict entry (https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project,
+  CC BY-SA 4.0, via jmdict-simplified 3.6.2) is adj-i or adj-na. Reviewed by
+  hand: left out the words that are really nouns or adverbs (大人, 秘密, 偶然,
+  突然, かなり, 流石…), expressions (仕方がない, 違いない, たまらない…),
+  onomatopoeia (ぴかぴか…), duplicates (喧しい/やかましい, 適確/的確), and at
+  N2 and N1 the words wordfreq rates rare (Zipf < 3.3 at N2, < 3.5 at N1),
+  except a few it can't count (積極的, 申し訳ない, 厳密…, frequency set by
+  hand). Meanings (en, id) were written for the app.
+  Words JMdict marks as usually written in kana (uk) are shown in kana with the
+  kanji in `spellings` (うるさい 煩い, すごい 凄い, だめ 駄目, かわいい 可愛い…);
+  美味しい and 易しい keep their kanji, as in textbooks.
 - Every word in `words.json` also has `jlpt` (missing = Non-JLPT), `frequency`
   and `topic`, worked out the same way as for the verbs below (JLPT lists +
   wordfreq; i-adjectives also count 高く/高かっ/高けれ, onomatopoeia also count
@@ -20,7 +45,7 @@
   (暑い 寒い, にこにこ にやにや, だから それで).
 - `verbs.json` is based on the verb list of **Japanese Verb Conjugator**
   (https://www.japaneseverbconjugator.com/JVerbList.asp, downloaded 2026-10-31),
-  credited on the Words page. English meanings, romaji and classes come from the
+  credited in the Words page's ⓘ dialog. English meanings, romaji and classes come from the
   site; the Indonesian meanings were written for the app. Sorted by reading.
   `verbGroup`: 1 = godan, 2 = ichidan, 3 = irregular. Every verb also has:
   - `jlpt`: the easiest level whose vocabulary list has the verb, from
