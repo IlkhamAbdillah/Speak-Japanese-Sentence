@@ -2017,3 +2017,514 @@ button.mode-card {
 .setup-field-note {
   color: var(--color-warning);
 }
+
+/* ─── Word list & quiz (onomatopoeia / adverbs) ──────── */
+
+.vocab-header {
+  padding: var(--space-xl) 0 var(--space-lg);
+}
+
+.vocab-tabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin: 0 auto var(--space-lg);
+  padding: var(--space-xs);
+  width: fit-content;
+  max-width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.vocab-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vocab-tab:hover {
+  color: var(--text-primary);
+}
+
+.vocab-tab.active {
+  background: var(--accent-primary-muted);
+  color: var(--accent-primary);
+}
+
+.vocab-panel {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.vocab-search {
+  position: relative;
+  margin: var(--space-md) 0 var(--space-sm);
+}
+
+.vocab-search svg {
+  position: absolute;
+  left: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.vocab-search .form-input {
+  padding-left: 40px;
+}
+
+.vocab-count {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-md);
+}
+
+.vocab-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.vocab-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(110px, 0.8fr) 2fr auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vocab-row:last-child {
+  border-bottom: none;
+}
+
+.vocab-row:not(:has(.vocab-row-number)) {
+  grid-template-columns: minmax(110px, 0.8fr) 2fr auto;
+}
+
+.vocab-row-number {
+  min-width: 2ch;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.vocab-row-word {
+  display: flex;
+  flex-direction: column;
+}
+
+.vocab-word {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-japanese);
+}
+
+.vocab-reading {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.vocab-row-meaning {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.vocab-see {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.vocab-start {
+  margin-top: var(--space-lg);
+}
+
+.vocab-quiz {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.vocab-prompt-word {
+  font-size: clamp(2rem, 9vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-japanese);
+  margin: var(--space-sm) 0;
+}
+
+.vocab-tip {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.vocab-feedback {
+  width: 100%;
+  max-width: 600px;
+}
+
+.vocab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.vocab-answer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 600px;
+  padding: var(--space-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.vocab-answer-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.vocab-answer-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vocab-answer-meaning {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.vocab-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vocab-score {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.vocab-review {
+  margin-top: var(--space-xl);
+}
+
+.vocab-review .card-title {
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 640px) {
+  .vocab-row,
+  .vocab-row:not(:has(.vocab-row-number)) {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xs) var(--space-sm);
+  }
+
+  .vocab-row-number {
+    display: none;
+  }
+
+  .vocab-row-meaning {
+    grid-column: 1;
+  }
+
+  .vocab-row-side {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+.vocab-credit {
+  margin-top: var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.vocab-credit a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+}
+
+/* ─── Word list: tags, filters, info dialog ──────────── */
+
+.vocab-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.vocab-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.vocab-filter .setup-field-label {
+  margin-bottom: 0;
+}
+
+.vocab-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.vocab-info-button {
+  padding-left: var(--space-xs);
+  padding-right: var(--space-xs);
+}
+
+.vocab-info-heading {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: var(--space-md) 0 var(--space-sm);
+}
+
+.vocab-info-list {
+  padding-left: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.vocab-info a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
+
+.vocab-info-list li {
+  font-family: 'Inter', var(--font-jp);
+}
+
+.vocab-filter .form-select {
+  font-family: 'Inter', var(--font-jp);
+}
+
+/* ─── Word list: sections, group stripe, frequency bars ─ */
+
+:root {
+  --vocab-g1: #60a5fa;
+  --vocab-g2: #4ade80;
+  --vocab-g3: #c084fc;
+  --vocab-i: #fbbf24;
+  --vocab-na: #f472b6;
+}
+
+/* One section per JLPT level (the list is sorted by level) */
+.vocab-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0 var(--space-sm);
+  padding: 0 var(--space-xs);
+}
+
+.vocab-section-header:first-of-type {
+  margin-top: 0;
+}
+
+.vocab-section-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--accent-primary-hover);
+  letter-spacing: 0.02em;
+}
+
+.vocab-section-count {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.vocab-stripe {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+}
+
+.vocab-stripe-g1 { background: var(--vocab-g1); }
+.vocab-stripe-g2 { background: var(--vocab-g2); }
+.vocab-stripe-g3 { background: var(--vocab-g3); }
+.vocab-stripe-i { background: var(--vocab-i); }
+.vocab-stripe-na { background: var(--vocab-na); }
+
+.vocab-row-side {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.vocab-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  padding: 0 var(--space-xs);
+}
+
+.vocab-bars span {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--surface-3);
+}
+
+.vocab-bars span:nth-child(1) { height: 25%; }
+.vocab-bars span:nth-child(2) { height: 50%; }
+.vocab-bars span:nth-child(3) { height: 75%; }
+.vocab-bars span:nth-child(4) { height: 100%; }
+
+.vocab-bars span.on {
+  background: var(--text-secondary);
+}
+
+.vocab-count-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Info dialog: the stripe colours and the bars */
+.vocab-info-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-family: 'Inter', var(--font-jp);
+}
+
+.vocab-info-swatch .vocab-stripe {
+  position: static;
+  display: inline-block;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+
+/* Info dialog: compact, fits without scrolling */
+.vocab-info {
+  max-width: 460px;
+  padding: var(--space-lg);
+}
+
+.vocab-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.vocab-info .vocab-info-heading:first-of-type {
+  margin-top: var(--space-xs);
+}
+
+.vocab-info-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs) var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.vocab-info-legend .vocab-info-swatch {
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: normal;
+}
+
+.vocab-info-wide {
+  grid-column: 1 / -1;
+}
+
+/* Collapsible JLPT sections */
+button.vocab-section-header {
+  width: 100%;
+  margin: var(--space-sm) 0 var(--space-xs);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  justify-content: flex-start;
+  align-items: center;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+}
+
+button.vocab-section-header:hover {
+  background: var(--surface-1);
+}
+
+button.vocab-section-header .vocab-section-count {
+  margin-left: auto;
+}
+
+.vocab-section-chevron {
+  color: var(--text-tertiary);
+  transform: rotate(-90deg);
+  transition: transform var(--transition-fast);
+}
+
+.vocab-section-header.open .vocab-section-chevron {
+  transform: none;
+}
+
+/* Quiz filters: rows of toggle buttons */
+.vocab-picks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.vocab-pick .setup-field-label {
+  margin-bottom: var(--space-xs);
+}
+
+/* "Hide details": keep the bars' space so the row layout doesn't move */
+.vocab-details-hidden {
+  visibility: hidden;
+}

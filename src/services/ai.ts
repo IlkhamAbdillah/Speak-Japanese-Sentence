@@ -860,7 +860,7 @@ function extractJSON(text: string): string {
 // ─── Kanji reading check ────────────────────────────────
 
 /** Normalize a reading for comparison: katakana → hiragana, drop spaces and punctuation. */
-function normalizeReading(text: string): string {
+export function normalizeReading(text: string): string {
   return text
     .normalize('NFKC')
     .replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60))

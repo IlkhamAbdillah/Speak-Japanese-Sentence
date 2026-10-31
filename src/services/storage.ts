@@ -1,5 +1,5 @@
 import type { UserSettings, Session, SessionSummary, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_JLPT_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
@@ -74,6 +74,22 @@ export function loadSettings(): UserSettings {
   if (typeof settings.storyCustomTopic !== 'string') settings.storyCustomTopic = '';
   if (!STORY_TENSES.includes(settings.storyTense)) settings.storyTense = DEFAULT_SETTINGS.storyTense;
   if (!KANJI_SESSION_TYPES.includes(settings.kanjiSessionType)) settings.kanjiSessionType = DEFAULT_SETTINGS.kanjiSessionType;
+  if (!VOCAB_CATEGORIES.includes(settings.vocabCategory)) settings.vocabCategory = DEFAULT_SETTINGS.vocabCategory;
+  if (!VOCAB_QUIZ_TYPES.includes(settings.vocabQuizType)) settings.vocabQuizType = DEFAULT_SETTINGS.vocabQuizType;
+  if (!VOCAB_QUIZ_COUNTS.includes(settings.vocabQuizCount)) settings.vocabQuizCount = DEFAULT_SETTINGS.vocabQuizCount;
+  if (!VERB_GROUP_FILTERS.includes(settings.vocabVerbGroup)) settings.vocabVerbGroup = DEFAULT_SETTINGS.vocabVerbGroup;
+  if (!ADJ_TYPE_FILTERS.includes(settings.vocabAdjType)) settings.vocabAdjType = DEFAULT_SETTINGS.vocabAdjType;
+  if (!VOCAB_JLPT_FILTERS.includes(settings.vocabJlpt)) settings.vocabJlpt = DEFAULT_SETTINGS.vocabJlpt;
+  if (!VOCAB_FREQUENCY_FILTERS.includes(settings.vocabFrequency)) settings.vocabFrequency = DEFAULT_SETTINGS.vocabFrequency;
+  if (typeof settings.vocabShowDetails !== 'boolean') settings.vocabShowDetails = DEFAULT_SETTINGS.vocabShowDetails;
+  // Lists of picked values: keep only the valid ones
+  const onlyValid = <T,>(value: unknown, valid: readonly T[]): T[] =>
+    Array.isArray(value) ? value.filter((v): v is T => valid.includes(v as T)) : [];
+  settings.vocabCollapsed = Array.isArray(settings.vocabCollapsed) ? settings.vocabCollapsed.filter((v) => typeof v === 'string') : [];
+  settings.vocabQuizJlpt = onlyValid(settings.vocabQuizJlpt, VOCAB_JLPT_VALUES);
+  settings.vocabQuizFrequency = onlyValid(settings.vocabQuizFrequency, VOCAB_FREQUENCIES);
+  settings.vocabQuizVerbGroups = onlyValid(settings.vocabQuizVerbGroups, VERB_GROUP_VALUES);
+  settings.vocabQuizAdjTypes = onlyValid(settings.vocabQuizAdjTypes, ADJ_TYPE_VALUES);
   // A language that is no longer shipped
   if (!(settings.instructionLanguage in LANGUAGES)) settings.instructionLanguage = DEFAULT_SETTINGS.instructionLanguage;
   return settings;

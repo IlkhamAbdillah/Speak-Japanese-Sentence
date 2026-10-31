@@ -12,6 +12,7 @@ import PracticePage from './pages/PracticePage';
 import ConversationPage from './pages/ConversationPage';
 import RecapPage from './pages/RecapPage';
 import HistoryPage from './pages/HistoryPage';
+import WordsPage from './pages/WordsPage';
 
 function AppInner() {
   const navigate = useNavigate();
@@ -129,6 +130,15 @@ function AppInner() {
             path="/settings"
             element={
               <SettingsPage
+                settings={settings}
+                onSettingsChange={handleSettingsChange}
+              />
+            }
+          />
+          <Route
+            path="/words"
+            element={
+              <WordsPage
                 settings={settings}
                 onSettingsChange={handleSettingsChange}
               />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, History, Mic, Languages, ChevronDown, Check } from 'lucide-react';
+import { Home, History, BookA, Mic, Languages, ChevronDown, Check } from 'lucide-react';
 import type { MicPermission } from '../types';
 import type { InstructionLanguage } from '../i18n';
 import { LANGUAGE_CODES, languageMeta, useI18n } from '../i18n';
@@ -57,6 +57,15 @@ export default function Header({ micPermission, onLanguageChange }: HeaderProps)
         >
           <Home size={16} />
           <span className="header-nav-label">{t('header.home')}</span>
+        </button>
+
+        <button
+          className={`header-nav-link ${path === '/words' ? 'active' : ''}`}
+          onClick={() => navigate('/words')}
+          title={t('words.navLabel')}
+        >
+          <BookA size={16} />
+          <span className="header-nav-label">{t('words.navLabel')}</span>
         </button>
 
         <button
