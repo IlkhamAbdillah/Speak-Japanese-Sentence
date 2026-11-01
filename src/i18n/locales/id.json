@@ -102,12 +102,6 @@
     "storyDesc": "Terjemahkan cerita pendek ke bahasa Jepang, satu kalimat demi satu kalimat",
     "tense": "Waktu Cerita",
     "customTopicPlaceholder": "Tulis topik Anda, mis. jalan-jalan ke Kyoto bersama teman",
-    "kanjiSessionType": "Jenis Sesi",
-    "kanjiNew": "Kanji baru",
-    "kanjiReview": "Ulang",
-    "kanjiProgress": "{level}: {studied}/{total} kanji sudah dilatih · {known} dikuasai · {due} perlu diulang",
-    "kanjiFewNew": "Tinggal {count} kanji baru di level ini; sisa sesi diisi kanji untuk diulang.",
-    "kanjiNothingToReview": "Belum ada kanji untuk diulang di level ini. Mulai dengan Kanji baru.",
     "kanjiSource": "Daftar kanji: {source}"
   },
   "settings": {
@@ -463,10 +457,11 @@
       "legendTitle": "Cara membacanya",
       "legendNew": "Belum dilatih",
       "legendLearning": "Sudah dilatih, belum dikuasai",
-      "legendKnown": "Benar di percobaan pertama 3 kali berturut-turut",
-      "legendProgress": "Progres diambil dari bagian kanji di Simulasi JLPT. Ketuk kanji untuk melihat cara baca dan katanya.",
+      "legendKnown": "3 latihan bagus berturut-turut, berjarak",
+      "legendProgress": "Progres diambil dari Latihan cara baca di kartu kanji. Ketuk kanji untuk mulai.",
       "via": "lewat",
-      "sourceRadicals": "Radikal (bagian):"
+      "sourceRadicals": "Radikal (bagian):",
+      "sourceWords": "Kata latihan:"
     },
     "quiz": {
       "tabList": "Daftar kanji",
@@ -484,12 +479,13 @@
         "meaning": "Apa arti kanji ini?",
         "kanji": "Kanji mana yang artinya ini?",
         "reading": "Bagaimana kanji ini dibaca?",
-        "say": "Ucapkan atau ketik salah satu cara baca kanji ini"
+        "say": "Ucapkan atau ketik salah satu cara baca kanji ini",
+        "word": "Kanji yang ditandai dibaca apa?"
       },
       "answerPlaceholder": "Ketik cara bacanya…",
       "wrongKanji": "Kanji yang perlu diulang",
       "noFilterMatch": "Tidak ada kanji yang cocok dengan filter ini.",
-      "notSaved": "Jawaban kuis tidak mengubah progres: progres hanya dari Simulasi JLPT."
+      "notSaved": "Jawaban kuis tidak mengubah progres: progres diambil dari Latihan cara baca di kartu kanji."
     },
     "radical": "Radikal",
     "allRadicals": "Semua radikal",
@@ -500,6 +496,17 @@
     "byStrokes": "Semua bagian, menurut jumlah goresan",
     "partsOf": "Bagian dari {kanji}",
     "noPartMatch": "Tidak ada bagian yang cocok dengan “{query}”.",
-    "largerParts": "Bagian yang lebih besar"
+    "largerParts": "Bagian yang lebih besar",
+    "practice": {
+      "button": "Latihan cara baca",
+      "noWords": "Belum ada kata latihan untuk kanji ini",
+      "back": "Kembali ke kanji",
+      "wrongWords": "Kata yang perlu diulang",
+      "alsoRead": "juga dibaca {readings}",
+      "counted": "Latihan bagus! {streak}/{known} menuju dikuasai · diulang {date}",
+      "mastered": "Latihan bagus! {kanji} sudah dikuasai · diulang {date}",
+      "early": "Latihan bagus! {kanji} belum waktunya diulang, jadi progresnya tetap · diulang {date}",
+      "notCounted": "Latihan bagus perlu {need} dari {total} benar di percobaan pertama. Hitungannya mulai lagi · diulang {date}"
+    }
   }
 }

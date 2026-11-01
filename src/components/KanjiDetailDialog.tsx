@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, TouchEvent } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Play, Volume2 } from 'lucide-react';
 import type { KanjiProgress } from '../types';
 import type { KanjiEntry } from '../services/kanjiList';
 import { examplesFor, plainReading, splitKun, toKatakana } from '../services/kanjiList';
-import { isDue, kanjiStatus, KNOWN_STREAK } from '../services/kanjiProgress';
+import { fromNow, isDue, kanjiStatus, KNOWN_STREAK } from '../services/kanjiProgress';
 import { meaningOf } from '../services/vocab';
 import { isSpeechSynthesisSupported, speakJapanese } from '../services/speech';
 import { languageMeta, useI18n } from '../i18n';
@@ -20,6 +20,8 @@ interface KanjiDetailDialogProps {
   /** Step to the previous / next kanji of the list (also ← / → and swiping); missing at the ends */
   onPrevious?: () => void;
   onNext?: () => void;
+  /** Start the kanji's reading practice; missing when there are no words for it */
+  onPractice?: () => void;
   onClose: () => void;
 }
 
@@ -32,12 +34,12 @@ const SWIPE_PX = 50;
 /**
  * One kanji, compact enough to fit without scrolling (user-requested): meanings,
  * on'yomi (katakana) and kun'yomi (okurigana dimmed), the learner's progress, and a
- * collapsed list of example words, one per reading first. Readings and words can be
- * tapped to hear them. Stepping to another kanji slides the content in. No close
+ * collapsed list of example words, one per reading first, and the Practice readings
+ * button (the kanji's reading practice). Readings and words can be tapped to hear them. Stepping to another kanji slides the content in. No close
  * button (user-requested: it sat where they tapped to step); tap outside or press Esc.
  */
 export default function KanjiDetailDialog({
-  entry, progress, direction, showWords, onShowWordsChange, onPrevious, onNext, onClose,
+  entry, progress, direction, showWords, onShowWordsChange, onPrevious, onNext, onPractice, onClose,
 }: KanjiDetailDialogProps) {
   const { t, lang } = useI18n();
   const canSpeak = isSpeechSynthesisSupported();
@@ -77,21 +79,13 @@ export default function KanjiDetailDialog({
       <span key={key} className="kanji-reading">{label}</span>
     );
 
-  // "in 3 hr" / "in 2 days": short enough for the card's top line
-  const fromNow = (time: number) => {
-    const minutes = Math.max(1, Math.round((time - now) / 60000));
-    const format = new Intl.RelativeTimeFormat(languageMeta(lang).locale, { style: 'short', numeric: 'always' });
-    if (minutes < 60) return format.format(minutes, 'minute');
-    if (minutes < 36 * 60) return format.format(Math.round(minutes / 60), 'hour');
-    return format.format(Math.round(minutes / 1440), 'day');
-  };
   const progressText = !progress
     ? t('kanjiList.notPractised')
     : [
       status === 'learning'
         ? `${t('kanjiList.status.learning')} ${progress.streak}/${KNOWN_STREAK}`
         : t(`kanjiList.status.${status}`),
-      isDue(progress, now) ? t('kanjiList.dueNow') : t('kanjiList.nextReview', { date: fromNow(progress.dueAt) }),
+      isDue(progress, now) ? t('kanjiList.dueNow') : t('kanjiList.nextReview', { date: fromNow(progress.dueAt, now, languageMeta(lang).locale) }),
     ].filter(Boolean).join(' · ');
 
   // The glyph and the body are keyed by the kanji, so the slide plays again for each kanji
@@ -158,6 +152,11 @@ export default function KanjiDetailDialog({
               </>
             )}
           </dl>
+
+          {/* The reading practice: the only thing that moves the progress shown above */}
+          <button className="btn btn-primary btn-sm kanji-practice-button" onClick={onPractice} disabled={!onPractice}>
+            {onPractice ? <><Play size={14} /> {t('kanjiList.practice.button')}</> : t('kanjiList.practice.noWords')}
+          </button>
 
           {(examples.length > 0 || practised.length > 0) && (
             <div className="kanji-examples">

@@ -72,3 +72,25 @@ every kanji in `jlpt.json`, shown on the **Kanji** page
   にんべん, くさかんむり…) written for the app for about 100 common parts.
   Generated on 2026-11-01.
 - Meanings are English only (KANJIDIC has no Indonesian).
+
+## `words.json`
+
+The words of the Kanji page's reading practice (**Practice readings** on a
+kanji's card, `src/services/kanjiPractice.ts`): every word of the JLPT N5–N1
+vocabulary lists that is written with a kanji of `jlpt.json`, as
+`[word, readings, meaning, level, zipf×10]`.
+
+- Words, readings, English meanings and levels: open-anki-jlpt-decks
+  (https://github.com/jamsinclair/open-anki-jlpt-decks, MIT), based on
+  Jonathan Waller's lists (tanos.co.uk, CC BY). A word on several lists keeps
+  its easiest level. Spellings split at `;`, notes in brackets and the する of
+  suru-verb readings were removed; affixes (～円) left out. A word with several
+  readings (今日: きょう, こんにち) lists them split by `|`, the most common
+  first (wordfreq of the kana). Meanings: the first 3 senses.
+- Frequency: wordfreq 3.1 (https://github.com/rspeer/wordfreq, data
+  CC BY-SA 4.0), `zipf_frequency(word, 'ja')`; the practice draws common words
+  far more often than rare ones.
+- The app works out which part of the reading belongs to the kanji
+  (`readingInWord` in `kanjiList.ts`); words where it can't (今日 きょう,
+  大人) are not asked. About 470 N1 kanji have no usable word.
+- Generated on 2026-11-01.

@@ -247,7 +247,7 @@ function soundVariants(reading: string): string[] {
 }
 
 /** Which of the kanji's readings a word uses, and where it is in the word's kana. */
-function readingInWord(entry: KanjiEntry, written: string, said: string): Pick<KanjiExample, 'reading' | 'start' | 'end'> {
+export function readingInWord(entry: KanjiEntry, written: string, said: string): Pick<KanjiExample, 'reading' | 'start' | 'end'> {
   const pos = written.indexOf(entry.kanji);
   const atStart = pos === 0;
   const atEnd = pos === written.length - 1;

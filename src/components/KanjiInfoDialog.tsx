@@ -10,6 +10,8 @@ const LEVEL_SOURCE = { name: 'Jonathan Waller (tanos.co.uk)', url: 'http://www.t
 const DETAILS_SOURCE = { name: 'KANJIDIC (EDRDG)', url: 'https://www.edrdg.org/wiki/index.php/KANJIDIC_Project' };
 const RADICAL_SOURCE = { name: 'KRADFILE (EDRDG)', url: 'https://www.edrdg.org/krad/kradinf.html' };
 const KANJIVG_SOURCE = { name: 'KanjiVG (Ulrich Apel, CC BY-SA 3.0)', url: 'https://kanjivg.tagaini.net' };
+const WORDS_SOURCE = { name: 'open-anki-jlpt-decks', url: 'https://github.com/jamsinclair/open-anki-jlpt-decks' };
+const FREQUENCY_SOURCE = { name: 'wordfreq', url: 'https://github.com/rspeer/wordfreq' };
 const DATA_SOURCE = { name: 'kanji-data', url: 'https://github.com/davidluzgouveia/kanji-data' };
 
 const link = (source: { name: string; url: string }) => (
@@ -54,6 +56,7 @@ export default function KanjiInfoDialog({ onClose }: KanjiInfoDialogProps) {
           <li>{t('kanjiList.info.sourceDetails')} {link(DETAILS_SOURCE)} {t('kanjiList.info.via')} {link(DATA_SOURCE)}</li>
           <li>{t('kanjiList.info.sourceRadicals')} {link(RADICAL_SOURCE)}, {link(KANJIVG_SOURCE)}</li>
           <li>{t('kanjiList.info.sourceOrder')} {link(DETAILS_SOURCE)}</li>
+          <li>{t('kanjiList.info.sourceWords')} {link(WORDS_SOURCE)}, {link(FREQUENCY_SOURCE)}</li>
           <li>{t('kanjiList.meaningNote')}</li>
         </ul>
 

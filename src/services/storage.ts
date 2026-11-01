@@ -1,5 +1,5 @@
 import type { UserSettings, Session, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, KANJI_SESSION_TYPES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
@@ -74,7 +74,6 @@ export function loadSettings(): UserSettings {
   if (!STORY_TOPICS.includes(settings.storyTopic)) settings.storyTopic = DEFAULT_SETTINGS.storyTopic;
   if (typeof settings.storyCustomTopic !== 'string') settings.storyCustomTopic = '';
   if (!STORY_TENSES.includes(settings.storyTense)) settings.storyTense = DEFAULT_SETTINGS.storyTense;
-  if (!KANJI_SESSION_TYPES.includes(settings.kanjiSessionType)) settings.kanjiSessionType = DEFAULT_SETTINGS.kanjiSessionType;
   if (!VOCAB_CATEGORIES.includes(settings.vocabCategory)) settings.vocabCategory = DEFAULT_SETTINGS.vocabCategory;
   if (!VOCAB_QUIZ_TYPES.includes(settings.vocabQuizType)) settings.vocabQuizType = DEFAULT_SETTINGS.vocabQuizType;
   if (!VOCAB_QUIZ_COUNTS.includes(settings.vocabQuizCount)) settings.vocabQuizCount = DEFAULT_SETTINGS.vocabQuizCount;
@@ -96,6 +95,8 @@ export function loadSettings(): UserSettings {
   settings.kanjiCollapsed = onlyValid(settings.kanjiCollapsed, JLPT_LEVELS);
   // The radical filter became a parts filter (a kanji counts under every part it contains)
   delete (settings as { kanjiRadical?: unknown }).kanjiRadical;
+  // The mock test's New kanji / Review choice went with the progress to the Kanji page
+  delete (settings as { kanjiSessionType?: unknown }).kanjiSessionType;
   if (typeof settings.kanjiPart !== 'string' || [...settings.kanjiPart].length > 1) settings.kanjiPart = '';
   if (!KANJI_QUIZ_TYPES.includes(settings.kanjiQuizType)) settings.kanjiQuizType = DEFAULT_SETTINGS.kanjiQuizType;
   if (!VOCAB_QUIZ_COUNTS.includes(settings.kanjiQuizCount)) settings.kanjiQuizCount = DEFAULT_SETTINGS.kanjiQuizCount;

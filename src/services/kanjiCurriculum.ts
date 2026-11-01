@@ -78,3 +78,13 @@ export function isKanjiAllowedAt(kanji: string, level: JLPTLevel): boolean {
   const kanjiLevel = LEVEL_OF.get(kanji);
   return !!kanjiLevel && JLPT_LEVELS.indexOf(kanjiLevel) <= JLPT_LEVELS.indexOf(level);
 }
+
+/** A mock test's kanji: `count` different kanji of the level's list, at random. */
+export function pickTestKanji(curriculum: Curriculum, count: number): string[] {
+  const kanji = curriculum.kanji.map((k) => k.kanji);
+  for (let i = kanji.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [kanji[i], kanji[j]] = [kanji[j], kanji[i]];
+  }
+  return kanji.slice(0, count);
+}

@@ -1,10 +1,10 @@
-import type { JLPTLevel, KanjiProgress, KanjiSessionType, Session } from '../types';
-import type { Curriculum } from './kanjiCurriculum';
+import type { JLPTLevel, KanjiProgress, Session } from '../types';
 import { getCurriculum, kanjiIn } from './kanjiCurriculum';
 
 // ─── Kanji progress ─────────────────────────────────────
 // Pure functions over the saved progress (storage.ts keeps it in localStorage).
-// Picking the kanji for a session is done here, deterministically, with no AI call.
+// Progress comes from the Kanji page's reading practice (one result per finished
+// practice); the JLPT Mock Test doesn't change it (user-requested).
 
 export type KanjiProgressMap = Record<string, KanjiProgress>;
 
@@ -14,13 +14,10 @@ const DAY = 24 * HOUR;
 /** Wait before a kanji comes back, by its streak after the answer. */
 const REVIEW_INTERVALS = [4 * HOUR, 1 * DAY, 3 * DAY, 7 * DAY, 14 * DAY, 30 * DAY];
 
-/** Right on the first try this many sessions in a row = mastered. */
+/** This many good practices in a row = mastered. */
 export const KNOWN_STREAK = 3;
 
-/** A kanji seen this recently is only used again when nothing else is left. */
-const RECENT_MS = 4 * HOUR;
-
-/** Words remembered per kanji, to vary the word used for it. */
+/** Words remembered per kanji (shown on its card as the words practised). */
 const MAX_WORDS = 5;
 
 export type KanjiStatus = 'new' | 'learning' | 'known';
@@ -33,14 +30,20 @@ export function kanjiStatus(p: KanjiProgress | undefined): KanjiStatus {
 export const isDue = (p: KanjiProgress | undefined, now: number) => !!p && p.dueAt <= now;
 
 export interface KanjiAnswer {
-  /** Answered right in the end */
+  /** Answered right in the end (a practice: a good practice) */
   correct: boolean;
-  /** Right on the first attempt, without looking at the answer */
+  /** Right on the first attempt, without looking at the answer (a practice: a good practice) */
   firstTry: boolean;
-  word: string;
+  /** Words asked */
+  words: string[];
 }
 
-/** The progress after one question about `kanji` has been answered. */
+/**
+ * The progress after a practice (or, for old sessions, a question) about `kanji`.
+ * Right → streak + 1, wrong → streak 0. Done right before the kanji is due again,
+ * the streak and the review date stay: mastery needs the spaced reviews, not three
+ * practices in a row on one evening.
+ */
 export function recordKanjiResult(
   progress: KanjiProgressMap,
   kanji: string,
@@ -49,9 +52,11 @@ export function recordKanjiResult(
   now: number
 ): KanjiProgressMap {
   const prev = progress[kanji];
+  const early = answer.firstTry && !!prev && !isDue(prev, now);
   // Right after a retry still counts as correct, but isn't mastery: the streak restarts
-  const streak = answer.firstTry ? (prev?.streak ?? 0) + 1 : 0;
-  const words = [...(prev?.words ?? []).filter((w) => w !== answer.word), answer.word].slice(-MAX_WORDS);
+  const streak = early ? prev.streak : answer.firstTry ? (prev?.streak ?? 0) + 1 : 0;
+  const dueAt = early ? prev.dueAt : now + REVIEW_INTERVALS[Math.min(streak, REVIEW_INTERVALS.length - 1)];
+  const words = [...(prev?.words ?? []).filter((w) => !answer.words.includes(w)), ...answer.words].slice(-MAX_WORDS);
   return {
     ...progress,
     [kanji]: {
@@ -62,69 +67,9 @@ export function recordKanjiResult(
       correct: (prev?.correct ?? 0) + (answer.correct ? 1 : 0),
       incorrect: (prev?.incorrect ?? 0) + (answer.correct ? 0 : 1),
       streak,
-      dueAt: now + REVIEW_INTERVALS[Math.min(streak, REVIEW_INTERVALS.length - 1)],
+      dueAt,
       words,
     },
-  };
-}
-
-const accuracy = (p: KanjiProgress) => (p.attempts > 0 ? p.correct / p.attempts : 0);
-
-/**
- * The kanji for a session, best first.
- * new:    never practised (curriculum order) → due for review → still learning → mastered
- * review: due for review → still learning (weakest first) → mastered
- * Within that order, kanji seen in the last few hours go last, and nothing repeats.
- * Returns fewer than `count` only when the curriculum (or, for review, what has
- * been practised) is smaller.
- */
-export function selectKanjiTargets(
-  curriculum: Curriculum,
-  progress: KanjiProgressMap,
-  count: number,
-  type: KanjiSessionType,
-  now: number
-): string[] {
-  const seen = curriculum.kanji.map((k) => k.kanji).filter((k) => progress[k]);
-  const p = (k: string) => progress[k];
-
-  const fresh = curriculum.kanji.map((k) => k.kanji).filter((k) => !progress[k]);
-  const due = seen
-    .filter((k) => isDue(p(k), now))
-    .sort((a, b) => p(a).dueAt - p(b).dueAt || p(b).incorrect - p(a).incorrect);
-  const notDue = seen.filter((k) => !isDue(p(k), now));
-  const learning = notDue.filter((k) => kanjiStatus(p(k)) === 'learning');
-  const known = notDue
-    .filter((k) => kanjiStatus(p(k)) === 'known')
-    .sort((a, b) => p(a).lastSeenAt - p(b).lastSeenAt);
-
-  const tiers = type === 'new'
-    ? [fresh, due, [...learning].sort((a, b) => p(a).lastSeenAt - p(b).lastSeenAt), known]
-    : [due, [...learning].sort((a, b) => accuracy(p(a)) - accuracy(p(b)) || p(a).lastSeenAt - p(b).lastSeenAt), known];
-
-  const ordered = tiers.flat();
-  const isRecent = (k: string) => !!p(k) && now - p(k).lastSeenAt < RECENT_MS;
-  return [...ordered.filter((k) => !isRecent(k)), ...ordered.filter(isRecent)].slice(0, count);
-}
-
-export interface KanjiProgressSummary {
-  total: number;
-  /** Never practised */
-  fresh: number;
-  /** Practised at least once */
-  studied: number;
-  known: number;
-  due: number;
-}
-
-export function summarizeKanjiProgress(curriculum: Curriculum, progress: KanjiProgressMap, now: number): KanjiProgressSummary {
-  const entries = curriculum.kanji.map((k) => progress[k.kanji]);
-  return {
-    total: entries.length,
-    fresh: entries.filter((p) => !p).length,
-    studied: entries.filter((p) => p).length,
-    known: entries.filter((p) => kanjiStatus(p) === 'known').length,
-    due: entries.filter((p) => isDue(p, now)).length,
   };
 }
 
@@ -149,9 +94,18 @@ export function progressFromSessions(sessions: Session[]): KanjiProgressMap {
       progress = recordKanjiResult(progress, kanji, level, {
         correct: r.isCorrect,
         firstTry: !!r.attempts[0]?.isCorrect && !r.revealedAnswer,
-        word,
+        words: [word],
       }, at);
     }
   }
   return progress;
+}
+
+/** "in 3 hr" / "in 2 days", short enough for the kanji card's top line. */
+export function fromNow(time: number, now: number, locale: string): string {
+  const minutes = Math.max(1, Math.round((time - now) / 60000));
+  const format = new Intl.RelativeTimeFormat(locale, { style: 'short', numeric: 'always' });
+  if (minutes < 60) return format.format(minutes, 'minute');
+  if (minutes < 36 * 60) return format.format(Math.round(minutes / 60), 'hour');
+  return format.format(Math.round(minutes / 1440), 'day');
 }

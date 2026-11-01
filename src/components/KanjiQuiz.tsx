@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Check, Eye, Mic, MicOff, RotateCcw, Send, Square, X, SkipForward, Trophy } from 'lucide-react';
 import type { KanjiEntry } from '../services/kanjiList';
-import { plainReading, toKatakana } from '../services/kanjiList';
+import { plainReading, splitKun, toKatakana } from '../services/kanjiList';
+import type { KanjiPracticeQuestion } from '../services/kanjiPractice';
+import { isPracticeAnswerCorrect } from '../services/kanjiPractice';
 import type { KanjiQuestion } from '../services/kanjiQuiz';
 import { isKanjiReadingCorrect, quizMeaning, quizReading } from '../services/kanjiQuiz';
 import { isIncompleteKanjiAnswer } from '../services/ai';
@@ -18,10 +21,16 @@ import { useI18n } from '../i18n';
 
 interface KanjiQuizProps {
   questions: KanjiQuestion[];
-  /** Start another quiz with these kanji (Retry wrong) */
-  onRetry: (entries: KanjiEntry[]) => void;
-  /** Back to the quiz options */
+  /** Start another quiz with these questions (Retry wrong) */
+  onRetry: (wrong: KanjiQuestion[]) => void;
+  /** Back to the quiz options (practice: to the kanji's card) */
   onExit: () => void;
+  /** Once, when the last question is answered: right on the first try without Show answer, per question */
+  onFinish?: (outcomes: boolean[]) => void;
+  /** Shown on the results card (practice: what it did to the kanji's progress) */
+  resultNote?: ReactNode;
+  /** The results card's exit button, when it isn't "New quiz" */
+  exitLabel?: string;
 }
 
 /** All readings of a kanji in one line: on'yomi in katakana, then kun'yomi. */
@@ -43,6 +52,39 @@ function KanjiResultRow({ entry }: { entry: KanjiEntry }) {
   );
 }
 
+/** A reading practice word with the kanji's part of the reading highlighted: 食[しょく]じ. */
+function PracticeReading({ q }: { q: KanjiPracticeQuestion }) {
+  return (
+    <>
+      {q.said.slice(0, q.start)}
+      <mark>{q.said.slice(q.start, q.end)}</mark>
+      {q.said.slice(q.end)}
+    </>
+  );
+}
+
+/** A practice word of the results list: the word, its reading and meaning. */
+function PracticeResultRow({ q }: { q: KanjiPracticeQuestion }) {
+  return (
+    <div className="vocab-row">
+      <div className="vocab-row-word">
+        <span className="vocab-word jp-text" lang="ja">{q.word.written}</span>
+        <span className="vocab-reading kanji-practice-reading jp-text" lang="ja"><PracticeReading q={q} /></span>
+      </div>
+      <div className="vocab-row-meaning">
+        <span>{q.word.meaning}</span>
+      </div>
+    </div>
+  );
+}
+
+/** The kanji's reading a practice word uses, as on the kanji card: ショク, た(べる). */
+function readingLabel(q: KanjiPracticeQuestion): string {
+  if (q.onyomi) return toKatakana(q.reading);
+  const { stem, okurigana } = splitKun(q.reading);
+  return okurigana ? `${stem}(${okurigana})` : stem;
+}
+
 /** How long "Correct!" stays on screen before the next question, as in practice. */
 const CORRECT_ADVANCE_MS = 1200;
 
@@ -53,7 +95,7 @@ type Phase = 'answering' | 'correct' | 'wrong' | 'revealed';
  * The Kanji page's quiz (same flow as the Words quiz): multiple choice for meaning /
  * kanji / reading, or say or type any reading. Checked locally, not saved.
  */
-export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps) {
+export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, resultNote, exitLabel }: KanjiQuizProps) {
   const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -105,7 +147,9 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
 
   const submitAnswer = (text: string, spoken = false) => {
     if (phase !== 'answering' || !entry || !text.trim()) return;
-    const correct = isKanjiReadingCorrect(entry, text, spoken);
+    const correct = question?.practice
+      ? isPracticeAnswerCorrect(question.practice, text, spoken)
+      : isKanjiReadingCorrect(entry, text, spoken);
     setLastAnswer(text.trim());
     record(correct);
     setPhase(correct ? 'correct' : 'wrong');
@@ -188,6 +232,18 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
   // Leaving the quiz stops the mic
   useEffect(() => () => stopRecognition(), []);
 
+  // Report the outcome once (a reading practice saves the kanji's progress)
+  const reported = useRef(false);
+  const onFinishRef = useRef(onFinish);
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  });
+  useEffect(() => {
+    if (!finished || reported.current) return;
+    reported.current = true;
+    onFinishRef.current?.(questions.map((_, i) => !!outcomes[i]));
+  }, [finished, questions, outcomes]);
+
   // A correct answer gets no explanation: flash and move on
   useEffect(() => {
     if (phase !== 'correct') return;
@@ -216,7 +272,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
   // ─── Results ──────────────────────────────────────────
   if (finished || !question || !entry) {
     const correctCount = outcomes.filter(Boolean).length;
-    const wrong = questions.filter((_, i) => !outcomes[i]).map((q) => q.entry);
+    const wrong = questions.filter((_, i) => !outcomes[i]);
     const percent = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
       <div className="vocab-quiz animate-in">
@@ -225,9 +281,10 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
           <h2 className="card-title">{t('words.resultTitle')}</h2>
           <p className="vocab-score">{t('words.score', { correct: correctCount, total: questions.length })}</p>
           <p className="question-context">{wrong.length === 0 ? t('words.perfect') : `${percent}%`}</p>
+          {resultNote && <p className="kanji-practice-note">{resultNote}</p>}
           <div className="start-card-actions">
             <button className="btn btn-secondary btn-lg" onClick={onExit}>
-              {t('words.newQuiz')}
+              {exitLabel ?? t('words.newQuiz')}
             </button>
             {wrong.length > 0 && (
               <button className="btn btn-primary btn-lg" onClick={() => onRetry(wrong)}>
@@ -238,9 +295,11 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
         </div>
         {wrong.length > 0 && (
           <section className="vocab-review">
-            <h3 className="card-title">{t('kanjiList.quiz.wrongKanji')}</h3>
+            <h3 className="card-title">{t(wrong[0].practice ? 'kanjiList.practice.wrongWords' : 'kanjiList.quiz.wrongKanji')}</h3>
             <div className="vocab-list">
-              {wrong.map((e) => <KanjiResultRow key={e.kanji} entry={e} />)}
+              {wrong.map((q) => q.practice
+                ? <PracticeResultRow key={q.practice.word.written} q={q.practice} />
+                : <KanjiResultRow key={q.entry.kanji} entry={q.entry} />)}
             </div>
           </section>
         )}
@@ -295,7 +354,21 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
           <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
             {t(`kanjiList.quiz.instruction.${question.type}`)}
           </p>
-          {question.type === 'kanji' ? (
+          {question.practice ? (
+            <>
+              {/* The word with the kanji marked, the rest of its reading around a blank (食事 → ？じ), the meaning (not repeated on the answer card) */}
+              <p className="vocab-prompt-word kanji-quiz-prompt kanji-practice-word jp-text" lang="ja">
+                {[...question.practice.word.written].map((ch, i) =>
+                  ch === entry.kanji ? <mark key={i}>{ch}</mark> : ch)}
+              </p>
+              <p className="kanji-practice-hint jp-text" lang="ja">
+                {question.practice.said.slice(0, question.practice.start)}
+                <span className="kanji-practice-blank">？</span>
+                {question.practice.said.slice(question.practice.end)}
+              </p>
+              <p className="kanji-practice-meaning">{question.practice.word.meaning}</p>
+            </>
+          ) : question.type === 'kanji' ? (
             <p className="question-prompt">{quizMeaning(entry)}</p>
           ) : (
             <p className="vocab-prompt-word kanji-quiz-prompt jp-text" lang="ja">{entry.kanji}</p>
@@ -401,11 +474,29 @@ export default function KanjiQuiz({ questions, onRetry, onExit }: KanjiQuizProps
             <div className="vocab-answer-label">
               {phase === 'revealed' ? t('words.revealed') : t('words.wrong')}
             </div>
-            <div className="vocab-answer-body">
-              <span className="vocab-word jp-text" lang="ja">{entry.kanji}</span>
-              <span className="vocab-reading jp-text" lang="ja">{allReadings(entry)}</span>
-            </div>
-            <div className="vocab-answer-meaning">{entry.meanings.join(', ')}</div>
+            {question.practice ? (
+              <>
+                <div className="vocab-answer-body">
+                  <span className="vocab-word jp-text" lang="ja">{question.practice.word.written}</span>
+                  <span className="vocab-reading kanji-practice-reading jp-text" lang="ja"><PracticeReading q={question.practice} /></span>
+                </div>
+                <div className="kanji-practice-answer-reading">
+                  <span className="jp-text" lang="ja">{entry.kanji}</span> · {t(question.practice.onyomi ? 'kanjiList.onyomi' : 'kanjiList.kunyomi')}{' '}
+                  <span className="jp-text" lang="ja">{readingLabel(question.practice)}</span>
+                  {question.practice.word.readings.length > 1 && (
+                    <> · {t('kanjiList.practice.alsoRead', { readings: question.practice.word.readings.filter((r) => r !== question.practice?.said).join('、') })}</>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="vocab-answer-body">
+                  <span className="vocab-word jp-text" lang="ja">{entry.kanji}</span>
+                  <span className="vocab-reading jp-text" lang="ja">{allReadings(entry)}</span>
+                </div>
+                <div className="vocab-answer-meaning">{entry.meanings.join(', ')}</div>
+              </>
+            )}
             <button className="btn btn-primary btn-lg" onClick={goNext} autoFocus>
               {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} />
             </button>

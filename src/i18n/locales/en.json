@@ -102,12 +102,6 @@
     "storyDesc": "Translate a short story into Japanese, one sentence at a time",
     "tense": "Time",
     "customTopicPlaceholder": "Write your topic, e.g. a trip to Kyoto with a friend",
-    "kanjiSessionType": "Session",
-    "kanjiNew": "New kanji",
-    "kanjiReview": "Review",
-    "kanjiProgress": "{level}: {studied}/{total} kanji practised · {known} mastered · {due} due for review",
-    "kanjiFewNew": "Only {count} new kanji left at this level; the rest of the session will be review.",
-    "kanjiNothingToReview": "No kanji to review at this level yet. Start with New kanji.",
     "kanjiSource": "Kanji list: {source}"
   },
   "settings": {
@@ -463,10 +457,11 @@
       "legendTitle": "How to read it",
       "legendNew": "Not practised yet",
       "legendLearning": "Practised, not mastered",
-      "legendKnown": "Right first try 3 times in a row",
-      "legendProgress": "Progress comes from the JLPT Mock Test kanji section. Tap a kanji for its readings and words.",
+      "legendKnown": "3 good practices in a row, spaced out",
+      "legendProgress": "Progress comes from Practice readings on a kanji's card. Tap a kanji to start.",
       "via": "via",
-      "sourceRadicals": "Radicals (parts):"
+      "sourceRadicals": "Radicals (parts):",
+      "sourceWords": "Practice words:"
     },
     "quiz": {
       "tabList": "Kanji list",
@@ -484,12 +479,13 @@
         "meaning": "What does this kanji mean?",
         "kanji": "Which kanji means this?",
         "reading": "How is this kanji read?",
-        "say": "Say or type a reading of this kanji"
+        "say": "Say or type a reading of this kanji",
+        "word": "How is the marked kanji read here?"
       },
       "answerPlaceholder": "Type a reading…",
       "wrongKanji": "Kanji to review",
       "noFilterMatch": "No kanji matches these filters.",
-      "notSaved": "Quiz answers don't change your progress: that comes from the JLPT Mock Test."
+      "notSaved": "Quiz answers don't change your progress: that comes from Practice readings on a kanji's card."
     },
     "radical": "Radical",
     "allRadicals": "All radicals",
@@ -500,6 +496,17 @@
     "byStrokes": "All parts, by stroke count",
     "partsOf": "Parts of {kanji}",
     "noPartMatch": "No part matches “{query}”.",
-    "largerParts": "Larger parts"
+    "largerParts": "Larger parts",
+    "practice": {
+      "button": "Practice readings",
+      "noWords": "No practice words for this kanji",
+      "back": "Back to the kanji",
+      "wrongWords": "Words to review",
+      "alsoRead": "also read {readings}",
+      "counted": "Good practice! {streak}/{known} towards mastered · next review {date}",
+      "mastered": "Good practice! {kanji} is mastered · next review {date}",
+      "early": "Good practice! {kanji} isn't due for review yet, so its progress stays the same · next review {date}",
+      "notCounted": "A good practice needs {need} of {total} right on the first try. The streak starts again · next review {date}"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, X } from 'lucide-react';
 import type { UserSettings } from '../types';
@@ -10,7 +10,6 @@ import {
   STORY_TENSES,
   STORY_CUSTOM_TOPIC_MAX_LENGTH,
   TRANSLATION_FORMATS,
-  KANJI_SESSION_TYPES,
   hasAttemptChoice,
   isConversationMode,
   isKanjiMode,
@@ -19,8 +18,6 @@ import {
 } from '../types';
 import { useI18n } from '../i18n';
 import { getCurriculum } from '../services/kanjiCurriculum';
-import { summarizeKanjiProgress } from '../services/kanjiProgress';
-import { loadKanjiProgress } from '../services/storage';
 
 interface SessionSetupDialogProps {
   settings: UserSettings;
@@ -64,15 +61,9 @@ export default function SessionSetupDialog({
   const isStory = isStoryMode(settings);
   const missingCustomTopic = isStory && settings.storyTopic === 'custom' && !settings.storyCustomTopic.trim();
 
-  // Kanji: how far the learner is in this level's curriculum
+  // Kanji: where the level's kanji list comes from (no progress here: that is the Kanji page's practice)
   const isKanji = isKanjiMode(settings);
-  const [openedAt] = useState(() => Date.now());
   const curriculum = getCurriculum(settings.jlptLevel);
-  const kanjiSummary = useMemo(
-    () => (isKanji ? summarizeKanjiProgress(curriculum, loadKanjiProgress(), openedAt) : null),
-    [isKanji, curriculum, openedAt]
-  );
-  const nothingToReview = !!kanjiSummary && settings.kanjiSessionType === 'review' && kanjiSummary.studied === 0;
 
   const title = settings.appMode === 'practice'
     ? t(`modes.exercise.${settings.exerciseMode}.label`)
@@ -212,39 +203,8 @@ export default function SessionSetupDialog({
           </div>
         )}
 
-        {kanjiSummary && (
-          <div className="setup-field">
-            <div className="setup-field-label">{t('setup.kanjiSessionType')}</div>
-            <div className="option-group">
-              {KANJI_SESSION_TYPES.map((type) => (
-                <button
-                  key={type}
-                  className={`option-pill ${settings.kanjiSessionType === type ? 'active' : ''}`}
-                  onClick={() => update({ kanjiSessionType: type })}
-                >
-                  {t(type === 'new' ? 'setup.kanjiNew' : 'setup.kanjiReview')}
-                </button>
-              ))}
-            </div>
-            <p className="setup-field-help">
-              {t('setup.kanjiProgress', {
-                level: settings.jlptLevel,
-                studied: kanjiSummary.studied,
-                total: kanjiSummary.total,
-                known: kanjiSummary.known,
-                due: kanjiSummary.due,
-              })}
-            </p>
-            {settings.kanjiSessionType === 'new' && kanjiSummary.fresh < settings.questionCount && (
-              <p className="setup-field-help setup-field-note">
-                {t('setup.kanjiFewNew', { count: kanjiSummary.fresh })}
-              </p>
-            )}
-            {nothingToReview && (
-              <p className="setup-field-help setup-field-note">{t('setup.kanjiNothingToReview')}</p>
-            )}
-            <p className="setup-field-help">{t('setup.kanjiSource', { source: curriculum.source })}</p>
-          </div>
+        {isKanji && (
+          <p className="setup-field-help">{t('setup.kanjiSource', { source: curriculum.source })}</p>
         )}
 
         {hasAttemptChoice(settings) && (
@@ -292,7 +252,7 @@ export default function SessionSetupDialog({
           <button className="btn btn-secondary" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn btn-primary" onClick={onStart} disabled={!!blockedReason || missingCustomTopic || nothingToReview}>
+          <button className="btn btn-primary" onClick={onStart} disabled={!!blockedReason || missingCustomTopic}>
             <Play size={16} /> {startLabel}
           </button>
         </div>

@@ -1099,7 +1099,7 @@ function toKanjiQuestion(
 }
 
 /**
- * One question per target kanji (picked by the app, see kanjiProgress.ts). Items
+ * One question per target kanji (picked by the app, see pickTestKanji). Items
  * that break the rules are asked for once more; targets still without a valid
  * item are left out, so the result can be shorter than `targets`.
  */

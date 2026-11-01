@@ -18,14 +18,6 @@ export type JLPTSection = 'kanji' | 'reading';
 
 export const JLPT_SECTIONS: JLPTSection[] = ['kanji', 'reading'];
 
-/**
- * Kanji sessions: new = kanji not practised yet come first;
- * review = kanji already practised, the ones due for review first.
- */
-export type KanjiSessionType = 'new' | 'review';
-
-export const KANJI_SESSION_TYPES: KanjiSessionType[] = ['new', 'review'];
-
 /** Kanji list filter by progress (see kanjiStatus in services/kanjiProgress.ts) */
 export type KanjiStatusFilter = 'all' | 'new' | 'learning' | 'known';
 export const KANJI_STATUS_FILTERS: KanjiStatusFilter[] = ['all', 'new', 'learning', 'known'];
@@ -357,7 +349,6 @@ export interface UserSettings {
   storyTopic: StoryTopic;
   storyCustomTopic: string;
   storyTense: StoryTense;
-  kanjiSessionType: KanjiSessionType;
   vocabCategory: VocabCategory;
   vocabQuizType: VocabQuizType;
   vocabQuizCount: number;
@@ -405,7 +396,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
   storyTopic: 'random',
   storyCustomTopic: '',
   storyTense: 'random',
-  kanjiSessionType: 'new',
   vocabCategory: 'verb',
   vocabQuizType: 'mixed',
   vocabQuizCount: 10,
@@ -428,21 +418,21 @@ export const DEFAULT_SETTINGS: UserSettings = {
 };
 
 // ─── Kanji progress ─────────────────────────────────────
-/** What the learner has done with one kanji, across all sessions (kanji mode). */
+/** What the learner has done with one kanji: its reading practices on the Kanji page (and old mock-test sessions). */
 export interface KanjiProgress {
   /** Curriculum level the kanji was practised at */
   level: JLPTLevel;
   firstSeenAt: number;
   lastSeenAt: number;
-  /** Questions that targeted this kanji */
+  /** Practices of this kanji (old data: mock-test questions) */
   attempts: number;
   correct: number;
   incorrect: number;
-  /** Right on the first attempt, without Show Answer, this many times in a row */
+  /** Good practices (right on the first try, without Show Answer) this many times in a row */
   streak: number;
   /** When it should come back for review */
   dueAt: number;
-  /** Words already used for it, newest last, so the next question uses another word */
+  /** Words practised with it, newest last */
   words: string[];
 }
 

@@ -1,5 +1,6 @@
 import type { KanjiQuizType, UserSettings } from '../types';
 import type { KanjiEntry } from './kanjiList';
+import type { KanjiPracticeQuestion } from './kanjiPractice';
 import { examplesFor, KANJI_LIST, plainReading, splitKun, toKatakana } from './kanjiList';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { kanjiStatus } from './kanjiProgress';
@@ -7,15 +8,18 @@ import { normalizeReading, stripKanjiTemplate } from './ai';
 
 // ─── Kanji quiz ─────────────────────────────────────────
 // The Kanji page's quiz, built and checked here with no AI call (like the Words quiz).
-// It doesn't change the kanji progress: that comes from the JLPT Mock Test only.
+// It doesn't change the kanji progress: that comes from a kanji's reading practice
+// (services/kanjiPractice.ts), which runs in the same quiz screen.
 
 export type KanjiQuestionType = Exclude<KanjiQuizType, 'mixed'>;
 
 export interface KanjiQuestion {
   entry: KanjiEntry;
-  type: KanjiQuestionType;
+  /** word: a reading practice question (say or type the kanji's reading in `practice`'s word) */
+  type: KanjiQuestionType | 'word';
   /** Multiple choice (meaning / kanji / reading): the options, the answer among them */
   choices?: KanjiEntry[];
+  practice?: KanjiPracticeQuestion;
 }
 
 const CHOICE_COUNT = 4;

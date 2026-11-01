@@ -4,15 +4,16 @@ import type { JLPTLevel, UserSettings } from '../types';
 import { JLPT_LEVELS, KANJI_QUIZ_TYPES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, VOCAB_QUIZ_COUNTS } from '../types';
 import type { KanjiEntry } from '../services/kanjiList';
 import { containsPart, KANJI_LIST, matchesKanjiSearch } from '../services/kanjiList';
-import { kanjiStatus } from '../services/kanjiProgress';
-import { loadKanjiProgress } from '../services/storage';
+import { fromNow, isDue, kanjiStatus, KNOWN_STREAK, recordKanjiResult } from '../services/kanjiProgress';
+import { buildKanjiPractice, practiceWordsFor, PRACTICE_PASS_RATE } from '../services/kanjiPractice';
+import { loadKanjiProgress, saveKanjiProgress } from '../services/storage';
 import KanjiDetailDialog from '../components/KanjiDetailDialog';
 import KanjiInfoDialog from '../components/KanjiInfoDialog';
 import KanjiQuiz from '../components/KanjiQuiz';
 import RadicalPicker from '../components/RadicalPicker';
 import type { KanjiQuestion } from '../services/kanjiQuiz';
 import { applyKanjiQuizFilters, buildKanjiQuiz } from '../services/kanjiQuiz';
-import { useI18n } from '../i18n';
+import { languageMeta, useI18n } from '../i18n';
 
 interface KanjiPageProps {
   settings: UserSettings;
@@ -21,12 +22,12 @@ interface KanjiPageProps {
 
 /**
  * The kanji chart: every JLPT kanji as a tile, one collapsible section per level
- * (teaching order), coloured by the learner's progress from the kanji section.
- * A tile opens the kanji's readings, meanings and words. The Quiz tab tests them
- * (no AI, like the Words quiz).
+ * (teaching order), coloured by the learner's progress. A tile opens the kanji's
+ * readings, meanings and words, and its reading practice: the only thing that
+ * changes the progress. The Quiz tab tests them (no AI, like the Words quiz).
  */
 export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [tab, setTab] = useState<'list' | 'quiz'>('list');
   const [quiz, setQuiz] = useState<KanjiQuestion[] | null>(null);
   // Each quiz (also a retry of the wrong kanji) starts with fresh quiz state
@@ -44,8 +45,11 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
   };
   // Sections closed while searching (the saved collapsed state is for the normal list)
   const [searchCollapsed, setSearchCollapsed] = useState<JLPTLevel[]>([]);
-  // Read once: nothing on this page changes the progress
-  const progress = useMemo(() => loadKanjiProgress(), []);
+  const [progress, setProgress] = useState(() => loadKanjiProgress());
+  // A kanji's reading practice runs in the quiz screen; only its first run counts for
+  // the progress (not Retry wrong), and its results card says what it did
+  const [practice, setPractice] = useState<{ entry: KanjiEntry; counts: boolean } | null>(null);
+  const [practiceNote, setPracticeNote] = useState<string | null>(null);
 
   const update = (partial: Partial<UserSettings>) => onSettingsChange({ ...settings, ...partial });
   const statusOf = (entry: KanjiEntry) => kanjiStatus(progress[entry.kanji]);
@@ -97,12 +101,61 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
   );
   const startQuiz = (entries: KanjiEntry[] = quizKanji, count = settings.kanjiQuizCount) => {
     setQuiz(buildKanjiQuiz(entries, settings.kanjiQuizType, count));
+    setPractice(null);
     setQuizNumber((n) => n + 1);
+  };
+  const startPractice = (entry: KanjiEntry) => {
+    setQuiz(buildKanjiPractice(entry).map((q) => ({ entry, type: 'word' as const, practice: q })));
+    setPractice({ entry, counts: true });
+    setPracticeNote(null);
+    setQuizNumber((n) => n + 1);
+  };
+  const retry = (wrong: KanjiQuestion[]) => {
+    if (!practice) return startQuiz(wrong.map((q) => q.entry), 0);
+    setQuiz([...wrong].sort(() => Math.random() - 0.5));
+    setPractice({ ...practice, counts: false });
+    setPracticeNote(null);
+    setQuizNumber((n) => n + 1);
+  };
+  // A finished practice: enough right on the first try = a good practice (streak + 1)
+  const finishPractice = (outcomes: boolean[]) => {
+    if (!practice?.counts || !quiz) return;
+    const { entry } = practice;
+    const now = Date.now();
+    const total = outcomes.length;
+    const need = Math.ceil(total * PRACTICE_PASS_RATE);
+    const passed = outcomes.filter(Boolean).length >= need;
+    const before = progress[entry.kanji];
+    const next = recordKanjiResult(progress, entry.kanji, entry.level, {
+      correct: passed,
+      firstTry: passed,
+      words: quiz.flatMap((q) => (q.practice ? [q.practice.word.written] : [])),
+    }, now);
+    saveKanjiProgress(next);
+    setProgress(next);
+    const after = next[entry.kanji];
+    const date = fromNow(after.dueAt, now, languageMeta(lang).locale);
+    setPracticeNote(!passed
+      ? t('kanjiList.practice.notCounted', { need, total, date })
+      : before && !isDue(before, now)
+        ? t('kanjiList.practice.early', { kanji: entry.kanji, date })
+        : kanjiStatus(after) === 'known'
+          ? t('kanjiList.practice.mastered', { kanji: entry.kanji, date })
+          : t('kanjiList.practice.counted', { streak: after.streak, known: KNOWN_STREAK, date }));
   };
   if (quiz) {
     return (
       <div className="app-main kanji-quiz-main">
-        <KanjiQuiz key={quizNumber} questions={quiz} onRetry={(wrong) => startQuiz(wrong, 0)} onExit={() => setQuiz(null)} />
+        <KanjiQuiz
+          key={quizNumber}
+          questions={quiz}
+          onRetry={retry}
+          // A practice goes back to its kanji's card (still `selected`)
+          onExit={() => { setQuiz(null); setPractice(null); setDirection(null); }}
+          onFinish={finishPractice}
+          resultNote={practice ? practiceNote : undefined}
+          exitLabel={practice ? t('kanjiList.practice.back') : undefined}
+        />
       </div>
     );
   }
@@ -121,6 +174,7 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
           onShowWordsChange={setShowWords}
           onPrevious={index > 0 ? () => open(browsable[index - 1].kanji, 'previous') : undefined}
           onNext={index >= 0 && index < browsable.length - 1 ? () => open(browsable[index + 1].kanji, 'next') : undefined}
+          onPractice={practiceWordsFor(current).length > 0 ? () => startPractice(current) : undefined}
           onClose={() => open(null)}
         />
       )}

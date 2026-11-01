@@ -9,9 +9,8 @@ import type {
   StoryInfo,
 } from '../types';
 import { isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode, isStoryMode } from '../types';
-import { saveSession, saveActiveSession, clearActiveSession, loadKanjiProgress, saveKanjiProgress } from '../services/storage';
-import { getCurriculum } from '../services/kanjiCurriculum';
-import { selectKanjiTargets, recordKanjiResult } from '../services/kanjiProgress';
+import { saveSession, saveActiveSession, clearActiveSession } from '../services/storage';
+import { getCurriculum, pickTestKanji } from '../services/kanjiCurriculum';
 import type { ActiveSession } from '../services/storage';
 import { generateQuestions, generateKanjiQuestions, generateStory, evaluateAnswer, aiConfigFromSettings, isIncompleteKanjiAnswer } from '../services/ai';
 import type { QuestionSetKind } from '../services/ai';
@@ -88,14 +87,11 @@ async function makeQuestions(
   }
 
   if (isKanjiMode(settings)) {
-    // The app picks the kanji from the curriculum and the saved progress; the AI only writes the words
-    const progress = loadKanjiProgress();
-    const targets = selectKanjiTargets(getCurriculum(level), progress, settings.questionCount, settings.kanjiSessionType, Date.now());
-    if (targets.length === 0) throw new Error('There are no kanji to review at this level yet.');
-    const questions = await generateKanjiQuestions(ai, level, lang, targets.map((kanji) => ({
-      kanji,
-      avoidWords: progress[kanji]?.words ?? [],
-    })));
+    // The app picks the kanji, at random from the level's list (a mock test samples the
+    // level; progress belongs to the Kanji page's practice); the AI only writes the words
+    const targets = pickTestKanji(getCurriculum(level), settings.questionCount);
+    if (targets.length === 0) throw new Error('There are no kanji at this level.');
+    const questions = await generateKanjiQuestions(ai, level, lang, targets.map((kanji) => ({ kanji, avoidWords: [] })));
     return { questions, requestedCount: settings.questionCount };
   }
 
@@ -402,15 +398,6 @@ export function useSession(): UseSessionReturn {
       revealedAnswer: revealedRef.current || lastEvaluation?.nextAction === 'reveal_answer',
       hintsUsed: hintsUsed || undefined,
     };
-
-    // Kanji: remember how this kanji went, across sessions
-    if (question.targetKanji) {
-      saveKanjiProgress(recordKanjiResult(loadKanjiProgress(), question.targetKanji, question.jlptLevel, {
-        correct: questionResult.isCorrect,
-        firstTry: !!currentAttempts[0]?.isCorrect && !questionResult.revealedAnswer,
-        word: question.prompt,
-      }, Date.now()));
-    }
 
     const newIndex = sess.currentQuestionIndex + 1;
     const isFinished = newIndex >= sess.questions.length;
