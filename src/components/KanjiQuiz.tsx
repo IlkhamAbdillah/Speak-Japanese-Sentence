@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Check, Eye, Mic, MicOff, RotateCcw, Send, Square, X, SkipForward, Trophy } from 'lucide-react';
-import type { KanjiEntry } from '../services/kanjiList';
-import { plainReading, splitKun, toKatakana } from '../services/kanjiList';
+import { Check, Eye, Lightbulb, Mic, MicOff, RotateCcw, Send, Square, X, SkipForward, Trophy } from 'lucide-react';
+import { splitKun, toKatakana } from '../services/kanjiList';
 import type { KanjiPracticeQuestion } from '../services/kanjiPractice';
 import { isPracticeAnswerCorrect } from '../services/kanjiPractice';
 import type { KanjiQuestion } from '../services/kanjiQuiz';
-import { isKanjiReadingCorrect, quizMeaning, quizReading } from '../services/kanjiQuiz';
+import { spellWith } from '../services/kanjiQuiz';
 import { isIncompleteKanjiAnswer } from '../services/ai';
 import {
   finishRecognition,
@@ -17,6 +16,8 @@ import {
 } from '../services/speech';
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import MultipleChoice from './MultipleChoice';
+import ConfirmDialog from './ConfirmDialog';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 
 interface KanjiQuizProps {
@@ -31,25 +32,12 @@ interface KanjiQuizProps {
   resultNote?: ReactNode;
   /** The results card's exit button, when it isn't "New quiz" */
   exitLabel?: string;
-}
-
-/** All readings of a kanji in one line: on'yomi in katakana, then kun'yomi. */
-const allReadings = (e: KanjiEntry) =>
-  [...e.on.map(toKatakana), ...e.kun.slice(0, 6).map(plainReading)].join('、');
-
-/** A kanji of the results list: the kanji, its main readings and meanings. */
-function KanjiResultRow({ entry }: { entry: KanjiEntry }) {
-  return (
-    <div className="vocab-row">
-      <div className="vocab-row-word">
-        <span className="vocab-word jp-text" lang="ja">{entry.kanji}</span>
-        <span className="vocab-reading jp-text" lang="ja">{quizReading(entry)}</span>
-      </div>
-      <div className="vocab-row-meaning">
-        <span>{entry.meanings.join(', ')}</span>
-      </div>
-    </div>
-  );
+  /** A kanji's reading practice (counts for its progress), not the quiz */
+  isPractice?: boolean;
+  /** Practice: start the next kanji's practice from the results card (also Enter) */
+  onNext?: () => void;
+  /** Its button label */
+  nextLabel?: string;
 }
 
 /** A reading practice word with the kanji's part of the reading highlighted: 食[しょく]じ. */
@@ -92,10 +80,11 @@ const CORRECT_ADVANCE_MS = 1200;
 type Phase = 'answering' | 'correct' | 'wrong' | 'revealed';
 
 /**
- * The Kanji page's quiz (same flow as the Words quiz): multiple choice for meaning /
- * kanji / reading, or say or type any reading. Checked locally, not saved.
+ * The Kanji page's quiz and a kanji's reading practice (same flow as the Words quiz):
+ * say or type the kanji's reading in a word, or pick the word's spelling among
+ * look-alike kanji. Checked locally; only a practice is saved (by the Kanji page).
  */
-export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, resultNote, exitLabel }: KanjiQuizProps) {
+export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, resultNote, exitLabel, isPractice, onNext, nextLabel }: KanjiQuizProps) {
   const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -104,6 +93,8 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   const [chosen, setChosen] = useState<number | null>(null);
   const [typed, setTyped] = useState('');
   const [lastAnswer, setLastAnswer] = useState('');
+  // Look-alike kanji: the meaning stays hidden until the hint (H) or an answer
+  const [showMeaning, setShowMeaning] = useState(false);
 
   const [listening, setListening] = useState(false);
   const [micStopped, setMicStopped] = useState(false);
@@ -133,6 +124,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
     setChosen(null);
     setTyped('');
     setLastAnswer('');
+    setShowMeaning(false);
     setPhase('answering');
     setIndex((i) => i + 1);
   };
@@ -147,9 +139,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
 
   const submitAnswer = (text: string, spoken = false) => {
     if (phase !== 'answering' || !entry || !text.trim()) return;
-    const correct = question?.practice
-      ? isPracticeAnswerCorrect(question.practice, text, spoken)
-      : isKanjiReadingCorrect(entry, text, spoken);
+    const correct = !!question && isPracticeAnswerCorrect(question.practice, text, spoken);
     setLastAnswer(text.trim());
     record(correct);
     setPhase(correct ? 'correct' : 'wrong');
@@ -172,7 +162,9 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   const goNextRef = useRef(goNext);
   const chooseRef = useRef(choose);
   const tryAgainRef = useRef(tryAgain);
+  const revealRef = useRef(reveal);
   useEffect(() => {
+    revealRef.current = reveal;
     submitRef.current = submitAnswer;
     goNextRef.current = goNext;
     chooseRef.current = choose;
@@ -232,6 +224,31 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   // Leaving the quiz stops the mic
   useEffect(() => () => stopRecognition(), []);
 
+  // Exit / Esc asks first (user-requested)
+  const [confirmExit, setConfirmExit] = useState(false);
+  const askExit = () => {
+    cancelListening();
+    setConfirmExit(true);
+  };
+  useEscapeKey(askExit, !finished && !confirmExit);
+
+  // Results of a practice: Enter starts the next kanji's practice
+  const onNextRef = useRef(onNext);
+  useEffect(() => {
+    onNextRef.current = onNext;
+  });
+  const hasNext = finished && !!onNext;
+  useEffect(() => {
+    if (!hasNext) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.repeat || e.isComposing || e.target instanceof HTMLButtonElement) return;
+      e.preventDefault();
+      onNextRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [hasNext]);
+
   // Report the outcome once (a reading practice saves the kanji's progress)
   const reported = useRef(false);
   const onFinishRef = useRef(onFinish);
@@ -256,8 +273,25 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.isComposing) return;
       if (phase === 'answering' && question?.choices) {
+        if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          setShowMeaning(true);
+          return;
+        }
         const n = Number(e.key);
         if (n >= 1 && n <= question.choices.length) chooseRef.current(n - 1);
+        return;
+      }
+      // Reading practice, wrong answer: R tries again, Enter shows the answer.
+      // preventDefault keeps the key out of the input / Next button that gets focus next.
+      if (phase === 'wrong' && question && !question.choices) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.key === 'r' || e.key === 'R') {
+          e.preventDefault();
+          tryAgainRef.current();
+        } else if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+          e.preventDefault();
+          revealRef.current();
+        }
         return;
       }
       // A focused button already handles Enter itself
@@ -287,19 +321,23 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
               {exitLabel ?? t('words.newQuiz')}
             </button>
             {wrong.length > 0 && (
-              <button className="btn btn-primary btn-lg" onClick={() => onRetry(wrong)}>
+              <button className={`btn ${onNext ? 'btn-secondary' : 'btn-primary'} btn-lg`} onClick={() => onRetry(wrong)}>
                 <RotateCcw size={18} /> {t('words.retryWrong', { count: wrong.length })}
               </button>
             )}
+            {onNext && (
+              <button className="btn btn-primary btn-lg" onClick={onNext}>
+                {nextLabel} <SkipForward size={18} />
+              </button>
+            )}
           </div>
+          {onNext && !pushToTalk && <p className="vocab-tip">{t('kanjiList.practice.nextTip')}</p>}
         </div>
         {wrong.length > 0 && (
           <section className="vocab-review">
-            <h3 className="card-title">{t(wrong[0].practice ? 'kanjiList.practice.wrongWords' : 'kanjiList.quiz.wrongKanji')}</h3>
+            <h3 className="card-title">{t('kanjiList.practice.wrongWords')}</h3>
             <div className="vocab-list">
-              {wrong.map((q) => q.practice
-                ? <PracticeResultRow key={q.practice.word.written} q={q.practice} />
-                : <KanjiResultRow key={q.entry.kanji} entry={q.entry} />)}
+              {wrong.map((q) => <PracticeResultRow key={`${q.entry.kanji}:${q.practice.word.written}`} q={q.practice} />)}
             </div>
           </section>
         )}
@@ -312,8 +350,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   const answered = phase !== 'answering';
   const isLast = index === questions.length - 1;
   const showAnswerCard = phase === 'revealed' || (phase === 'wrong' && isChoice);
-  const choiceLabels = question.choices?.map((c) =>
-    question.type === 'meaning' ? quizMeaning(c) : question.type === 'reading' ? quizReading(c) : c.kanji) ?? [];
+  const choiceLabels = question.choices?.map((c) => spellWith(question.practice, c)) ?? [];
 
   const micHandlers = pushToTalk
     ? ptt.handlers
@@ -328,33 +365,110 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
       ? t('practice.speech.listeningKanji')
       : t('practice.speech.idle');
 
-  return (
-    // kanji-quiz: compact sizes so a question fits on screen without scrolling (user-requested)
-    <div className="vocab-quiz kanji-quiz">
-      <div className="session-header">
-        <div className="session-info">
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            {t('words.questionOf', { current: index + 1, total: questions.length })}
-          </span>
-          <span className="badge badge-success">
-            <Check size={12} /> {outcomes.filter(Boolean).length}
-          </span>
+  // The bottom sheet: Correct!, a wrong reading (Try again / Show answer) or the answer card
+  const sheet = phase === 'correct' ? (
+    <div className="kanji-sheet kanji-sheet-correct animate-in">
+      <Check size={20} /> {t('words.correct')}
+    </div>
+  ) : phase === 'wrong' && !isChoice ? (
+    // A wrong reading can be tried again before the answer is shown
+    <div className="kanji-sheet kanji-sheet-wrong animate-in">
+      <div className="kanji-sheet-main">
+        <div className="kanji-sheet-title">
+          <RotateCcw size={18} /> {t('words.wrong')}
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={onExit}>
-          <X size={16} /> {t('words.exit')}
+        {!pushToTalk && (
+          <div className="vocab-tip kanji-practice-keys">
+            <p>{t('kanjiList.practice.tryAgainKey')}</p>
+            <p>{t('kanjiList.practice.showAnswerKey')}</p>
+          </div>
+        )}
+      </div>
+      <div className="kanji-sheet-actions">
+        <button className="btn btn-secondary" onClick={reveal}>
+          <Eye size={16} /> {t('words.showAnswer')}
+        </button>
+        <button className="btn btn-primary" onClick={tryAgain}>
+          <RotateCcw size={16} /> {t('words.tryAgain')}
         </button>
       </div>
-
-      <div className="progress-bar">
-        <div className="progress-bar-fill" style={{ width: `${(index / questions.length) * 100}%` }} />
+    </div>
+  ) : showAnswerCard ? (
+    <div className={`kanji-sheet kanji-sheet-answer ${phase === 'wrong' ? 'kanji-sheet-wrong' : ''} animate-in`}>
+      <div className="kanji-sheet-main">
+        <div className="vocab-answer-label">
+          {phase === 'revealed' ? t('words.revealed') : t('words.wrong')}
+        </div>
+        <div className="vocab-answer-body">
+          <span className="vocab-word jp-text" lang="ja">{question.practice.word.written}</span>
+          <span className="vocab-reading kanji-practice-reading jp-text" lang="ja"><PracticeReading q={question.practice} /></span>
+        </div>
+        <div className="kanji-practice-answer-reading">
+          <span className="jp-text" lang="ja">{entry.kanji}</span> · {t(question.practice.onyomi ? 'kanjiList.onyomi' : 'kanjiList.kunyomi')}{' '}
+          <span className="jp-text" lang="ja">{readingLabel(question.practice)}</span>
+          {question.practice.word.readings.length > 1 && (
+            <> · {t('kanjiList.practice.alsoRead', { readings: '' })}<span className="jp-text" lang="ja">{question.practice.word.readings.filter((r) => r !== question.practice.said).join('、')}</span></>
+          )}
+        </div>
       </div>
+      <div className="kanji-sheet-actions">
+        <button className="btn btn-primary btn-lg" onClick={goNext} autoFocus>
+          {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} />
+        </button>
+      </div>
+    </div>
+  ) : null;
 
-      <div className="game-area animate-in" key={index}>
+  return (
+    // kanji-quiz: on laptops it fills the screen and never scrolls (user-requested): a header,
+    // the question in the middle, and a bottom sheet for the outcome. Phones may scroll.
+    <div className="vocab-quiz kanji-quiz">
+      <div className="kanji-quiz-top">
+        <div className="session-header">
+          <div className="session-info">
+            <span className="kanji-quiz-count">
+              {t('words.questionOf', { current: index + 1, total: questions.length })}
+            </span>
+            <span className="badge badge-success">
+              <Check size={12} /> {outcomes.filter(Boolean).length}
+            </span>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={askExit}>
+            <X size={16} /> {t(isPractice ? 'kanjiList.practice.exit' : 'words.exit')}
+          </button>
+        </div>
+        <div className="progress-bar">
+          <div className="progress-bar-fill" style={{ width: `${(index / questions.length) * 100}%` }} />
+        </div>
+      </div>
+      {confirmExit && (
+        <ConfirmDialog
+          title={t(isPractice ? 'kanjiList.practice.exitTitle' : 'words.exitTitle')}
+          text={t(isPractice ? 'kanjiList.practice.exitText' : 'words.exitText')}
+          confirmLabel={t(isPractice ? 'kanjiList.practice.exit' : 'words.exit')}
+          onCancel={() => setConfirmExit(false)}
+          onConfirm={onExit}
+        />
+      )}
+
+      <div className="kanji-quiz-stage animate-in" key={index}>
         <div className="question-card">
-          <p className="question-context" style={{ marginBottom: 'var(--space-sm)' }}>
+          <p className="question-context">
             {t(`kanjiList.quiz.instruction.${question.type}`)}
           </p>
-          {question.practice ? (
+          {question.type === 'similar' ? (
+            <>
+              {/* The word's reading (no part marked, user-requested); the meaning is a hint: H or the button */}
+              <p className="vocab-prompt-word kanji-quiz-prompt jp-text" lang="ja">{question.practice.said}</p>
+              {showMeaning || answered ? (
+                <p className="kanji-practice-meaning kanji-similar-meaning">{question.practice.word.meaning}</p>
+              ) : (
+                <button className="btn btn-ghost btn-sm kanji-meaning-hint" onClick={() => setShowMeaning(true)} title="H">
+                  <Lightbulb size={14} /> {t('practice.hint')}
+                </button>
+              )}
+            </>
+          ) : (
             <>
               {/* The word with the kanji marked, the rest of its reading around a blank (食事 → ？じ), the meaning (not repeated on the answer card) */}
               <p className="vocab-prompt-word kanji-quiz-prompt kanji-practice-word jp-text" lang="ja">
@@ -368,27 +482,20 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
               </p>
               <p className="kanji-practice-meaning">{question.practice.word.meaning}</p>
             </>
-          ) : question.type === 'kanji' ? (
-            <p className="question-prompt">{quizMeaning(entry)}</p>
-          ) : (
-            <p className="vocab-prompt-word kanji-quiz-prompt jp-text" lang="ja">{entry.kanji}</p>
           )}
         </div>
 
         {isChoice ? (
-          <>
-            <div className={question.type === 'kanji' ? 'kanji-quiz-choices' : question.type === 'reading' ? 'jp-text' : undefined}>
+          <div className="kanji-quiz-choices">
             <MultipleChoice
               choices={choiceLabels}
               selected={chosen}
               onSelect={choose}
               result={answered && chosen !== null ? { chosen, correct: correctChoice } : null}
             />
-            </div>
-            {!answered && <p className="vocab-tip">{t('words.keyboardTip')}</p>}
-          </>
+          </div>
         ) : (
-          <>
+          <div className={`kanji-say ${pushToTalk ? 'kanji-say-ptt' : ''}`}>
             {phase === 'answering' ? (
               <div className="answer-input-row">
                 <input
@@ -413,96 +520,40 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
                 </button>
               </div>
             ) : (
-              <div className="transcript-display jp-text">{lastAnswer || t('common.noAnswer')}</div>
+              <div className={`transcript-display jp-text ${phase === 'correct' ? 'is-correct' : ''}`}>{lastAnswer || t('common.noAnswer')}</div>
             )}
-
-            <div className="game-controls">
-              {isSpeechRecognitionSupported() ? (
-                <button
-                  className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${listening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${phase === 'correct' ? 'correct' : ''}`}
-                  style={pushToTalk ? ptt.buttonStyle : undefined}
-                  {...micHandlers}
-                  title={pushToTalk ? t('common.holdToTalk') : listening ? t('common.cancelRecording') : t('common.speak')}
-                  disabled={micDisabled}
-                >
-                  {ptt.cancelArmed ? <X size={28} /> : listening ? <Square size={28} /> : phase === 'correct' ? <Check size={28} /> : <Mic size={28} />}
-                </button>
-              ) : (
-                <button className="mic-button" disabled>
-                  <MicOff size={28} />
-                </button>
-              )}
-              {phase === 'answering' && <span className="speech-state-label">{micLabel}</span>}
-              {phase === 'answering' && !listening && (
-                <div className="answer-help-actions">
+            {isSpeechRecognitionSupported() ? (
+              <button
+                className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${listening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${phase === 'correct' ? 'correct' : ''}`}
+                style={pushToTalk ? ptt.buttonStyle : undefined}
+                {...micHandlers}
+                title={pushToTalk ? t('common.holdToTalk') : listening ? t('common.cancelRecording') : t('common.speak')}
+                disabled={micDisabled}
+              >
+                {ptt.cancelArmed ? <X size={24} /> : listening ? <Square size={24} /> : phase === 'correct' ? <Check size={24} /> : <Mic size={24} />}
+              </button>
+            ) : (
+              <button className="mic-button" disabled>
+                <MicOff size={24} />
+              </button>
+            )}
+            {/* Only while answering, so the outcome sheet sits right under the answer */}
+            {phase === 'answering' && (
+              <div className="kanji-say-status">
+                <span className="speech-state-label">{micLabel}</span>
+                {!listening && (
                   <button className="btn btn-ghost btn-sm" onClick={reveal}>
                     <Eye size={14} /> {t('words.showAnswer')}
                   </button>
-                </div>
-              )}
-            </div>
-            {micError && <div className="alert alert-error" style={{ maxWidth: 500, width: '100%' }}>{micError}</div>}
-          </>
-        )}
-
-        {phase === 'correct' && (
-          <div className="correct-flash animate-in">
-            <Check size={20} /> {t('words.correct')}
-          </div>
-        )}
-
-        {/* Say questions: a wrong answer can be tried again before the answer is shown */}
-        {phase === 'wrong' && !isChoice && (
-          <div className="feedback-panel feedback-incorrect vocab-feedback animate-in">
-            <div className="feedback-title">
-              <RotateCcw size={20} /> {t('words.wrong')}
-            </div>
-            <p className="feedback-text">{t('words.yourAnswer', { answer: lastAnswer })}</p>
-            <div className="vocab-actions">
-              <button className="btn btn-secondary" onClick={reveal}>
-                <Eye size={16} /> {t('words.showAnswer')}
-              </button>
-              <button className="btn btn-primary" onClick={tryAgain}>
-                <RotateCcw size={16} /> {t('words.tryAgain')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showAnswerCard && (
-          <div className="vocab-answer animate-in">
-            <div className="vocab-answer-label">
-              {phase === 'revealed' ? t('words.revealed') : t('words.wrong')}
-            </div>
-            {question.practice ? (
-              <>
-                <div className="vocab-answer-body">
-                  <span className="vocab-word jp-text" lang="ja">{question.practice.word.written}</span>
-                  <span className="vocab-reading kanji-practice-reading jp-text" lang="ja"><PracticeReading q={question.practice} /></span>
-                </div>
-                <div className="kanji-practice-answer-reading">
-                  <span className="jp-text" lang="ja">{entry.kanji}</span> · {t(question.practice.onyomi ? 'kanjiList.onyomi' : 'kanjiList.kunyomi')}{' '}
-                  <span className="jp-text" lang="ja">{readingLabel(question.practice)}</span>
-                  {question.practice.word.readings.length > 1 && (
-                    <> · {t('kanjiList.practice.alsoRead', { readings: question.practice.word.readings.filter((r) => r !== question.practice?.said).join('、') })}</>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="vocab-answer-body">
-                  <span className="vocab-word jp-text" lang="ja">{entry.kanji}</span>
-                  <span className="vocab-reading jp-text" lang="ja">{allReadings(entry)}</span>
-                </div>
-                <div className="vocab-answer-meaning">{entry.meanings.join(', ')}</div>
-              </>
+                )}
+              </div>
             )}
-            <button className="btn btn-primary btn-lg" onClick={goNext} autoFocus>
-              {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} />
-            </button>
+            {micError && <div className="alert alert-error kanji-say-error">{micError}</div>}
           </div>
         )}
       </div>
+
+      <div className="kanji-sheet-slot">{sheet}</div>
     </div>
   );
 }

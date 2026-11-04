@@ -231,6 +231,7 @@
     "hint": "Starts with 「{firstKana}」 ({length} kana)"
   },
   "conversation": {
+    "endTextEmpty": "You haven't sent a message yet, so nothing will be saved.",
     "intro": "Chat with AI in Japanese. Choose your own topic, or let the AI start a random one.",
     "topicLabel": "Topic / context (optional)",
     "topicPlaceholder": "e.g. Ordering food at a restaurant, you are the waiter",
@@ -321,6 +322,8 @@
     "dismiss": "I know this now (remove)"
   },
   "words": {
+    "exitTitle": "End this quiz?",
+    "exitText": "Your answers so far won't be kept.",
     "navLabel": "Words",
     "title": "Vocabulary",
     "subtitle": "Japanese words with their meanings, and a quick quiz.",
@@ -461,7 +464,8 @@
       "legendProgress": "Progress comes from Practice readings on a kanji's card. Tap a kanji to start.",
       "via": "via",
       "sourceRadicals": "Radicals (parts):",
-      "sourceWords": "Practice words:"
+      "sourceWords": "Practice words:",
+      "sourceSimilar": "Look-alike kanji:"
     },
     "quiz": {
       "tabList": "Kanji list",
@@ -469,21 +473,14 @@
       "levels": "JLPT",
       "status": "Progress",
       "types": {
-        "mixed": "Mixed",
-        "meaning": "Kanji → meaning",
-        "kanji": "Meaning → kanji",
-        "reading": "Kanji → reading",
-        "say": "Say or type a reading"
+        "readings": "Practice readings",
+        "similar": "Look-alike kanji"
       },
       "instruction": {
-        "meaning": "What does this kanji mean?",
-        "kanji": "Which kanji means this?",
-        "reading": "How is this kanji read?",
-        "say": "Say or type a reading of this kanji",
-        "word": "How is the marked kanji read here?"
+        "word": "How is the marked kanji read here?",
+        "similar": "Which is the right spelling?"
       },
       "answerPlaceholder": "Type a reading…",
-      "wrongKanji": "Kanji to review",
       "noFilterMatch": "No kanji matches these filters.",
       "notSaved": "Quiz answers don't change your progress: that comes from Practice readings on a kanji's card."
     },
@@ -498,11 +495,18 @@
     "noPartMatch": "No part matches “{query}”.",
     "largerParts": "Larger parts",
     "practice": {
+      "exit": "End practice",
+      "exitTitle": "End this practice?",
+      "exitText": "It won't count towards this kanji's progress.",
+      "next": "Next kanji: {kanji}",
+      "nextTip": "Press Enter for the next kanji",
       "button": "Practice readings",
       "noWords": "No practice words for this kanji",
       "back": "Back to the kanji",
       "wrongWords": "Words to review",
       "alsoRead": "also read {readings}",
+      "tryAgainKey": "Press R to try again",
+      "showAnswerKey": "Press Enter to show the answer",
       "counted": "Good practice! {streak}/{known} towards mastered · next review {date}",
       "mastered": "Good practice! {kanji} is mastered · next review {date}",
       "early": "Good practice! {kanji} isn't due for review yet, so its progress stays the same · next review {date}",

@@ -94,3 +94,26 @@ vocabulary lists that is written with a kanji of `jlpt.json`, as
   (`readingInWord` in `kanjiList.ts`); words where it can't (今日 きょう,
   大人) are not asked. About 470 N1 kanji have no usable word.
 - Generated on 2026-11-01.
+
+## `similar.json`
+
+The look-alike kanji of the Kanji quiz's **Look-alike kanji** type
+(`src/services/kanjiQuiz.ts`): for each kanji of `jlpt.json`, up to 6 kanji
+that look like it, closest first (時 → 待持特侍星晴). Only kanji with two or
+more look-alikes are asked.
+
+- Lars Yencken's kanji similarity data (https://lars.yencken.org/datasets/kanji-confusion/,
+  CC BY 3.0): the "Kanji similarity sets" by stroke edit distance
+  (`jyouyou__strokeEditDistance.csv`, Yencken & Baldwin 2008: each jōyō kanji's
+  10 nearest neighbours) and the hand-picked confusable pairs of the White Rabbit
+  flashcards (`flashcards.csv`).
+- Combined with this folder's `details.json`: kanji sharing a KanjiVG larger
+  part (`c`, e.g. 寺 in 時 / 持 / 待 / 特) and KRADFILE parts (`p`).
+- Score of a pair: 1 if a flashcard pair, + the stroke similarity (0–1),
+  + 0.35 for a shared larger part, + 0.5 × the Jaccard overlap of the parts.
+  A pair needs a flashcard pair, a stroke similarity ≥ 0.6, a shared larger
+  part with a part overlap ≥ 0.4, or a part overlap ≥ 0.75; pairs scoring
+  under 0.8 are left out.
+- The quiz draws 3 of the 5 closest for a question and leaves out a spelling
+  that is a real word with the same reading.
+- Generated on 2026-11-04.

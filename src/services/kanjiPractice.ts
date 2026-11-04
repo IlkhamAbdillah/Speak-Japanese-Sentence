@@ -51,6 +51,10 @@ const WORDS: PracticeWord[] = (data.words as RawWord[]).map(([written, readings,
 }));
 
 const KANJI_BY_CHAR = new Map(KANJI_LIST.map((e) => [e.kanji, e]));
+
+const READINGS_BY_WORD = new Map(WORDS.map((w) => [w.written, w.readings.map(normalizeReading)]));
+/** Is `written` a listed word that can be read `reading`? */
+export const isWordRead = (written: string, reading: string) => !!READINGS_BY_WORD.get(written)?.includes(reading);
 const readingsOf = (e: KanjiEntry) => new Set([...e.on, ...e.kun].map((r) => normalizeReading(plainReading(r))));
 
 /** A word as a question about one kanji, or null when the kanji's part of the reading can't be found (今日 きょう). */

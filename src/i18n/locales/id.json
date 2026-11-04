@@ -231,6 +231,7 @@
     "hint": "Dimulai dengan 「{firstKana}」 ({length} huruf kana)"
   },
   "conversation": {
+    "endTextEmpty": "Kamu belum mengirim pesan, jadi tidak ada yang disimpan.",
     "intro": "Mengobrol dengan AI dalam bahasa Jepang. Tentukan topik sendiri atau biarkan AI memilih topik acak.",
     "topicLabel": "Topik / konteks (opsional)",
     "topicPlaceholder": "mis. Memesan makanan di restoran, kamu pelayannya",
@@ -321,6 +322,8 @@
     "dismiss": "Saya sudah paham (hapus)"
   },
   "words": {
+    "exitTitle": "Akhiri kuis ini?",
+    "exitText": "Jawabanmu sejauh ini tidak akan disimpan.",
     "navLabel": "Kosakata",
     "title": "Kosakata",
     "subtitle": "Kosakata Jepang beserta artinya, dan kuis singkat.",
@@ -461,7 +464,8 @@
       "legendProgress": "Progres diambil dari Latihan cara baca di kartu kanji. Ketuk kanji untuk mulai.",
       "via": "lewat",
       "sourceRadicals": "Radikal (bagian):",
-      "sourceWords": "Kata latihan:"
+      "sourceWords": "Kata latihan:",
+      "sourceSimilar": "Kanji yang mirip:"
     },
     "quiz": {
       "tabList": "Daftar kanji",
@@ -469,21 +473,14 @@
       "levels": "JLPT",
       "status": "Progres",
       "types": {
-        "mixed": "Campuran",
-        "meaning": "Kanji → arti",
-        "kanji": "Arti → kanji",
-        "reading": "Kanji → cara baca",
-        "say": "Ucapkan atau ketik cara baca"
+        "readings": "Latihan cara baca",
+        "similar": "Kanji yang mirip"
       },
       "instruction": {
-        "meaning": "Apa arti kanji ini?",
-        "kanji": "Kanji mana yang artinya ini?",
-        "reading": "Bagaimana kanji ini dibaca?",
-        "say": "Ucapkan atau ketik salah satu cara baca kanji ini",
-        "word": "Kanji yang ditandai dibaca apa?"
+        "word": "Kanji yang ditandai dibaca apa?",
+        "similar": "Mana penulisan yang benar?"
       },
       "answerPlaceholder": "Ketik cara bacanya…",
-      "wrongKanji": "Kanji yang perlu diulang",
       "noFilterMatch": "Tidak ada kanji yang cocok dengan filter ini.",
       "notSaved": "Jawaban kuis tidak mengubah progres: progres diambil dari Latihan cara baca di kartu kanji."
     },
@@ -498,11 +495,18 @@
     "noPartMatch": "Tidak ada bagian yang cocok dengan “{query}”.",
     "largerParts": "Bagian yang lebih besar",
     "practice": {
+      "exit": "Akhiri latihan",
+      "exitTitle": "Akhiri latihan ini?",
+      "exitText": "Latihan ini tidak akan dihitung untuk progres kanji ini.",
+      "next": "Kanji berikutnya: {kanji}",
+      "nextTip": "Tekan Enter untuk kanji berikutnya",
       "button": "Latihan cara baca",
       "noWords": "Belum ada kata latihan untuk kanji ini",
       "back": "Kembali ke kanji",
       "wrongWords": "Kata yang perlu diulang",
       "alsoRead": "juga dibaca {readings}",
+      "tryAgainKey": "Tekan R untuk mencoba lagi",
+      "showAnswerKey": "Tekan Enter untuk melihat jawaban",
       "counted": "Latihan bagus! {streak}/{known} menuju dikuasai · diulang {date}",
       "mastered": "Latihan bagus! {kanji} sudah dikuasai · diulang {date}",
       "early": "Latihan bagus! {kanji} belum waktunya diulang, jadi progresnya tetap · diulang {date}",

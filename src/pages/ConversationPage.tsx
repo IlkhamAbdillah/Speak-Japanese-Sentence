@@ -5,6 +5,8 @@ import { useConversation } from '../hooks/useConversation';
 import { loadActiveSession } from '../services/storage';
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import ChatBubble from '../components/ChatBubble';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 import {
   startRecognition,
@@ -43,6 +45,8 @@ export default function ConversationPage({ settings, onFinish, onExit, resume: r
   // Push-to-talk: the phone stopped listening while the mic is still held
   const [micStopped, setMicStopped] = useState(false);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  // Esc asks before ending the conversation (user-requested)
+  useEscapeKey(() => setShowConfirmEnd(true), !!session && !showConfirmEnd);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Keep the newest message in view
@@ -260,22 +264,16 @@ export default function ConversationPage({ settings, onFinish, onExit, resume: r
       </div>
 
       {showConfirmEnd && (
-        <div className="dialog-overlay" onClick={() => setShowConfirmEnd(false)}>
-          <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <h3 className="dialog-title">{t('conversation.endTitle')}</h3>
-            <p className="dialog-text">
-              {t('conversation.endText', { count: userMessageCount })}
-            </p>
-            <div className="dialog-actions">
-              <button className="btn btn-secondary" onClick={() => setShowConfirmEnd(false)}>
-                {t('common.cancel')}
-              </button>
-              <button className="btn btn-primary" onClick={handleEnd}>
-                {t('conversation.endConfirm')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title={t('conversation.endTitle')}
+          text={userMessageCount > 0
+            ? t('conversation.endText', { count: userMessageCount })
+            : t('conversation.endTextEmpty')}
+          confirmLabel={t('conversation.endConfirm')}
+          confirmClass="btn-primary"
+          onCancel={() => setShowConfirmEnd(false)}
+          onConfirm={handleEnd}
+        />
       )}
     </div>
   );

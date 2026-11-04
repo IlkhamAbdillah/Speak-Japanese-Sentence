@@ -110,10 +110,11 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
     setPracticeNote(null);
     setQuizNumber((n) => n + 1);
   };
+  // Retry wrong asks the same questions again, in a new order
   const retry = (wrong: KanjiQuestion[]) => {
-    if (!practice) return startQuiz(wrong.map((q) => q.entry), 0);
-    setQuiz([...wrong].sort(() => Math.random() - 0.5));
-    setPractice({ ...practice, counts: false });
+    const reshuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
+    setQuiz(reshuffle(wrong).map((q) => (q.choices ? { ...q, choices: reshuffle(q.choices) } : q)));
+    if (practice) setPractice({ ...practice, counts: false });
     setPracticeNote(null);
     setQuizNumber((n) => n + 1);
   };
@@ -143,6 +144,19 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
           ? t('kanjiList.practice.mastered', { kanji: entry.kanji, date })
           : t('kanjiList.practice.counted', { streak: after.streak, known: KNOWN_STREAK, date }));
   };
+  // The results card offers the next kanji (of the open sections, as the card steps) that has practice words
+  const nextPracticeKanji = (() => {
+    if (!practice) return undefined;
+    const list = browsable.some((e) => e.kanji === practice.entry.kanji) ? browsable : KANJI_LIST;
+    const from = list.findIndex((e) => e.kanji === practice.entry.kanji);
+    return list.slice(from + 1).find((e) => practiceWordsFor(e).length > 0);
+  })();
+  const practiseNext = () => {
+    if (!nextPracticeKanji) return;
+    open(nextPracticeKanji.kanji, 'next');
+    startPractice(nextPracticeKanji);
+  };
+
   if (quiz) {
     return (
       <div className="app-main kanji-quiz-main">
@@ -155,6 +169,9 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
           onFinish={finishPractice}
           resultNote={practice ? practiceNote : undefined}
           exitLabel={practice ? t('kanjiList.practice.back') : undefined}
+          isPractice={!!practice}
+          onNext={nextPracticeKanji ? practiseNext : undefined}
+          nextLabel={nextPracticeKanji ? t('kanjiList.practice.next', { kanji: nextPracticeKanji.kanji }) : undefined}
         />
       </div>
     );

@@ -14,6 +14,8 @@ import {
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import MultipleChoice from './MultipleChoice';
 import VocabRow from './VocabRow';
+import ConfirmDialog from './ConfirmDialog';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 
 interface VocabQuizProps {
@@ -167,6 +169,14 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
   // Leaving the quiz stops the mic
   useEffect(() => () => stopRecognition(), []);
 
+  // Exit / Esc asks first (user-requested)
+  const [confirmExit, setConfirmExit] = useState(false);
+  const askExit = () => {
+    cancelListening();
+    setConfirmExit(true);
+  };
+  useEscapeKey(askExit, !finished && !confirmExit);
+
   // A correct answer gets no explanation: flash and move on
   useEffect(() => {
     if (phase !== 'correct') return;
@@ -258,10 +268,19 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
             <Check size={12} /> {outcomes.filter(Boolean).length}
           </span>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={onExit}>
+        <button className="btn btn-ghost btn-sm" onClick={askExit}>
           <X size={16} /> {t('words.exit')}
         </button>
       </div>
+      {confirmExit && (
+        <ConfirmDialog
+          title={t('words.exitTitle')}
+          text={t('words.exitText')}
+          confirmLabel={t('words.exit')}
+          onCancel={() => setConfirmExit(false)}
+          onConfirm={onExit}
+        />
+      )}
 
       <div className="progress-bar" style={{ marginBottom: 'var(--space-xl)' }}>
         <div className="progress-bar-fill" style={{ width: `${(index / questions.length) * 100}%` }} />

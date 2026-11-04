@@ -24,10 +24,10 @@ export const KANJI_STATUS_FILTERS: KanjiStatusFilter[] = ['all', 'new', 'learnin
 export type KanjiStatusValue = Exclude<KanjiStatusFilter, 'all'>;
 export const KANJI_STATUS_VALUES: KanjiStatusValue[] = ['new', 'learning', 'known'];
 
-// Kanji quiz (Kanji page, no AI): meaning: kanji → pick the meaning; kanji: meaning → pick
-// the kanji; reading: kanji → pick its readings; say: kanji → say or type any reading
-export type KanjiQuizType = 'mixed' | 'meaning' | 'kanji' | 'reading' | 'say';
-export const KANJI_QUIZ_TYPES: KanjiQuizType[] = ['mixed', 'meaning', 'kanji', 'reading', 'say'];
+// Kanji quiz (Kanji page, no AI): readings: a random practice word of each kanji (say or
+// type the kanji's reading); similar: a word's reading → pick its spelling among look-alike kanji
+export type KanjiQuizType = 'readings' | 'similar';
+export const KANJI_QUIZ_TYPES: KanjiQuizType[] = ['readings', 'similar'];
 
 /** Reading tests always have one passage with this many questions. */
 export const READING_QUESTION_COUNT = 3;
@@ -411,7 +411,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   kanjiStatusFilter: 'all',
   kanjiCollapsed: [],
   kanjiPart: '',
-  kanjiQuizType: 'mixed',
+  kanjiQuizType: 'readings',
   kanjiQuizCount: 10,
   kanjiQuizJlpt: ['N5'],
   kanjiQuizStatus: [],

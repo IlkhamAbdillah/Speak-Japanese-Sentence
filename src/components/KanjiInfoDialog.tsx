@@ -12,6 +12,7 @@ const RADICAL_SOURCE = { name: 'KRADFILE (EDRDG)', url: 'https://www.edrdg.org/k
 const KANJIVG_SOURCE = { name: 'KanjiVG (Ulrich Apel, CC BY-SA 3.0)', url: 'https://kanjivg.tagaini.net' };
 const WORDS_SOURCE = { name: 'open-anki-jlpt-decks', url: 'https://github.com/jamsinclair/open-anki-jlpt-decks' };
 const FREQUENCY_SOURCE = { name: 'wordfreq', url: 'https://github.com/rspeer/wordfreq' };
+const SIMILAR_SOURCE = { name: 'Lars Yencken (CC BY 3.0)', url: 'https://lars.yencken.org/datasets/kanji-confusion/' };
 const DATA_SOURCE = { name: 'kanji-data', url: 'https://github.com/davidluzgouveia/kanji-data' };
 
 const link = (source: { name: string; url: string }) => (
@@ -57,6 +58,7 @@ export default function KanjiInfoDialog({ onClose }: KanjiInfoDialogProps) {
           <li>{t('kanjiList.info.sourceRadicals')} {link(RADICAL_SOURCE)}, {link(KANJIVG_SOURCE)}</li>
           <li>{t('kanjiList.info.sourceOrder')} {link(DETAILS_SOURCE)}</li>
           <li>{t('kanjiList.info.sourceWords')} {link(WORDS_SOURCE)}, {link(FREQUENCY_SOURCE)}</li>
+          <li>{t('kanjiList.info.sourceSimilar')} {link(SIMILAR_SOURCE)}, {link(RADICAL_SOURCE)}, {link(KANJIVG_SOURCE)}</li>
           <li>{t('kanjiList.meaningNote')}</li>
         </ul>
 

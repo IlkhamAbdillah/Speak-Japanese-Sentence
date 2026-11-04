@@ -19,6 +19,8 @@ import type { PresetQuestions } from '../hooks/useSession';
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode, isStoryMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import { isSpeechRecognitionSupported, prefersPushToTalk, SILENCE_SUBMIT_MS } from '../services/speech';
 import { loadActiveSession } from '../services/storage';
 import { useI18n } from '../i18n';
@@ -68,6 +70,8 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
   } = useSession();
 
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  // Esc asks before ending the session (user-requested)
+  useEscapeKey(() => setShowConfirmEnd(true), !!session && session.status !== 'completed' && !showConfirmEnd);
   const [editedTranscript, setEditedTranscript] = useState('');
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
@@ -607,26 +611,15 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
 
       {/* End Session Dialog */}
       {showConfirmEnd && (
-        <div className="dialog-overlay" onClick={() => setShowConfirmEnd(false)}>
-          <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <h3 className="dialog-title">
-              {t('practice.endTitle')}
-            </h3>
-            <p className="dialog-text">
-              {session.results.length > 0
-                ? t('practice.endWithResults', { count: session.results.length })
-                : t('practice.endWithoutResults')}
-            </p>
-            <div className="dialog-actions">
-              <button className="btn btn-secondary" onClick={() => setShowConfirmEnd(false)}>
-                {t('common.cancel')}
-              </button>
-              <button className="btn btn-danger" onClick={handleEndSession}>
-                {t('practice.endConfirm')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title={t('practice.endTitle')}
+          text={session.results.length > 0
+            ? t('practice.endWithResults', { count: session.results.length })
+            : t('practice.endWithoutResults')}
+          confirmLabel={t('practice.endConfirm')}
+          onCancel={() => setShowConfirmEnd(false)}
+          onConfirm={handleEndSession}
+        />
       )}
     </div>
   );
