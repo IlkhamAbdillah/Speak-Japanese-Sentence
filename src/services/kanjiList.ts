@@ -104,7 +104,14 @@ export interface KanjiPart {
 export const containsPart = (entry: KanjiEntry, id: string) =>
   entry.kanji === id || entry.parts.includes(id) || entry.components.includes(id);
 
-const countOf = (id: string) => KANJI_LIST.filter((e) => containsPart(e, id)).length;
+// How many kanji contain each part, counted in one pass (counting per part was ~50 ms on a phone)
+const PART_COUNTS = new Map<string, number>();
+for (const e of KANJI_LIST) {
+  for (const id of new Set([e.kanji, ...e.parts, ...e.components])) {
+    PART_COUNTS.set(id, (PART_COUNTS.get(id) ?? 0) + 1);
+  }
+}
+const countOf = (id: string) => PART_COUNTS.get(id) ?? 0;
 
 /**
  * Every part used by the list's kanji, in the usual parts-picker order (by stroke

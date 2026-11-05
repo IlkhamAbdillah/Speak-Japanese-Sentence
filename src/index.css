@@ -3609,3 +3609,19 @@ button.kanji-reading:hover {
     min-height: 0;
   }
 }
+
+/* ─── Kanji list: render only the tiles on screen ────── */
+/* 2000+ tiles: the browser skips laying out and painting the ones off screen, and
+   only fetches the Noto Sans JP font files for the kanji actually shown
+   (otherwise opening the list downloaded ~100 font files). */
+.kanji-tile {
+  content-visibility: auto;
+  /* Estimated size until a tile has been shown once (then the real one is remembered) */
+  contain-intrinsic-size: auto 77px auto 72px;
+}
+
+@media (max-width: 640px) {
+  .kanji-tile {
+    contain-intrinsic-size: auto 67px auto 66px;
+  }
+}

@@ -95,9 +95,11 @@ export default function KanjiPage({ settings, onSettingsChange }: KanjiPageProps
   const current = index >= 0 ? browsable[index] : KANJI_LIST.find((e) => e.kanji === selected);
 
   // ─── Quiz ─────────────────────────────────────────────
+  // Only worked out on the Quiz tab: it builds practice words for every kanji, too slow
+  // to do while the list opens
   const quizKanji = useMemo(
-    () => applyKanjiQuizFilters(settings, progress),
-    [settings, progress]
+    () => (tab === 'quiz' ? applyKanjiQuizFilters(settings, progress) : []),
+    [tab, settings, progress]
   );
   const startQuiz = (entries: KanjiEntry[] = quizKanji, count = settings.kanjiQuizCount) => {
     setQuiz(buildKanjiQuiz(entries, settings.kanjiQuizType, count));
