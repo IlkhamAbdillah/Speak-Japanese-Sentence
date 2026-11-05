@@ -209,6 +209,8 @@ function AppInner() {
               />
             }
           />
+          {/* Every URL reaches the app (vercel.json rewrite); unknown ones go home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </LanguageContext>
