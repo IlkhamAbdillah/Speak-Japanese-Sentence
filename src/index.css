@@ -3356,31 +3356,34 @@ button.kanji-reading:hover {
   text-align: center;
 }
 
-/* Say / type a reading: the input with the mic beside it, the status line under them */
+/* Say / type a reading: laid out like the other say-or-type quizzes (Words, JLPT kanji):
+   the input, the big mic centred under it, its status, then Show answer (user-requested) */
 .kanji-say {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  /* Status / error rows only exist when shown (no empty rows under the answer) */
-  grid-template-areas: "input mic";
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-sm) var(--space-md);
+  gap: var(--space-md);
   width: 100%;
 }
 
 .kanji-say > .answer-input-row,
 .kanji-say > .transcript-display {
-  grid-area: input;
+  width: 100%;
   max-width: none;
+}
+
+.kanji-say > .transcript-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  /* As tall as the input it replaces, so nothing jumps after answering */
+  min-height: 52px;
+  padding: var(--space-sm) var(--space-md);
 }
 
 .kanji-say .answer-input {
   height: 52px;
-}
-
-.kanji-say > .transcript-display {
-  margin: 0;
-  min-height: 52px;
-  padding: var(--space-sm) var(--space-md);
 }
 
 .kanji-say > .transcript-display.is-correct {
@@ -3388,44 +3391,21 @@ button.kanji-reading:hover {
   color: var(--color-success);
 }
 
-.kanji-say > .mic-button {
-  grid-area: mic;
-  width: 52px;
-  height: 52px;
+.kanji-say .game-controls {
+  gap: var(--space-sm);
 }
 
-.kanji-say-status {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-xs) var(--space-md);
-  min-height: 32px;
+/* Laptops: a slightly smaller mic, so a question fits a browser window without scrolling */
+@media (pointer: fine) {
+  .kanji-say .mic-button {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 .kanji-say-error {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
-/* Phones (push to talk): a big mic to hold, under the input */
-.kanji-say-ptt {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    "input"
-    "mic";
-  justify-items: center;
-}
-
-.kanji-say-ptt > .answer-input-row,
-.kanji-say-ptt > .transcript-display {
   width: 100%;
-}
-
-.kanji-say-ptt > .mic-button {
-  width: 72px;
-  height: 72px;
+  margin: 0;
 }
 
 /* The bottom sheet */
@@ -3619,5 +3599,13 @@ button.kanji-reading:hover {
 
   .kanji-quiz-choices .choice-item {
     padding: var(--space-sm) var(--space-md);
+  }
+}
+
+/* Say / type: the mic status and Show answer fill the place of the outcome sheet while
+   answering, so no extra room is kept for it then */
+@media (min-width: 768px) {
+  .kanji-quiz-say .kanji-sheet-slot:empty {
+    min-height: 0;
   }
 }

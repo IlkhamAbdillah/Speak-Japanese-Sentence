@@ -34,7 +34,10 @@ interface UseSessionReturn {
   isGenerating: boolean;
   generationError: string | null;
   evaluationError: string | null;
+  /** Time spent on the current question (stored as the answer's response time) */
   elapsedMs: number;
+  /** Time spent in the whole session so far; stops when it ends (the header timer) */
+  sessionElapsedMs: number;
   /** With `preset`, practise those questions again instead of generating new ones */
   startSession: (settings: UserSettings, preset?: PresetQuestions) => Promise<void>;
   /** Continue a session saved before the page was reloaded */
@@ -119,9 +122,13 @@ export function useSession(): UseSessionReturn {
   const [answerShown, setAnswerShown] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [sessionElapsedMs, setSessionElapsedMs] = useState(0);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
+  // When the session timer would have started had it run without breaks
+  // (now − time already spent, so a resumed session continues where it was)
+  const sessionStartRef = useRef<number>(0);
   const settingsRef = useRef<UserSettings | null>(null);
   const sessionRef = useRef<Session | null>(null);
   // Id of the latest startSession call. A slower, older generation request must not
@@ -148,7 +155,9 @@ export function useSession(): UseSessionReturn {
     startTimeRef.current = Date.now();
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setElapsedMs(Date.now() - startTimeRef.current);
+      const now = Date.now();
+      setElapsedMs(now - startTimeRef.current);
+      setSessionElapsedMs(now - sessionStartRef.current);
     }, 100);
   }, []);
 
@@ -213,6 +222,8 @@ export function useSession(): UseSessionReturn {
         setFinalTranscript('');
         setInterimTranscript('');
         setSpeechState('idle');
+        sessionStartRef.current = Date.now();
+        setSessionElapsedMs(0);
         resetTimer();
         startTimer();
       } catch (err) {
@@ -238,6 +249,8 @@ export function useSession(): UseSessionReturn {
       setHintsUsed(saved.hintsUsed ?? 0);
       setLastEvaluation(saved.lastEvaluation);
       setSpeechState(saved.lastEvaluation ? (saved.lastEvaluation.correct ? 'correct' : 'retry') : 'idle');
+      sessionStartRef.current = Date.now() - (saved.sessionElapsedMs ?? 0);
+      setSessionElapsedMs(saved.sessionElapsedMs ?? 0);
       resetTimer();
       startTimer();
     },
@@ -245,20 +258,34 @@ export function useSession(): UseSessionReturn {
   );
 
   // Keep the session in progress in storage so a reload can continue it
+  const activeRef = useRef<Omit<ActiveSession, 'sessionElapsedMs'> | null>(null);
   useEffect(() => {
     if (session?.status === 'in-progress') {
-      saveActiveSession({
+      activeRef.current = {
         session,
         attempts: currentAttempts,
         lastEvaluation,
         answerShown,
         answerRevealed: revealedRef.current,
         hintsUsed,
-      });
+      };
+      saveActiveSession({ ...activeRef.current, sessionElapsedMs: Date.now() - sessionStartRef.current });
     } else if (session) {
+      activeRef.current = null;
       clearActiveSession();
     }
   }, [session, currentAttempts, lastEvaluation, answerShown, hintsUsed]);
+
+  // The session timer keeps running between saves: store its latest value when the page goes away
+  useEffect(() => {
+    const saveTime = () => {
+      if (activeRef.current) {
+        saveActiveSession({ ...activeRef.current, sessionElapsedMs: Date.now() - sessionStartRef.current });
+      }
+    };
+    window.addEventListener('pagehide', saveTime);
+    return () => window.removeEventListener('pagehide', saveTime);
+  }, []);
 
   // Speech recognition
   const startListening = useCallback(() => {
@@ -540,6 +567,7 @@ export function useSession(): UseSessionReturn {
     generationError,
     evaluationError,
     elapsedMs,
+    sessionElapsedMs,
     startSession,
     restoreSession,
     startListening,

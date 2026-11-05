@@ -19,9 +19,10 @@ import { isKanjiAllowedAt, kanjiIn } from './kanjiCurriculum';
 
 // ─── Provider Request Helpers ───────────────────────────
 
-// Reading tests (a long Japanese text plus questions and explanations) need room;
-// Gemini 2.5 models also spend part of this budget on internal reasoning.
-const MAX_OUTPUT_TOKENS = 8192;
+// Reading tests (a long Japanese text plus questions and explanations) need room,
+// and the current OpenAI, Gemini and Claude models all think before answering,
+// which counts against this budget too.
+const MAX_OUTPUT_TOKENS = 16000;
 
 interface ChatMessage {
   role: 'system' | 'user';
@@ -58,8 +59,9 @@ async function callOpenAI(
     body: JSON.stringify({
       model,
       messages,
-      temperature: 0.7,
-      max_tokens: MAX_OUTPUT_TOKENS,
+      // GPT-6 models are reasoning models: max_tokens is deprecated for them,
+      // and temperature is left at its default.
+      max_completion_tokens: MAX_OUTPUT_TOKENS,
     }),
   });
 
@@ -88,7 +90,8 @@ async function callGoogle(
 
   const body: Record<string, unknown> = {
     contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: MAX_OUTPUT_TOKENS },
+    // Gemini 3+ is tuned for the default temperature (1.0); lowering it can make it loop.
+    generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
   };
 
   if (systemInstruction) {
@@ -110,7 +113,12 @@ async function callGoogle(
   }
 
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  // Skip thought parts; join the text parts of the answer
+  const parts: { text?: string; thought?: boolean }[] = data.candidates?.[0]?.content?.parts ?? [];
+  return parts
+    .filter((p) => !p.thought && typeof p.text === 'string')
+    .map((p) => p.text)
+    .join('');
 }
 
 async function callAnthropic(
@@ -123,6 +131,9 @@ async function callAnthropic(
     .filter((m) => m.role !== 'system')
     .map((m) => ({ role: m.role, content: m.content }));
 
+  // Server-side refusal fallback exists for Opus 5.5 / Sonnet 5.5, not for Haiku
+  const fallbacks = /^claude-(opus|sonnet)-5-5/.test(model);
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -130,12 +141,15 @@ async function callAnthropic(
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
+      ...(fallbacks ? { 'anthropic-beta': 'server-side-fallback-2026-07-01' } : {}),
     },
     body: JSON.stringify({
       model,
       max_tokens: MAX_OUTPUT_TOKENS,
       system: systemMsg,
       messages: userMessages,
+      // If a safety classifier declines the request, the API retries it on another model
+      ...(fallbacks ? { fallbacks: 'default' } : {}),
     }),
   });
 
@@ -145,7 +159,16 @@ async function callAnthropic(
   }
 
   const data = await res.json();
-  return data.content?.[0]?.text ?? '';
+  if (data.stop_reason === 'refusal') {
+    throw new Error('Anthropic declined this request (refusal). Try again or pick another model.');
+  }
+  // Current Claude models always think: content starts with a thinking block,
+  // so join the text blocks instead of reading content[0].
+  const blocks: { type: string; text?: string }[] = data.content ?? [];
+  return blocks
+    .filter((b) => b.type === 'text' && typeof b.text === 'string')
+    .map((b) => b.text)
+    .join('');
 }
 
 // ─── Ollama / Custom API (Local / Cloudflare Tunnel / URL) ─
@@ -427,7 +450,8 @@ function buildQuestionGenerationPrompt(
   };
 
   const contextField: Record<PracticeKind, string> = {
-    translation: `"context" is an empty string "" unless the sentence is ambiguous without it (e.g. who is speaking, polite or casual); then give that detail in a few ${langName} words`,
+    // The page shows only the sentence, so it must be clear on its own
+    translation: `"context" is always an empty string "": the learner sees only the sentence, so write sentences that are clear on their own`,
     situation: `"context" is an empty string "" unless an extra detail is needed (e.g. who you are talking to); then give it in a few ${langName} words`,
   };
 
@@ -699,7 +723,8 @@ IMPORTANT: The transcript comes from speech recognition and may contain minor tr
 Rules:
 - Accept grammatically valid alternative expressions: a different word order, a different particle that is valid in context, or a different grammatical structure from the expected answer is NOT a mistake
 - Do NOT require exact string matching
-- Explain only the mistakes that matter most (at most 3 notes in total); skip trivial ones${story ? `
+- Explain only the mistakes that matter most (at most 3 notes in total); skip trivial ones${question.mode === 'translation' && !story ? `
+- The learner sees only the sentence: unless it makes the politeness level clear, accept both polite (です/ます) and plain forms` : ''}${story ? `
 - The sentence is part of a story: a subject or topic that is clear from the previous sentences may be omitted, and tense and names must fit the story. A name written in hiragana or katakana, or without さん, is fine (speech recognition may write it that way)` : ''}
 - Provide feedback in ${langName}
 - Be educational and constructive, not judgmental
@@ -709,7 +734,7 @@ ${attemptRules}
 ${EVALUATION_SCHEMA(langName)}`;
 
   const user = `${story ? storyContextFor(story, question) : ''}Question: ${question.prompt}
-${question.context ? `Context: ${question.context}` : ''}
+${question.context && question.mode !== 'translation' ? `Context: ${question.context}` : ''}
 Expected meaning: ${question.intendedMeaning}
 Expected answer: ${question.expectedAnswer}
 Acceptable guidelines: ${question.acceptableAnswerGuidelines}

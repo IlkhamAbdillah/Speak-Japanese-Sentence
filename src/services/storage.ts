@@ -1,5 +1,5 @@
 import type { UserSettings, Session, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS, AI_PROVIDER_MODELS } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
@@ -102,6 +102,15 @@ export function loadSettings(): UserSettings {
   if (!VOCAB_QUIZ_COUNTS.includes(settings.kanjiQuizCount)) settings.kanjiQuizCount = DEFAULT_SETTINGS.kanjiQuizCount;
   settings.kanjiQuizJlpt = Array.isArray(settings.kanjiQuizJlpt) ? onlyValid(settings.kanjiQuizJlpt, JLPT_LEVELS) : DEFAULT_SETTINGS.kanjiQuizJlpt;
   settings.kanjiQuizStatus = onlyValid(settings.kanjiQuizStatus, KANJI_STATUS_VALUES);
+  // Retired cloud models (e.g. gemini-2.5-flash, gpt-4o): switch to the provider's default.
+  // Custom URL models are free text, so they stay.
+  const models = AI_PROVIDER_MODELS[settings.aiProvider];
+  if (!models) {
+    settings.aiProvider = DEFAULT_SETTINGS.aiProvider;
+    settings.aiModel = DEFAULT_SETTINGS.aiModel;
+  } else if (settings.aiProvider !== 'ollama' && !models.includes(settings.aiModel)) {
+    settings.aiModel = models[0];
+  }
   // A language that is no longer shipped
   if (!(settings.instructionLanguage in LANGUAGES)) settings.instructionLanguage = DEFAULT_SETTINGS.instructionLanguage;
   return settings;
@@ -168,6 +177,8 @@ export interface ActiveSession {
   answerRevealed?: boolean;
   /** Hint steps opened for the current question */
   hintsUsed?: number;
+  /** Time spent in the session so far (the header timer) */
+  sessionElapsedMs?: number;
 }
 
 export function saveActiveSession(active: ActiveSession): boolean {

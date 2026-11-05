@@ -324,9 +324,11 @@ export const AI_PROVIDER_LABELS: Record<AIProvider, string> = {
 
 export const AI_PROVIDER_MODELS: Record<AIProvider, string[]> = {
   ollama: ['llama3.1', 'llama3.2', 'gemma2', 'mistral', 'qwen2.5', 'phi3', 'deepseek-r1'],
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1-nano'],
-  google: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
-  anthropic: ['claude-sonnet-4-20250514', 'claude-haiku-4-20250414'],
+  // The first model of each list is the default when picking the provider.
+  // A saved model that is no longer listed is replaced by it (loadSettings).
+  openai: ['gpt-6.1-terra', 'gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra'],
+  google: ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-4-argon'],
+  anthropic: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'],
 };
 
 // ─── User Settings ──────────────────────────────────────
@@ -380,7 +382,7 @@ export interface UserSettings {
 
 export const DEFAULT_SETTINGS: UserSettings = {
   aiProvider: 'google',
-  aiModel: 'gemini-2.5-flash',
+  aiModel: 'gemini-3.8-flash',
   apiKey: '',
   ollamaBaseUrl: 'http://localhost:11434/v1',
   appMode: 'practice',

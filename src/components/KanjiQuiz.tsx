@@ -422,7 +422,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   return (
     // kanji-quiz: on laptops it fills the screen and never scrolls (user-requested): a header,
     // the question in the middle, and a bottom sheet for the outcome. Phones may scroll.
-    <div className="vocab-quiz kanji-quiz">
+    <div className={`vocab-quiz kanji-quiz ${isChoice ? '' : 'kanji-quiz-say'}`}>
       <div className="kanji-quiz-top">
         <div className="session-header">
           <div className="session-info">
@@ -495,7 +495,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
             />
           </div>
         ) : (
-          <div className={`kanji-say ${pushToTalk ? 'kanji-say-ptt' : ''}`}>
+          <div className="kanji-say">
             {phase === 'answering' ? (
               <div className="answer-input-row">
                 <input
@@ -522,32 +522,35 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
             ) : (
               <div className={`transcript-display jp-text ${phase === 'correct' ? 'is-correct' : ''}`}>{lastAnswer || t('common.noAnswer')}</div>
             )}
-            {isSpeechRecognitionSupported() ? (
-              <button
-                className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${listening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${phase === 'correct' ? 'correct' : ''}`}
-                style={pushToTalk ? ptt.buttonStyle : undefined}
-                {...micHandlers}
-                title={pushToTalk ? t('common.holdToTalk') : listening ? t('common.cancelRecording') : t('common.speak')}
-                disabled={micDisabled}
-              >
-                {ptt.cancelArmed ? <X size={24} /> : listening ? <Square size={24} /> : phase === 'correct' ? <Check size={24} /> : <Mic size={24} />}
-              </button>
-            ) : (
-              <button className="mic-button" disabled>
-                <MicOff size={24} />
-              </button>
-            )}
-            {/* Only while answering, so the outcome sheet sits right under the answer */}
-            {phase === 'answering' && (
-              <div className="kanji-say-status">
-                <span className="speech-state-label">{micLabel}</span>
-                {!listening && (
+            {/* Same layout as the other say-or-type quizzes (Words, JLPT kanji): the big mic
+                under the input, its status under it, then Show answer (user-requested).
+                Once the answer is shown the mic has nothing left to do, so the answer takes its place */}
+            {phase !== 'revealed' && <div className="game-controls">
+              {isSpeechRecognitionSupported() ? (
+                <button
+                  className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${listening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${phase === 'correct' ? 'correct' : ''}`}
+                  style={pushToTalk ? ptt.buttonStyle : undefined}
+                  {...micHandlers}
+                  title={pushToTalk ? t('common.holdToTalk') : listening ? t('common.cancelRecording') : t('common.speak')}
+                  disabled={micDisabled}
+                >
+                  {ptt.cancelArmed ? <X size={28} /> : listening ? <Square size={28} /> : phase === 'correct' ? <Check size={28} /> : <Mic size={28} />}
+                </button>
+              ) : (
+                <button className="mic-button" disabled>
+                  <MicOff size={28} />
+                </button>
+              )}
+              {/* Only while answering, so the outcome sheet sits right under the answer */}
+              {phase === 'answering' && <span className="speech-state-label">{micLabel}</span>}
+              {phase === 'answering' && !listening && (
+                <div className="answer-help-actions">
                   <button className="btn btn-ghost btn-sm" onClick={reveal}>
                     <Eye size={14} /> {t('words.showAnswer')}
                   </button>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>}
             {micError && <div className="alert alert-error kanji-say-error">{micError}</div>}
           </div>
         )}

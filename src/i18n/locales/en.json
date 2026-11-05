@@ -145,6 +145,7 @@
     "goBack": "Go Back",
     "questionOf": "Question {current} of {total}",
     "endSession": "End Session",
+    "sessionTime": "Time in this session",
     "kanjiInstruction": "How is this word read? Type it in hiragana or say it.",
     "kanjiVoiceTip": "Speaking? Short words are hard to recognise, so you can say 「それは ___ です」, or for a one-kana reading the row and the kana, e.g. 「それは はひふへほ の ひ」.",
     "readingInstruction": "Read the text above, then choose the best answer.",

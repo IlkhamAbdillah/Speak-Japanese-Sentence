@@ -145,6 +145,7 @@
     "goBack": "Kembali",
     "questionOf": "Soal {current} dari {total}",
     "endSession": "Akhiri Sesi",
+    "sessionTime": "Waktu di sesi ini",
     "kanjiInstruction": "Bagaimana cara membaca kata ini? Tulis dalam hiragana atau ucapkan.",
     "kanjiVoiceTip": "Pakai suara? Kata pendek sulit dikenali, jadi ucapkan 「それは ___ です」, atau untuk bacaan satu kana sebutkan barisnya lalu kananya, mis. 「それは はひふへほ の ひ」.",
     "readingInstruction": "Baca teks di atas, lalu pilih jawaban yang paling tepat.",

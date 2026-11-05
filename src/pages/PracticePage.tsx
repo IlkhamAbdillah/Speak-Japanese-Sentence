@@ -51,7 +51,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
     isGenerating,
     generationError,
     evaluationError,
-    elapsedMs,
+    sessionElapsedMs,
     startSession,
     restoreSession,
     startListening,
@@ -279,7 +279,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
           </span>
         </div>
         <div className="session-controls">
-          <span className="timer">{formatTime(elapsedMs)}</span>
+          <span className="timer" title={t('practice.sessionTime')}>{formatTime(sessionElapsedMs)}</span>
           <button
             className="btn btn-ghost btn-icon"
             onClick={() => setShowConfirmEnd(true)}
@@ -343,7 +343,8 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
                 </>
               )}
               <p className="question-prompt">{currentQuestion.prompt}</p>
-              {currentQuestion.context && (
+              {/* Translation shows only the sentence (user-requested) */}
+              {currentQuestion.context && currentQuestion.mode !== 'translation' && (
                 <p className="question-context">{currentQuestion.context}</p>
               )}
               {openedHints.map((step) => (
