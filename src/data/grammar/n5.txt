@@ -1,0 +1,357 @@
+# JLPT N5 grammar. Format: see README.md in this folder.
+
+@ 〜は〜です
+= X is Y (polite) | X adalah Y (sopan)
+f N1 + は + N2 + です
+s copula
+e 私[は]学生[です]。 | I am a student. | Saya mahasiswa.
+e これ[は]日本の車[です]。 | This is a Japanese car. | Ini mobil Jepang.
+
+@ 〜じゃありません / 〜ではありません
+= is not (polite) | bukan (sopan)
+f N / Na + じゃありません・ではありません
+s copula
+e 私は先生[じゃありません]。 | I am not a teacher. | Saya bukan guru.
+e この部屋は静か[ではありません]。 | This room is not quiet. | Kamar ini tidak tenang.
+
+@ 〜でした
+= was (polite past) | dulu adalah (lampau, sopan)
+f N / Na + でした
+s copula
+e 昨日は雨[でした]。 | It was rainy yesterday. | Kemarin hujan.
+e テストは簡単[でした]。 | The test was easy. | Ujiannya mudah.
+
+@ 〜と〜とどちらが
+= which is more…, X or Y? | mana yang lebih…, X atau Y?
+f N1 + と + N2 + と + どちらが + adj
+e 犬と猫[とどちらが]好きですか。 | Which do you like more, dogs or cats? | Kamu lebih suka anjing atau kucing?
+e 夏と冬[とどちらが]いいですか。 | Which is better, summer or winter? | Mana yang lebih baik, musim panas atau musim dingin?
+
+@ 〜の中で〜がいちばん | のなかで〜がいちばん
+= the most … of all | paling … di antara
+f group + の中で + N + が + 一番 + adj
+e 果物[の中で]りんご[がいちばん]好きです。 | Of all fruit, I like apples the most. | Di antara buah-buahan, saya paling suka apel.
+e クラス[の中で]田中さん[がいちばん]背が高いです。 | Tanaka is the tallest in the class. | Tanaka yang paling tinggi di kelas.
+
+@ 〜ます / 〜ません
+= polite verb ending (present/future, negative) | akhiran kata kerja sopan (sekarang/akan, negatif)
+f V-masu stem + ます・ません
+s polite
+e 毎朝コーヒーを飲み[ます]。 | I drink coffee every morning. | Saya minum kopi setiap pagi.
+e 私はお酒を飲み[ません]。 | I don't drink alcohol. | Saya tidak minum alkohol.
+
+@ 〜ました / 〜ませんでした
+= polite past (positive, negative) | lampau sopan (positif, negatif)
+f V-masu stem + ました・ませんでした
+s polite
+e 昨日、本を読み[ました]。 | I read a book yesterday. | Kemarin saya membaca buku.
+e 朝ご飯を食べ[ませんでした]。 | I didn't eat breakfast. | Saya tidak sarapan.
+
+@ 〜ましょう
+= let's… | mari…
+f V-masu stem + ましょう
+s invite
+e 一緒に昼ご飯を食べ[ましょう]。 | Let's have lunch together. | Mari makan siang bersama.
+e ちょっと休み[ましょう]。 | Let's take a little break. | Mari istirahat sebentar.
+
+@ 〜ましょうか
+= shall I…? shall we…? | bagaimana kalau saya/kita…?
+f V-masu stem + ましょうか
+s invite
+e 荷物を持ち[ましょうか]。 | Shall I carry your bag? | Boleh saya bawakan barangnya?
+e 駅で会い[ましょうか]。 | Shall we meet at the station? | Bagaimana kalau kita bertemu di stasiun?
+
+@ 〜ませんか
+= won't you…? (invitation) | maukah…? (ajakan)
+f V-masu stem + ませんか
+s invite
+e 週末、映画を見に行き[ませんか]。 | Won't you go see a movie this weekend? | Maukah kamu menonton film akhir pekan ini?
+e 一緒にお茶を飲み[ませんか]。 | Would you like to have tea together? | Maukah minum teh bersama?
+
+@ 〜たい
+= want to (do) | ingin
+f V-masu stem + たい
+s want
+e 日本へ行き[たい]です。 | I want to go to Japan. | Saya ingin pergi ke Jepang.
+e 冷たい水が飲み[たい]。 | I want to drink cold water. | Saya ingin minum air dingin.
+
+@ 〜がほしい
+= want (something) | ingin (memiliki sesuatu)
+f N + が + ほしい
+s like
+e 新しいパソコン[がほしい]です。 | I want a new computer. | Saya ingin komputer baru.
+e 今、何[がほしい]ですか。 | What do you want now? | Sekarang kamu ingin apa?
+
+@ 〜に行く | にいく
+= go to (do) | pergi untuk
+f V-masu stem・N + に + 行く・来る
+s want
+e デパートへ買い物[に行き]ます。 | I'm going to the department store to shop. | Saya pergi ke mal untuk berbelanja.
+e 公園へ写真を撮り[に行き]ました。 | I went to the park to take photos. | Saya pergi ke taman untuk memotret.
+
+@ 〜てください
+= please do… | tolong…
+f V-て + ください
+s permission
+e ここに名前を書い[てください]。 | Please write your name here. | Tolong tulis nama Anda di sini.
+e もう一度言っ[てください]。 | Please say it once more. | Tolong katakan sekali lagi.
+
+@ 〜ないでください
+= please don't… | tolong jangan…
+f V-nai + でください
+s permission
+e ここで写真を撮ら[ないでください]。 | Please don't take photos here. | Tolong jangan memotret di sini.
+e 心配し[ないでください]。 | Please don't worry. | Jangan khawatir.
+
+@ 〜ている (in progress)
+= be …ing (action in progress) | sedang
+f V-て + いる
+s te
+e 今、雨が降っ[ています]。 | It's raining now. | Sekarang sedang hujan.
+e 弟は部屋で勉強し[ています]。 | My brother is studying in his room. | Adik laki-laki saya sedang belajar di kamar.
+
+@ 〜ている (state)
+= state that continues (married, live, know…) | keadaan yang berlanjut (sudah menikah, tinggal, tahu…)
+f V-て + いる
+s te
+e 姉は結婚し[ています]。 | My older sister is married. | Kakak perempuan saya sudah menikah.
+e 私は大阪に住ん[でいます]。 | I live in Osaka. | Saya tinggal di Osaka.
+
+@ 〜てから
+= after doing… | setelah…
+f V-て + から
+s order, te
+e 手を洗っ[てから]、ご飯を食べます。 | I wash my hands, then eat. | Setelah mencuci tangan, saya makan.
+e 宿題をし[てから]、遊びに行きます。 | I'll go out to play after doing my homework. | Setelah mengerjakan PR, saya pergi bermain.
+
+@ 〜て、〜 (sequence)
+= and (then) — linking actions | lalu — menyambung kegiatan
+f V-て, …
+s order
+e 朝起き[て]、シャワーを浴びます。 | I get up in the morning and take a shower. | Pagi hari saya bangun lalu mandi.
+e デパートへ行っ[て]、靴を買いました。 | I went to the department store and bought shoes. | Saya pergi ke mal lalu membeli sepatu.
+
+@ 〜くて / 〜で (adjectives)
+= and (linking adjectives) | dan (menyambung kata sifat)
+f A-くて・Na + で
+e この部屋は広[くて]明るいです。 | This room is big and bright. | Kamar ini luas dan terang.
+e 彼女はきれい[で]優しいです。 | She is pretty and kind. | Dia cantik dan baik hati.
+
+@ 〜たり〜たりする
+= do things like X and Y | melakukan hal seperti X dan Y
+f V-ta + り, V-ta + り + する
+e 週末は本を読ん[だり]、映画を見[たりします]。 | On weekends I do things like read and watch movies. | Akhir pekan saya membaca buku, menonton film, dan sebagainya.
+e 休みの日は掃除し[たり]、洗濯し[たりします]。 | On days off I clean, do the laundry and so on. | Pada hari libur saya bersih-bersih, mencuci baju, dan lain-lain.
+
+@ 〜たことがある
+= have done (experience) | pernah
+f V-ta + ことがある
+s te
+e 富士山に登っ[たことがあります]。 | I have climbed Mt. Fuji. | Saya pernah mendaki Gunung Fuji.
+e すしを食べ[たことがありますか]。 | Have you ever eaten sushi? | Apakah kamu pernah makan sushi?
+
+@ 〜ながら
+= while doing… | sambil
+f V-masu stem + ながら
+s order
+e 音楽を聞き[ながら]勉強します。 | I study while listening to music. | Saya belajar sambil mendengarkan musik.
+e 歩き[ながら]電話をしないでください。 | Please don't phone while walking. | Tolong jangan menelepon sambil berjalan.
+
+@ 〜前に | まえに
+= before… | sebelum
+f V-dict・N + の + 前に
+s order
+e 寝る[前に]歯を磨きます。 | I brush my teeth before going to bed. | Sebelum tidur saya menggosok gigi.
+e 食事の[前に]手を洗いましょう。 | Let's wash our hands before the meal. | Mari cuci tangan sebelum makan.
+
+@ 〜後で | あとで
+= after… | sesudah
+f V-ta・N + の + 後で
+s order
+e 授業が終わった[後で]、図書館へ行きます。 | After class ends, I'll go to the library. | Sesudah kelas selesai, saya pergi ke perpustakaan.
+e 仕事の[後で]、飲みに行きませんか。 | Want to go for a drink after work? | Mau minum-minum sesudah kerja?
+
+@ 〜とき
+= when… | ketika, saat
+f plain form・A-い・Na-な・N-の + とき
+s order
+e 子供の[とき]、よく川で泳ぎました。 | When I was a child, I often swam in the river. | Waktu kecil, saya sering berenang di sungai.
+e 寂しい[とき]、母に電話します。 | When I'm lonely, I call my mother. | Ketika kesepian, saya menelepon ibu.
+
+@ 〜けど
+= but (casual) | tapi (santai)
+f plain form + けど
+s but
+e 行きたい[けど]、時間がない。 | I want to go, but I don't have time. | Aku mau pergi, tapi tidak ada waktu.
+e 高い[けど]、買いました。 | It was expensive, but I bought it. | Mahal, tapi saya beli.
+
+@ 〜でしょう
+= probably…; …right? | mungkin; …kan?
+f plain form (Na/N without だ) + でしょう
+s copula
+e 明日は晴れる[でしょう]。 | It will probably be sunny tomorrow. | Besok mungkin cerah.
+e このかばん、高い[でしょう]。 | This bag was expensive, right? | Tas ini mahal, kan?
+
+@ 〜くなる / 〜になる
+= become… | menjadi
+f A-く・Na/N + に + なる
+s become
+e 暖か[くなりました]ね。 | It's gotten warm, hasn't it? | Sudah menjadi hangat, ya.
+e 姉は医者[になりました]。 | My older sister became a doctor. | Kakak perempuan saya menjadi dokter.
+
+@ 〜くする / 〜にする
+= make (something) … | membuat menjadi
+f A-く・Na + に + する
+s become
+e 部屋をきれい[にしました]。 | I tidied up the room. | Saya membersihkan kamar.
+e 音を小さ[くして]ください。 | Please turn the sound down. | Tolong kecilkan suaranya.
+
+@ 〜にする (choose)
+= decide on, I'll have… | memilih, saya pesan…
+f N + に + する
+s become
+e 私はコーヒー[にします]。 | I'll have coffee. | Saya pesan kopi.
+e 旅行は京都[にしました]。 | We chose Kyoto for the trip. | Untuk liburan, kami memilih Kyoto.
+
+@ もう〜ました
+= already did | sudah
+f もう + V-ました
+s polite
+e [もう]晩ご飯を食べ[ました]か。 | Have you already eaten dinner? | Kamu sudah makan malam?
+e 宿題は[もう]終わり[ました]。 | I've already finished my homework. | PR-nya sudah selesai.
+
+@ まだ〜ていません
+= not yet | belum
+f まだ + V-て + いません
+s degree
+e [まだ]昼ご飯を食べ[ていません]。 | I haven't eaten lunch yet. | Saya belum makan siang.
+e レポートは[まだ]書い[ていません]。 | I haven't written the report yet. | Laporannya belum saya tulis.
+
+@ あまり〜ない
+= not very, not much | tidak terlalu
+f あまり + negative
+s degree
+e この映画は[あまり]面白く[ない]。 | This movie isn't very interesting. | Film ini tidak terlalu menarik.
+e 肉は[あまり]食べ[ません]。 | I don't eat much meat. | Saya tidak terlalu sering makan daging.
+
+@ ぜんぜん〜ない
+= not at all | sama sekali tidak
+f ぜんぜん + negative
+s degree
+e 日本語が[ぜんぜん]分から[ない]。 | I don't understand Japanese at all. | Saya sama sekali tidak mengerti bahasa Jepang.
+e 昨日は[ぜんぜん]寝[ませんでした]。 | I didn't sleep at all yesterday. | Kemarin saya sama sekali tidak tidur.
+
+@ 〜がある / 〜がいる
+= there is (things / living beings) | ada (benda / makhluk hidup)
+f N + が + ある (things)・いる (people, animals)
+s exist
+e 机の上に本[があります]。 | There's a book on the desk. | Di atas meja ada buku.
+e 公園に子供[がいます]。 | There are children in the park. | Di taman ada anak-anak.
+
+@ 〜は〜にある / いる
+= X is (located) at Y | X ada di Y
+f N + は + place + に + ある・いる
+s exist
+e トイレ[は]二階[にあります]。 | The toilet is on the second floor. | Toiletnya ada di lantai dua.
+e 母[は]台所[にいます]。 | My mother is in the kitchen. | Ibu ada di dapur.
+
+@ 〜が好き / 〜が嫌い | がすき / がきらい
+= like / dislike | suka / tidak suka
+f N + が + 好き・嫌い
+s like
+e 私は音楽[が好き]です。 | I like music. | Saya suka musik.
+e 弟は野菜[が嫌い]です。 | My younger brother dislikes vegetables. | Adik laki-laki saya tidak suka sayur.
+
+@ 〜が上手 / 〜が下手 | がじょうず / がへた
+= good at / bad at | pandai / tidak pandai
+f N + が + 上手・下手
+s like
+e 田中さんは料理[が上手]です。 | Tanaka is good at cooking. | Tanaka pandai memasak.
+e 私は歌[が下手]です。 | I'm bad at singing. | Saya tidak pandai bernyanyi.
+
+@ 〜が分かる | がわかる
+= understand | mengerti
+f N + が + 分かる
+s like
+e 英語[が分かり]ますか。 | Do you understand English? | Apakah kamu mengerti bahasa Inggris?
+e この漢字の意味[が分かりません]。 | I don't understand this kanji's meaning. | Saya tidak mengerti arti kanji ini.
+
+@ 〜という
+= called…, named… | yang bernama
+f N + という + N
+e 「さくら」[という]店を知っていますか。 | Do you know a shop called Sakura? | Kamu tahu toko yang bernama Sakura?
+e 山田[という]人から電話がありました。 | There was a call from someone named Yamada. | Ada telepon dari orang bernama Yamada.
+
+@ 〜ので
+= because, since (softer, explaining) | karena (lebih halus, menjelaskan)
+f plain form (Na/N + な) + ので
+s but
+e 頭が痛い[ので]、早く帰ります。 | I have a headache, so I'll go home early. | Karena sakit kepala, saya pulang lebih awal.
+e 明日は休みな[ので]、ゆっくり寝ます。 | Tomorrow is a day off, so I'll sleep in. | Karena besok libur, saya akan tidur puas.
+
+@ 〜ごろ
+= around (a point in time) | sekitar (waktu)
+f time + ごろ
+s about
+e 七時[ごろ]家を出ます。 | I leave home around seven. | Saya keluar rumah sekitar jam tujuh.
+e 三月[ごろ]桜が咲きます。 | Cherry blossoms bloom around March. | Bunga sakura mekar sekitar bulan Maret.
+
+@ 〜ないで
+= without doing… | tanpa
+f V-nai + で
+e 朝ご飯を食べ[ないで]学校へ行きました。 | I went to school without eating breakfast. | Saya pergi ke sekolah tanpa sarapan.
+e 傘を持た[ないで]出かけました。 | I went out without an umbrella. | Saya keluar tanpa membawa payung.
+
+@ 〜なくてもいい
+= don't have to | tidak perlu
+f V-nai stem + なくてもいい
+s permission
+e 明日は来[なくてもいいです]。 | You don't have to come tomorrow. | Besok kamu tidak perlu datang.
+e 靴を脱が[なくてもいい]ですよ。 | You don't need to take off your shoes. | Tidak perlu melepas sepatu, kok.
+
+@ 〜てもいい
+= may, it's OK to | boleh
+f V-て + もいい
+s permission
+e 窓を開け[てもいい]ですか。 | May I open the window? | Bolehkah saya membuka jendela?
+e ここでたばこを吸っ[てもいい]ですよ。 | You may smoke here. | Boleh merokok di sini.
+
+@ 〜てはいけない
+= must not | tidak boleh
+f V-て + はいけない
+s permission
+e ここに車を止め[てはいけません]。 | You must not park here. | Tidak boleh memarkir mobil di sini.
+e 授業中に寝[てはいけない]。 | You must not sleep in class. | Tidak boleh tidur selama pelajaran.
+
+@ 〜なければならない
+= must, have to | harus
+f V-nai stem + なければならない
+s permission
+e 明日は早く起き[なければなりません]。 | I have to get up early tomorrow. | Besok saya harus bangun pagi.
+e 薬を飲ま[なければならない]。 | I have to take medicine. | Saya harus minum obat.
+
+@ 〜つもり
+= intend to, plan to | berencana, bermaksud
+f V-dict・V-nai + つもり
+s want
+e 夏休みに国へ帰る[つもり]です。 | I plan to go back to my country for the summer break. | Saya berencana pulang kampung saat liburan musim panas.
+e もうたばこは吸わない[つもり]です。 | I intend not to smoke anymore. | Saya bermaksud tidak merokok lagi.
+
+@ 〜方 | かた
+= how to, way of doing | cara
+f V-masu stem + 方
+e この漢字の読み[方]を教えてください。 | Please tell me how to read this kanji. | Tolong ajari cara membaca kanji ini.
+e 駅への行き[方]が分かりません。 | I don't know how to get to the station. | Saya tidak tahu cara pergi ke stasiun.
+
+@ 〜すぎる
+= too (much) | terlalu
+f V-masu stem・A (−い)・Na + すぎる
+e 昨日は飲み[すぎました]。 | I drank too much yesterday. | Kemarin saya terlalu banyak minum.
+e この靴は高[すぎます]。 | These shoes are too expensive. | Sepatu ini terlalu mahal.
+
+@ 〜ほうがいい
+= had better, should | sebaiknya
+f V-ta・V-nai + ほうがいい
+s permission
+e 早く寝た[ほうがいい]ですよ。 | You'd better go to bed early. | Sebaiknya kamu tidur lebih awal.
+e 無理しない[ほうがいい]。 | You shouldn't overdo it. | Sebaiknya jangan memaksakan diri.

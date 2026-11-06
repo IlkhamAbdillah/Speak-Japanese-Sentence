@@ -1,0 +1,388 @@
+# Particles (助詞). Format: see README.md in this folder.
+# The particle is the first word of the pattern ("に (time)" → に); its uses are listed
+# together in the order below. `l` = JLPT level of the use (default N5).
+# [へ|に] in an example = both are right; the first is the one shown.
+
+@ は (topic)
+= as for, (topic of the sentence) | kalau, (topik kalimat)
+f N + は
+s wa-ga
+e 私[は]学生です。 | I'm a student. | Saya mahasiswa.
+e 今日[は]日曜日です。 | Today is Sunday. | Hari ini hari Minggu.
+
+@ は (contrast)
+= (this one, unlike others) | (yang ini, berbeda dengan yang lain)
+f N + は
+s wa-ga
+e 肉は食べますが、魚[は]食べません。 | I eat meat, but not fish. | Daging saya makan, tapi ikan tidak.
+e お酒は飲みませんが、ビール[は]少し飲みます。 | I don't drink sake, but I do drink a little beer. | Sake saya tidak minum, tapi bir sedikit-sedikit saya minum.
+
+@ は〜が (feature)
+= X has a … Y; as for X, Y is … | X itu Y-nya …
+f N1 + は + N2 + が + adjective
+s wa-ga
+e 象は鼻[が]長いです。 | Elephants have long trunks. | Gajah belalainya panjang.
+e この町は人[が]多いです。 | This town has a lot of people. | Kota ini orangnya banyak.
+
+@ が (subject)
+= (subject: new information, after question words) | (subjek: info baru, setelah kata tanya)
+f N + が
+s wa-ga
+e 誰[が]来ましたか。 | Who came? | Siapa yang datang?
+e あ、雨[が]降ってきた。 | Oh, it's started to rain. | Wah, hujan mulai turun.
+
+@ が (object of feelings and ability)
+= (with 好き, 分かる, ほしい, できる, 上手…) | (dengan 好き, 分かる, ほしい, できる, 上手…)
+f N + が + 好き・分かる・ほしい・できる
+s wa-ga
+e 私は猫[が]好きです。 | I like cats. | Saya suka kucing.
+e 兄は中国語[が]分かります。 | My brother understands Chinese. | Kakak laki-laki saya mengerti bahasa Mandarin.
+
+@ が (but)
+= but | tetapi
+f clause + が, clause
+s but
+e この店は安いです[が]、おいしくないです。 | This shop is cheap, but not tasty. | Toko ini murah, tetapi tidak enak.
+e すみません[が]、駅はどこですか。 | Excuse me, but where's the station? | Maaf, stasiun di mana, ya?
+
+@ を (object)
+= (direct object) | (objek langsung)
+f N + を + V
+e 毎朝コーヒー[を]飲みます。 | I drink coffee every morning. | Setiap pagi saya minum kopi.
+e 友達に手紙[を]書きました。 | I wrote a letter to a friend. | Saya menulis surat untuk teman.
+
+@ を (route)
+= through, along, across (a place you move through) | melewati, menyusuri (tempat yang dilalui)
+f place + を + 歩く・渡る・通る・飛ぶ
+s place
+e 公園[を]散歩します。 | I take a walk through the park. | Saya berjalan-jalan di taman.
+e この橋[を]渡ってください。 | Please cross this bridge. | Tolong seberangi jembatan ini.
+
+@ を (leaving)
+= out of, from (a place you leave) | dari (tempat yang ditinggalkan)
+f place + を + 出る・降りる・卒業する
+s from
+e 八時に家[を]出ます。 | I leave home at eight. | Saya keluar rumah jam delapan.
+e 次の駅で電車[を]降ります。 | I get off the train at the next station. | Saya turun dari kereta di stasiun berikutnya.
+
+@ に (time)
+= at, on, in (a point in time) | pada (waktu)
+f time + に
+s time
+e 七時[に]起きます。 | I get up at seven. | Saya bangun jam tujuh.
+e 日曜日[に]映画を見ました。 | I saw a movie on Sunday. | Saya menonton film pada hari Minggu.
+
+@ に (destination)
+= to, into (where you go or put something) | ke, di (tujuan, tempat menaruh)
+f place + に + 行く・来る・入る・置く
+s place
+e 来年、日本[に|へ]行きます。 | I'm going to Japan next year. | Tahun depan saya pergi ke Jepang.
+e かばんを机の上[に]置きました。 | I put the bag on the desk. | Saya menaruh tas di atas meja.
+
+@ に (existence)
+= in, at (where something is) | di (tempat sesuatu berada)
+f place + に + ある・いる・住む
+s place
+e 駅の前[に]銀行があります。 | There's a bank in front of the station. | Di depan stasiun ada bank.
+e 姉は東京[に]住んでいます。 | My older sister lives in Tokyo. | Kakak perempuan saya tinggal di Tokyo.
+
+@ に (to someone)
+= to (the person who receives) | kepada (penerima)
+f person + に + あげる・言う・会う・電話する
+s person
+e 母[に]花をあげました。 | I gave my mother flowers. | Saya memberi ibu bunga.
+e 明日、先生[に]会います。 | I'll meet the teacher tomorrow. | Besok saya bertemu guru.
+
+@ に (by someone)
+= by, from (passive, もらう) | oleh, dari (pasif, もらう)
+f person + に + V-passive・V-て + もらう
+l N4
+s person
+e 先生[に]褒められました。 | I was praised by the teacher. | Saya dipuji oleh guru.
+e 友達[に]本を貸してもらった。 | I had a friend lend me a book. | Saya dipinjami buku oleh teman.
+
+@ に (purpose)
+= to (do), for | untuk
+f V-masu stem・N + に + 行く・来る
+s purpose
+e 図書館へ本を借り[に]行きます。 | I'm going to the library to borrow books. | Saya pergi ke perpustakaan untuk meminjam buku.
+e 京都へ旅行[に]行きました。 | I went to Kyoto on a trip. | Saya pergi berwisata ke Kyoto.
+
+@ に (change)
+= (become / decide on) | (menjadi / memilih)
+f N・Na + に + なる・する
+s change
+e 兄は医者[に]なりました。 | My brother became a doctor. | Kakak laki-laki saya menjadi dokter.
+e 飲み物はお茶[に]します。 | I'll have tea to drink. | Minumannya saya pilih teh.
+
+@ に (frequency)
+= per, a (how often) | per, dalam (frekuensi)
+f period + に + number
+s amount
+e 一週間[に]二回、ジムに行きます。 | I go to the gym twice a week. | Saya ke gym dua kali seminggu.
+e 薬は一日[に]三回飲んでください。 | Take the medicine three times a day. | Minum obatnya tiga kali sehari.
+
+@ へ (direction)
+= to, towards | ke, menuju
+f place + へ + 行く・来る・帰る
+s place
+e 夏休みに国[へ|に]帰ります。 | I'm going back to my country for the summer break. | Liburan musim panas saya pulang kampung.
+e 東[へ]まっすぐ進んでください。 | Please go straight east. | Silakan jalan lurus ke arah timur.
+
+@ で (place of action)
+= at, in (where something happens) | di (tempat kegiatan)
+f place + で + V
+s place
+e 図書館[で]勉強します。 | I study at the library. | Saya belajar di perpustakaan.
+e 駅の前[で]友達に会いました。 | I met a friend in front of the station. | Saya bertemu teman di depan stasiun.
+
+@ で (means)
+= by, with (a means or tool) | dengan, naik (alat, cara)
+f N + で
+s means
+e バス[で]学校へ行きます。 | I go to school by bus. | Saya pergi ke sekolah naik bus.
+e 日本語[で]話しましょう。 | Let's talk in Japanese. | Mari berbicara dalam bahasa Jepang.
+
+@ で (material)
+= from, out of (what it's made of) | dari (bahan)
+f material + で + 作る
+l N4
+s means
+e この机は木[で]作りました。 | I made this desk out of wood. | Meja ini saya buat dari kayu.
+e 紙[で]飛行機を作った。 | I made a plane out of paper. | Saya membuat pesawat dari kertas.
+
+@ で (cause)
+= because of, due to | karena
+f N + で
+l N4
+s cause
+e 風邪[で]学校を休みました。 | I missed school because of a cold. | Saya tidak masuk sekolah karena masuk angin.
+e 事故[で]電車が止まった。 | The train stopped because of an accident. | Kereta berhenti karena kecelakaan.
+
+@ で (scope)
+= in, of (within a group or range) | di antara, dalam (lingkup)
+f group・place + で + 一番・superlative
+s scope
+e クラス[で]一番背が高いのは誰ですか。 | Who is the tallest in the class? | Siapa yang paling tinggi di kelas?
+e 世界[で]一番高い山はエベレストです。 | The highest mountain in the world is Everest. | Gunung tertinggi di dunia adalah Everest.
+
+@ で (total, how many people)
+= for, in all; (by oneself, together) | semuanya; (sendirian, bersama)
+f amount・人数 + で
+s amount
+e りんごは三つ[で]五百円です。 | The apples are 500 yen for three. | Apelnya tiga buah lima ratus yen.
+e 昨日は一人[で]映画を見ました。 | Yesterday I watched a movie by myself. | Kemarin saya menonton film sendirian.
+
+@ と (and)
+= and (a complete list) | dan (daftar lengkap)
+f N1 + と + N2
+s and
+e パン[と]牛乳を買いました。 | I bought bread and milk. | Saya membeli roti dan susu.
+e 父[と]母は旅行中です。 | My father and mother are on a trip. | Ayah dan ibu sedang bepergian.
+
+@ と (with)
+= with (together with someone) | bersama, dengan
+f person + と + V
+s person
+e 友達[と]映画を見ました。 | I watched a movie with a friend. | Saya menonton film bersama teman.
+e 週末は家族[と]過ごします。 | I spend weekends with my family. | Akhir pekan saya habiskan bersama keluarga.
+
+@ と (quote)
+= (quoting: say / think that…) | (kutipan: berkata / berpikir bahwa…)
+f quote・plain form + と + 言う・思う・聞く
+l N4
+s quote
+e 彼は「すぐ行く」[と]言いました。 | He said, "I'll come right away." | Dia berkata, "Aku segera datang."
+e 明日は晴れる[と]思います。 | I think it will be sunny tomorrow. | Saya pikir besok cerah.
+
+@ と (comparison)
+= as, from (same as / different from) | dengan (sama dengan / berbeda dengan)
+f N + と + 同じ・違う・似ている
+l N4
+s compare
+e 私のかばんはあなたの[と]同じです。 | My bag is the same as yours. | Tas saya sama dengan punyamu.
+e 日本の習慣は私の国[と]違います。 | Japanese customs are different from my country's. | Kebiasaan Jepang berbeda dengan negara saya.
+
+@ や (and so on)
+= X, Y and so on (some examples) | X, Y, dan lain-lain (beberapa contoh)
+f N1 + や + N2 + (など)
+s and
+e 机の上に本[や]ペンがあります。 | There are books, pens and such on the desk. | Di atas meja ada buku, pulpen, dan lain-lain.
+e りんご[や]みかんを買いました。 | I bought apples, oranges and so on. | Saya membeli apel, jeruk, dan sebagainya.
+
+@ の (possession, linking)
+= of, 's | milik, dari
+f N1 + の + N2
+s link
+e これは私[の]かばんです。 | This is my bag. | Ini tas saya.
+e 日本語[の]本を買いました。 | I bought a Japanese book. | Saya membeli buku bahasa Jepang.
+
+@ の (one, thing)
+= the one, (turns a verb into a noun) | yang, (membendakan kata kerja)
+f V・A + の
+l N4
+s link
+e 赤い[の]をください。 | The red one, please. | Tolong yang merah.
+e 私は絵を描く[の]が好きです。 | I like drawing pictures. | Saya suka menggambar.
+
+@ の (subject in a clause)
+= (subject inside a noun-modifying clause) | (subjek di dalam anak kalimat)
+f N + の + V + N
+l N4
+s wa-ga
+e 母[の|が]作った料理はおいしい。 | The food my mother made is delicious. | Masakan buatan ibu enak.
+e 背[の|が]高い人が田中さんです。 | The tall person is Tanaka. | Orang yang tinggi itu Tanaka.
+
+@ も (also)
+= also, too; both … and | juga; baik … maupun
+f N + も
+s also
+e 私[も]学生です。 | I'm a student too. | Saya juga mahasiswa.
+e 弟は野菜も果物[も]嫌いです。 | My brother hates both vegetables and fruit. | Adik laki-laki saya tidak suka sayur maupun buah.
+
+@ も (as many as)
+= as many as, as much as (surprise at an amount) | sampai, sebanyak (terkejut akan jumlah)
+f amount + も
+l N4
+s amount
+e 駅で一時間[も]待ちました。 | I waited at the station for a whole hour. | Saya menunggu di stasiun sampai satu jam.
+e 彼はケーキを五つ[も]食べた。 | He ate as many as five pieces of cake. | Dia makan kue sampai lima potong.
+
+@ も (not any)
+= (with a negative: nothing, nobody, nowhere) | (dengan negatif: tidak apa pun, siapa pun)
+f question word + も + negative
+s also
+e 教室には誰[も]いません。 | There's nobody in the classroom. | Di kelas tidak ada siapa pun.
+e 朝から何[も]食べていない。 | I haven't eaten anything since morning. | Sejak pagi saya belum makan apa pun.
+
+@ から (from)
+= from (start point in time or place) | dari (titik awal waktu atau tempat)
+f N + から
+s from
+e 授業は九時[から]です。 | Class is from nine. | Pelajaran mulai dari jam sembilan.
+e 東京[から]大阪まで新幹線で行きました。 | I went from Tokyo to Osaka by shinkansen. | Saya pergi dari Tokyo ke Osaka naik shinkansen.
+
+@ から (because)
+= because, so | karena, jadi
+f clause + から
+s cause
+e 雨が降っています[から]、出かけません。 | It's raining, so I won't go out. | Karena hujan, saya tidak keluar.
+e 時間がない[から]、タクシーで行こう。 | We don't have time, so let's take a taxi. | Tidak ada waktu, jadi ayo naik taksi.
+
+@ から (made from)
+= from (raw material, changed form) | dari (bahan yang sudah berubah)
+f material + から + 作る・できる
+l N4
+s means
+e 日本酒は米[から]作られます。 | Sake is made from rice. | Sake dibuat dari beras.
+e チーズは牛乳[から]できています。 | Cheese is made from milk. | Keju terbuat dari susu.
+
+@ まで (until, as far as)
+= until, to, as far as | sampai
+f N + まで
+s from
+e 九時から五時[まで]働きます。 | I work from nine to five. | Saya bekerja dari jam sembilan sampai jam lima.
+e 駅[まで]歩いて十分です。 | It's ten minutes on foot to the station. | Ke stasiun sepuluh menit jalan kaki.
+
+@ まで (even)
+= even (surprise) | bahkan
+f N + まで
+l N3
+s even
+e 子供[まで]そのニュースを知っていた。 | Even children knew that news. | Bahkan anak-anak tahu berita itu.
+e 雨だけでなく、雷[まで]鳴り出した。 | Not just rain, even thunder started. | Bukan hanya hujan, bahkan petir mulai bergemuruh.
+
+@ より (than)
+= than | daripada
+f N + より
+s compare
+e 今日は昨日[より]寒いです。 | Today is colder than yesterday. | Hari ini lebih dingin daripada kemarin.
+e 電車はバス[より]速いです。 | Trains are faster than buses. | Kereta lebih cepat daripada bus.
+
+@ か (question)
+= (question marker) | (penanda pertanyaan)
+f sentence + か
+s ending
+e これは何です[か]。 | What is this? | Ini apa?
+e 明日、学校へ行きます[か]。 | Are you going to school tomorrow? | Besok kamu pergi ke sekolah?
+
+@ か (or)
+= or | atau
+f N1 + か + N2
+s and
+e コーヒー[か]紅茶を飲みますか。 | Will you have coffee or tea? | Mau minum kopi atau teh?
+e 月曜日[か]火曜日に来てください。 | Please come on Monday or Tuesday. | Tolong datang hari Senin atau Selasa.
+
+@ ね (agreement)
+= …isn't it? right? | …ya? kan?
+f sentence + ね
+s ending
+e 今日は暑いです[ね]。 | It's hot today, isn't it? | Hari ini panas, ya.
+e このケーキ、おいしい[ね]。 | This cake is good, isn't it? | Kue ini enak, ya.
+
+@ よ (telling)
+= …you know, I tell you | lho, kok
+f sentence + よ
+s ending
+e あの店は安いです[よ]。 | That shop is cheap, you know. | Toko itu murah, lho.
+e 明日はテストです[よ]。 | There's a test tomorrow, you know. | Besok ada ujian, lho.
+
+@ よね (checking)
+= …right? (checking what you think is true) | …kan? (memastikan)
+f sentence + よね
+l N4
+s ending
+e 会議は三時からです[よね]。 | The meeting is from three, right? | Rapatnya mulai jam tiga, kan?
+e 田中さんも来る[よね]。 | Tanaka is coming too, right? | Tanaka juga datang, kan?
+
+@ かな (wondering)
+= I wonder | kira-kira, ya
+f plain form + かな
+l N4
+s ending
+e 明日、晴れる[かな]。 | I wonder if it'll be sunny tomorrow. | Besok cerah tidak, ya?
+e 彼はもう着いた[かな]。 | I wonder if he's arrived yet. | Dia sudah sampai belum, ya?
+
+@ しか (only)
+= only, nothing but (with a negative) | hanya (dengan negatif)
+f N + しか + negative
+s only
+e 財布に百円[しか]ありません。 | I only have 100 yen in my wallet. | Di dompet saya hanya ada seratus yen.
+e 朝はコーヒー[しか]飲まない。 | In the morning I only drink coffee. | Pagi hari saya hanya minum kopi.
+
+@ だけ (just)
+= only, just | hanya, saja
+f N + だけ
+s only
+e 一つ[だけ]質問があります。 | I have just one question. | Saya hanya punya satu pertanyaan.
+e 日曜日[だけ]休みです。 | Only Sunday is a day off. | Hanya hari Minggu yang libur.
+
+@ ぐらい (about)
+= about, around (amount) | sekitar (jumlah)
+f amount + ぐらい・くらい
+s amount
+e 駅まで十分[ぐらい|くらい]かかります。 | It takes about ten minutes to the station. | Ke stasiun butuh sekitar sepuluh menit.
+e 毎日二時間[くらい|ぐらい]勉強します。 | I study about two hours every day. | Setiap hari saya belajar sekitar dua jam.
+
+@ など (such as)
+= and so on, things like | dan lain-lain, seperti
+f N + など
+s and
+e 京都や奈良[など]へ行きました。 | I went to places like Kyoto and Nara. | Saya pergi ke Kyoto, Nara, dan lain-lain.
+e 飲み物はお茶[など]いかがですか。 | How about something to drink, like tea? | Bagaimana kalau minum teh atau sejenisnya?
+
+@ でも (even)
+= even | bahkan … pun
+f N + でも
+l N4
+s even
+e この問題は子供[でも]分かります。 | Even a child can understand this question. | Soal ini bahkan anak kecil pun mengerti.
+e 日曜日[でも]、店は開いています。 | The shop is open even on Sundays. | Hari Minggu pun tokonya buka.
+
+@ ずつ (each)
+= each, at a time | masing-masing, sedikit demi sedikit
+f amount + ずつ
+l N4
+s amount
+e 一人に二つ[ずつ]配ってください。 | Please hand out two to each person. | Tolong bagikan dua buah ke setiap orang.
+e 毎日少し[ずつ]日本語を勉強しています。 | I study Japanese a little at a time every day. | Setiap hari saya belajar bahasa Jepang sedikit demi sedikit.

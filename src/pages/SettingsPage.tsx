@@ -94,9 +94,11 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
 
   const handleSave = () => {
     saveSettings(settings);
-    // Back to the page AI Setup was opened from (Speaking Practice / JLPT Mock Test)
+    // Back to the page that sent the learner here (e.g. a missing-AI notice), else the previous page
     const from = (location.state as { from?: string } | null)?.from;
-    navigate(from ?? '/');
+    if (from) navigate(from);
+    else if ((window.history.state as { idx?: number } | null)?.idx) navigate(-1);
+    else navigate('/');
   };
 
   const handleClearKey = () => {

@@ -1,0 +1,572 @@
+# JLPT N1 grammar. Format: see README.md in this folder.
+
+@ 〜あっての
+= only possible because of, owes everything to | ada karena, tanpa … tidak ada
+f N1 + あっての + N2
+s nara
+e お客様[あっての]商売です。 | Our business exists only because of our customers. | Usaha kami ada karena pelanggan.
+e 健康[あっての]人生だ。 | Life depends on good health. | Tanpa kesehatan, tidak ada kehidupan.
+
+@ 〜いかんによって / 〜いかんでは
+= depending on | tergantung pada
+f N(-の) + いかんによって・いかんでは
+s regardless
+e 結果の[いかんによって]は、計画を変更する。 | Depending on the results, we'll change the plan. | Tergantung hasilnya, rencana akan diubah.
+e 成績[いかんでは]、奨学金がもらえない。 | Depending on your grades, you may not get the scholarship. | Tergantung nilainya, bisa saja tidak mendapat beasiswa.
+
+@ 〜いかんにかかわらず / 〜いかんによらず
+= regardless of | apa pun (hasilnya)
+f N-の + いかんにかかわらず・いかんによらず
+s regardless
+e 理由の[いかんにかかわらず]、遅刻は認めない。 | Lateness won't be accepted, whatever the reason. | Apa pun alasannya, keterlambatan tidak diterima.
+e 結果の[いかんによらず]、報告してください。 | Please report, whatever the result. | Apa pun hasilnya, tolong laporkan.
+
+@ 〜以前の問題 | いぜんのもんだい
+= a problem that comes before …, more basic than | masalah yang lebih mendasar dari
+f N + 以前の問題だ
+s situation
+e それは能力[以前の問題]だ。 | That's a problem more basic than ability. | Itu masalah yang lebih mendasar daripada kemampuan.
+e 遅刻するのは、マナー[以前の問題]だ。 | Being late is a problem even before manners. | Terlambat itu masalah yang lebih mendasar dari sekadar sopan santun.
+
+@ 〜かたわら
+= while also (doing as a side activity) | sambil (kegiatan sampingan)
+f V-dict・N-の + かたわら
+s situation
+e 彼は会社に勤める[かたわら]、小説を書いている。 | He writes novels while working at a company. | Dia menulis novel sambil bekerja di perusahaan.
+e 子育ての[かたわら]、資格の勉強をしている。 | She's studying for a qualification while raising children. | Dia belajar untuk sertifikasi sambil mengasuh anak.
+
+@ 〜が早いか | がはやいか
+= no sooner than | begitu … langsung
+f V-dict・V-ta + が早いか
+s asap
+e 彼はベルが鳴る[が早いか]、教室を飛び出した。 | No sooner had the bell rung than he rushed out of the classroom. | Begitu bel berbunyi, dia langsung lari keluar kelas.
+e 子供は家に帰る[が早いか]、ゲームを始めた。 | No sooner was the child home than he started playing games. | Begitu pulang, anak itu langsung main game.
+
+@ 〜や否や | やいなや
+= as soon as, the instant | segera setelah, begitu
+f V-dict + や否や
+s asap
+e 彼女は部屋に入る[や否や]、泣き出した。 | The instant she entered the room, she burst into tears. | Begitu masuk kamar, dia langsung menangis.
+e 発売される[や否や]、売り切れた。 | It sold out as soon as it went on sale. | Begitu dijual, langsung habis.
+
+@ 〜なり
+= as soon as (then something unexpected) | begitu … langsung
+f V-dict + なり
+s asap
+e 父は家に帰る[なり]、寝てしまった。 | As soon as Dad got home, he fell asleep. | Begitu sampai rumah, ayah langsung tidur.
+e 彼は私の顔を見る[なり]、笑い出した。 | He burst out laughing the moment he saw my face. | Begitu melihat wajah saya, dia langsung tertawa.
+
+@ 〜そばから
+= no sooner … than (again) | baru saja … sudah lagi
+f V-dict・V-ta + そばから
+s asap
+e 片付ける[そばから]、子供が散らかす。 | No sooner do I tidy up than the kids make a mess again. | Baru saja dibereskan, anak-anak sudah mengacak-acak lagi.
+e 習った[そばから]忘れてしまう。 | I forget things as soon as I learn them. | Baru saja dipelajari, sudah lupa.
+
+@ 〜を皮切りに | をかわきりに
+= starting with (and then more) | diawali dengan
+f N + を皮切りに
+s wo
+e 東京[を皮切りに]、全国でコンサートを行う。 | Starting in Tokyo, they'll hold concerts nationwide. | Diawali di Tokyo, konser akan diadakan di seluruh negeri.
+e 彼の発言[を皮切りに]、次々と意見が出た。 | Starting with his remark, one opinion after another came out. | Diawali ucapannya, berbagai pendapat bermunculan.
+
+@ 〜を限りに | をかぎりに
+= as of (the last time), from … on no more | mulai … tidak lagi, terakhir
+f N + を限りに
+s wo
+e 今日[を限りに]、たばこをやめる。 | As of today, I'm quitting smoking. | Mulai hari ini, saya berhenti merokok.
+e 今月[を限りに]、この店は閉店します。 | This shop closes for good at the end of this month. | Toko ini tutup untuk terakhir kalinya bulan ini.
+
+@ 〜をもって
+= with, by means of; as of (formal) | dengan; per (formal)
+f N + をもって
+s wo
+e 本日[をもって]、受付を終了します。 | Registration closes as of today. | Per hari ini, pendaftaran ditutup.
+e 書面[をもって]お知らせします。 | We'll inform you in writing. | Kami akan memberi tahu secara tertulis.
+
+@ 〜をよそに
+= ignoring, in disregard of | tanpa menghiraukan
+f N + をよそに
+s ignore
+e 親の心配[をよそに]、彼は一人で旅に出た。 | Ignoring his parents' worries, he went travelling alone. | Tanpa menghiraukan kekhawatiran orang tuanya, dia bepergian sendirian.
+e 住民の反対[をよそに]、工事が始まった。 | Construction began despite residents' opposition. | Pembangunan dimulai tanpa menghiraukan penolakan warga.
+
+@ 〜をものともせず(に)
+= in defiance of, undaunted by | tanpa gentar terhadap
+f N + をものともせず(に)
+s ignore
+e 彼はけが[をものともせず]、試合に出た。 | Undaunted by his injury, he played in the match. | Tanpa gentar akan cederanya, dia ikut bertanding.
+e 嵐[をものともせずに]、船は進んだ。 | The ship pressed on in defiance of the storm. | Kapal itu terus maju tanpa gentar menghadapi badai.
+
+@ 〜を余儀なくされる | をよぎなくされる
+= be forced to (by circumstances) | terpaksa (karena keadaan)
+f N + を余儀なくされる
+s neg
+e 大雨のため、試合は中止[を余儀なくされた]。 | The game was forced to be cancelled due to heavy rain. | Karena hujan lebat, pertandingan terpaksa dibatalkan.
+e 会社の倒産で、転職[を余儀なくされた]。 | The company's bankruptcy forced me to change jobs. | Karena perusahaan bangkrut, saya terpaksa pindah kerja.
+
+@ 〜を禁じ得ない | をきんじえない
+= can't help feeling (formal) | tidak bisa menahan (perasaan, formal)
+f N + を禁じ得ない
+s neg
+e 被害者の話に、涙[を禁じ得なかった]。 | I couldn't hold back tears at the victims' stories. | Mendengar cerita korban, saya tidak bisa menahan air mata.
+e その判決には怒り[を禁じ得ない]。 | I can't help feeling angry at that ruling. | Saya tidak bisa menahan amarah atas putusan itu.
+
+@ 〜をおいて
+= nobody/nothing other than | selain … tidak ada
+f N + をおいて(ほかに)〜ない
+s situation
+e この仕事を任せられるのは、彼[をおいて]ほかにいない。 | There's nobody but him we can trust with this job. | Selain dia, tidak ada yang bisa diserahi pekerjaan ini.
+e 話し合うなら、今[をおいて]ない。 | If we're going to talk, there's no time but now. | Kalau mau berdiskusi, sekaranglah waktunya.
+
+@ 〜を踏まえて | をふまえて
+= taking into account, based on | dengan mempertimbangkan
+f N + を踏まえて
+s wo
+e 前回の反省[を踏まえて]、計画を立て直した。 | We redid the plan taking last time's lessons into account. | Dengan mempertimbangkan evaluasi sebelumnya, rencananya disusun ulang.
+e 皆さんの意見[を踏まえて]、決定します。 | We'll decide taking everyone's opinions into account. | Kami akan memutuskan dengan mempertimbangkan pendapat semua.
+
+@ 〜にあって
+= in (a situation), being in | dalam (situasi)
+f N + にあって
+s situation
+e 厳しい状況[にあって]も、彼は明るさを失わなかった。 | Even in a tough situation, he didn't lose his cheerfulness. | Bahkan dalam situasi sulit, dia tidak kehilangan keceriaannya.
+e 異国の地[にあって]、家族の大切さを知った。 | Being in a foreign land, I learned the value of family. | Berada di negeri asing, saya mengetahui berharganya keluarga.
+
+@ 〜に至っては | にいたっては
+= as for (the extreme case) | bahkan, apalagi
+f N + に至っては
+s letalone
+e みんな遅刻した。田中さん[に至っては]、来もしなかった。 | Everyone was late. As for Tanaka, he didn't even come. | Semua terlambat. Bahkan Tanaka tidak datang sama sekali.
+e 兄は勉強が嫌いで、弟[に至っては]教科書も開かない。 | The older brother hates studying, and the younger one doesn't even open his textbook. | Kakaknya malas belajar, apalagi adiknya, membuka buku pun tidak.
+
+@ 〜に至るまで | にいたるまで
+= (all the way) down to, even | sampai ke, bahkan
+f N + に至るまで
+s letalone
+e 子供から大人[に至るまで]、この歌を知っている。 | Everyone from children to adults knows this song. | Dari anak-anak sampai orang dewasa, semua tahu lagu ini.
+e 彼女は服から靴[に至るまで]、全部ブランド品だ。 | Everything she wears, from clothes down to shoes, is brand-name. | Dari baju sampai sepatu, semua yang dia pakai barang bermerek.
+
+@ 〜に即して | にそくして
+= in line with, in accordance with | sesuai dengan
+f N + に即して
+s wo
+e 実情[に即して]、対策を考える必要がある。 | We need to think of measures in line with the actual situation. | Perlu memikirkan langkah sesuai kondisi nyata.
+e 法律[に即して]判断する。 | We judge in accordance with the law. | Kami menilai sesuai hukum.
+
+@ 〜にひきかえ
+= in (sharp) contrast to | berbanding terbalik dengan
+f N・plain form + の + にひきかえ
+s situation
+e 兄[にひきかえ]、弟はよく勉強する。 | In contrast to his older brother, the younger one studies hard. | Berbeda dengan kakaknya, adiknya rajin belajar.
+e 去年の暑さ[にひきかえ]、今年の夏は涼しい。 | Unlike last year's heat, this summer is cool. | Berbanding terbalik dengan panasnya tahun lalu, musim panas tahun ini sejuk.
+
+@ 〜にもまして
+= even more than | bahkan lebih dari
+f N + にもまして
+s letalone
+e 今年は去年[にもまして]暑い。 | This year is even hotter than last year. | Tahun ini bahkan lebih panas dari tahun lalu.
+e 何[にもまして]、健康が大切だ。 | Health matters more than anything. | Kesehatan lebih penting dari apa pun.
+
+@ 〜にたえる / 〜にたえない
+= worth (doing) / unbearable to | layak / tidak tahan untuk
+f V-dict・N + にたえる・にたえない
+s worth
+e 彼の作品は、大人の鑑賞[にたえる]。 | His work is worth an adult's attention. | Karyanya layak dinikmati orang dewasa.
+e その事故の現場は、見る[にたえない]ものだった。 | The accident scene was unbearable to look at. | Lokasi kecelakaan itu tidak tahan untuk dilihat.
+
+@ 〜に足る | にたる
+= worthy of, enough to | layak, cukup untuk
+f V-dict・N + に足る
+s worth
+e 彼は信頼する[に足る]人物だ。 | He's a person worthy of trust. | Dia orang yang layak dipercaya.
+e 証拠は、彼を逮捕する[に足る]ものではなかった。 | The evidence wasn't enough to arrest him. | Buktinya tidak cukup untuk menangkapnya.
+
+@ 〜に値する | にあたいする
+= worth, deserve | layak, patut
+f V-dict・N + に値する
+s worth
+e この本は一読[に値する]。 | This book is worth a read. | Buku ini layak dibaca.
+e 彼の勇気は称賛[に値する]。 | His courage deserves praise. | Keberaniannya patut dipuji.
+
+@ 〜にかたくない
+= not hard to (imagine) | tidak sulit untuk (dibayangkan)
+f N・V-dict + にかたくない
+s worth
+e 彼女の悲しみは想像[にかたくない]。 | Her grief isn't hard to imagine. | Kesedihannya tidak sulit dibayangkan.
+e 親の苦労は察する[にかたくない]。 | It's easy to guess how hard it was for the parents. | Tidak sulit menebak susah payahnya orang tua.
+
+@ 〜ならでは
+= unique to, only possible with | khas, hanya ada pada
+f N + ならでは(の)
+s nara
+e これは京都[ならでは]の景色だ。 | This is a view you only get in Kyoto. | Ini pemandangan khas Kyoto.
+e 子供[ならではの]発想だ。 | That's an idea only a child would have. | Ini ide yang khas anak-anak.
+
+@ 〜なりに
+= in one's own way | dengan caranya sendiri
+f N・plain form + なりに
+s nara
+e 私[なりに]頑張ったつもりです。 | I think I did my best in my own way. | Menurut saya, saya sudah berusaha dengan cara saya sendiri.
+e 子供は子供[なりに]考えている。 | Kids think things through in their own way. | Anak-anak berpikir dengan cara mereka sendiri.
+
+@ 〜なしに(は) / 〜なくして(は)
+= without | tanpa
+f N + なしに・なくして(は)
+s nara
+e 努力[なくして]成功はない。 | There's no success without effort. | Tanpa usaha, tidak ada keberhasilan.
+e 許可[なしに]、入ってはいけない。 | You mustn't enter without permission. | Tidak boleh masuk tanpa izin.
+
+@ 〜ならまだしも
+= it would be one thing if …, but | kalau … sih masih mending, tapi
+f N・plain form + ならまだしも
+s nara
+e 一度[ならまだしも]、何度も同じミスをするのは困る。 | Once would be one thing, but making the same mistake repeatedly is a problem. | Kalau sekali sih masih mending, tapi kesalahan yang sama berkali-kali itu merepotkan.
+e 子供[ならまだしも]、大人がそんなことをするなんて。 | If it were a child, fine, but for an adult to do that! | Kalau anak kecil masih bisa dimaklumi, tapi orang dewasa melakukan itu?
+
+@ 〜とあって
+= because (it's a special situation) | karena (situasi khusus)
+f plain form・N + とあって
+s to
+e 連休[とあって]、観光地はどこも込んでいる。 | Because it's a long weekend, every tourist spot is crowded. | Karena libur panjang, semua tempat wisata ramai.
+e 人気歌手が来る[とあって]、会場は満員だった。 | With a popular singer coming, the venue was packed. | Karena penyanyi populer datang, tempatnya penuh.
+
+@ 〜とあれば
+= if it's for (then I'll even…) | kalau demi
+f N・plain form + とあれば
+s to
+e 子供のため[とあれば]、どんなことでもする。 | If it's for my child, I'll do anything. | Kalau demi anak, apa pun akan saya lakukan.
+e 社長の命令[とあれば]、従うしかない。 | If it's the president's order, we have to obey. | Kalau perintah direktur, harus dituruti.
+
+@ 〜といったらない
+= extremely, indescribably | luar biasa, tidak terkatakan
+f A-い・N + といったらない
+s extreme
+e 試合に負けたときの悔しさ[といったらなかった]。 | I can't describe how frustrated I was when we lost. | Kecewanya saat kalah bertanding luar biasa.
+e あの店の店員の態度の悪さ[といったらない]。 | That shop's staff are unbelievably rude. | Sikap pegawai toko itu buruk sekali.
+
+@ 〜といえども
+= even though, even (formal) | sekalipun, meskipun (formal)
+f N・plain form + といえども
+s to
+e 子供[といえども]、ルールは守らなければならない。 | Even children must follow the rules. | Sekalipun anak-anak, aturan harus dipatuhi.
+e プロ[といえども]、失敗することはある。 | Even professionals sometimes fail. | Meskipun profesional, kadang gagal juga.
+
+@ 〜と思いきや | とおもいきや
+= I thought …, but actually | dikira …, ternyata
+f plain form + と思いきや
+s to
+e 簡単だ[と思いきや]、意外に難しかった。 | I thought it'd be easy, but it was surprisingly hard. | Dikira mudah, ternyata sulit.
+e 晴れる[と思いきや]、急に雨が降り出した。 | I thought it'd clear up, but it suddenly started raining. | Dikira akan cerah, ternyata tiba-tiba hujan.
+
+@ 〜とばかりに
+= as if to say | seolah-olah berkata
+f plain form・quote + とばかりに
+s to
+e 彼は「出て行け」[とばかりに]ドアを開けた。 | He opened the door as if to say "get out". | Dia membuka pintu seolah-olah berkata "keluar".
+e 待ってました[とばかりに]、客が店に入ってきた。 | Customers came into the shop as if they'd been waiting for it. | Para pelanggan masuk ke toko seolah-olah sudah lama menunggu.
+
+@ 〜ともなると / 〜ともなれば
+= once it comes to (a higher level) | kalau sudah menjadi
+f N・V-dict + ともなると・ともなれば
+s to
+e 大学生[ともなると]、自分のことは自分でするべきだ。 | Once you're a university student, you should take care of yourself. | Kalau sudah mahasiswa, harusnya mengurus diri sendiri.
+e 年末[ともなれば]、どこも忙しい。 | When it comes to year-end, everyone's busy. | Kalau sudah akhir tahun, di mana-mana sibuk.
+
+@ 〜ともあろう
+= someone (in such a position) of all people | orang sekelas
+f N + ともあろう + N
+s to
+e 教師[ともあろう]人が、そんなことを言うなんて。 | For a teacher of all people to say such a thing! | Orang sekelas guru bisa berkata begitu?
+e 大臣[ともあろう]者が、うそをつくとは。 | A minister, of all people, lying! | Seorang menteri sampai berbohong!
+
+@ 〜たりとも
+= not even (one) | sekali pun tidak, walau hanya
+f one + counter + たりとも + negative
+s taru
+e 一日[たりとも]練習を休んだことはない。 | I haven't missed practice even for a single day. | Tidak sehari pun saya pernah bolos latihan.
+e 一円[たりとも]無駄にできない。 | We can't waste even a single yen. | Satu yen pun tidak boleh disia-siakan.
+
+@ 〜たるもの
+= as a (proper) … | sebagai seorang (yang sejati)
+f N + たるもの
+s taru
+e 教師[たるもの]、生徒の手本にならなければならない。 | A teacher must set an example for students. | Sebagai seorang guru, harus menjadi teladan bagi murid.
+e 社会人[たるもの]、時間を守るべきだ。 | A working adult should be punctual. | Sebagai orang yang sudah bekerja, harus tepat waktu.
+
+@ 〜ずくめ
+= nothing but, entirely | serba
+f N + ずくめ
+s covered
+e 今年はいいこと[ずくめ]の一年だった。 | This year was nothing but good things. | Tahun ini penuh hal baik.
+e 彼女は黒[ずくめ]の服装で現れた。 | She appeared dressed all in black. | Dia muncul dengan pakaian serba hitam.
+
+@ 〜まみれ
+= covered in (dirt, sweat…) | berlumuran
+f N + まみれ
+s covered
+e 子供たちは泥[まみれ]になって遊んだ。 | The children played until they were covered in mud. | Anak-anak bermain sampai berlumuran lumpur.
+e 汗[まみれ]で働いた。 | I worked drenched in sweat. | Saya bekerja bermandikan keringat.
+
+@ 〜ぐるみ
+= the whole (family, town…) together | seluruh (keluarga, kota…) bersama
+f N + ぐるみ
+s covered
+e 家族[ぐるみ]で付き合っている。 | Our whole families are friends. | Kami berteman satu keluarga dengan keluarga.
+e 町[ぐるみ]で祭りの準備をした。 | The whole town prepared for the festival. | Seluruh kota bersama-sama menyiapkan festival.
+
+@ 〜じみた / 〜じみている
+= -like, smacking of (negative) | seperti, berbau (negatif)
+f N + じみた・じみている
+s covered
+e 子供[じみた]ことを言うな。 | Don't say childish things. | Jangan bicara kekanak-kanakan.
+e 彼の話は言い訳[じみている]。 | What he says sounds like an excuse. | Ucapannya terdengar seperti dalih.
+
+@ 〜極まる / 〜極まりない | きわまる / きわまりない
+= extremely | sangat, luar biasa
+f Na + 極まる・極まりない
+s extreme
+e 彼の態度は失礼[極まりない]。 | His attitude is extremely rude. | Sikapnya sangat tidak sopan.
+e 危険[極まる]運転だった。 | It was extremely dangerous driving. | Itu cara menyetir yang sangat berbahaya.
+
+@ 〜の至り | のいたり
+= the utmost, extremely (formal) | sangat (formal)
+f N + の至り
+s extreme
+e このような賞をいただき、光栄[の至り]です。 | Receiving this award is the greatest honour. | Mendapat penghargaan ini adalah kehormatan yang sangat besar.
+e 若気[の至り]で、ばかなことをした。 | I did something stupid in the folly of youth. | Karena darah muda, saya melakukan hal bodoh.
+
+@ 〜の極み | のきわみ
+= the height of | puncak dari
+f N + の極み
+s extreme
+e こんな結果になり、残念[の極み]です。 | It's utterly regrettable that it ended like this. | Sangat disayangkan hasilnya seperti ini.
+e 贅沢[の極み]のような食事だった。 | It was the height of luxury, that meal. | Makanannya adalah puncak kemewahan.
+
+@ 〜までもない
+= no need to (it's obvious) | tidak perlu (sudah jelas)
+f V-dict + までもない
+s made
+e 言う[までもなく]、健康は大切だ。 | It goes without saying that health is important. | Tidak perlu dikatakan lagi, kesehatan itu penting.
+e そんな簡単なことは、先生に聞く[までもない]。 | Something that simple, there's no need to ask the teacher. | Hal semudah itu tidak perlu ditanyakan ke guru.
+
+@ 〜までだ / 〜までのことだ
+= just (do it, nothing else); merely | tinggal … saja; hanya
+f V-dict・V-ta + までだ
+s made
+e 電車がないなら、歩いて帰る[までだ]。 | If there are no trains, I'll just walk home. | Kalau tidak ada kereta, tinggal jalan kaki pulang saja.
+e 思ったことを言った[までです]。 | I merely said what I thought. | Saya hanya mengatakan apa yang saya pikirkan.
+
+@ 〜まじき
+= unacceptable for, should not (formal) | tidak pantas
+f V-dict + まじき + N
+s mustnot
+e それは教師にある[まじき]行為だ。 | That's conduct unacceptable for a teacher. | Itu perbuatan yang tidak pantas bagi seorang guru.
+e 許す[まじき]犯罪だ。 | It's an unforgivable crime. | Itu kejahatan yang tidak bisa dimaafkan.
+
+@ 〜べからず / 〜べからざる
+= must not (signs, formal) | dilarang (papan, formal)
+f V-dict + べからず・べからざる + N
+s mustnot
+e 芝生に入る[べからず]。 | Keep off the grass. | Dilarang menginjak rumput.
+e 彼はこの会社に欠く[べからざる]人材だ。 | He's indispensable to this company. | Dia sumber daya yang tidak tergantikan bagi perusahaan ini.
+
+@ 〜ないまでも
+= even if not, if not … at least | walaupun tidak sampai
+f V-nai + までも
+s neg
+e 毎日とは言わ[ないまでも]、週に三回は運動したい。 | If not every day, I want to exercise at least three times a week. | Walaupun tidak setiap hari, setidaknya saya ingin olahraga tiga kali seminggu.
+e 満点は取れ[ないまでも]、合格はしたい。 | Even if I can't get full marks, I want to pass. | Walaupun tidak sampai nilai sempurna, saya ingin lulus.
+
+@ 〜ないではすまない / 〜ずにはすまない
+= can't get away without | mau tidak mau harus
+f V-nai + ではすまない・V-nai stem + ずにはすまない
+s neg
+e 人のものを壊したのだから、弁償し[ないではすまない]。 | You broke someone's things, so you can't get away without paying. | Kamu merusak barang orang, jadi mau tidak mau harus mengganti.
+e こんなミスをしたら、謝ら[ずにはすまない]だろう。 | After a mistake like this, you'll have to apologise. | Kalau sudah salah begini, mau tidak mau harus minta maaf.
+
+@ 〜ずにはおかない / 〜ないではおかない
+= will surely (cause), won't fail to | pasti akan (menimbulkan)
+f V-nai stem + ずにはおかない
+s neg
+e 彼の演技は、観客を感動させ[ずにはおかない]。 | His performance will surely move the audience. | Aktingnya pasti akan membuat penonton terharu.
+e この事件は社会に影響を与え[ずにはおかない]だろう。 | This incident is bound to affect society. | Kejadian ini pasti akan berdampak pada masyarakat.
+
+@ 〜んがため(に)
+= in order to (literary) | demi (sastra)
+f V-nai stem + んがため(に)
+s purpose
+e 夢をかなえ[んがため]、彼は努力を続けた。 | He kept striving to make his dream come true. | Demi mewujudkan mimpinya, dia terus berusaha.
+e 勝た[んがために]、ずるい手を使った。 | They used dirty tricks just to win. | Demi menang, mereka memakai cara curang.
+
+@ 〜んばかりに
+= as if about to | seolah-olah hampir
+f V-nai stem + んばかりに (する → せんばかり)
+s purpose
+e 彼女は泣き出さ[んばかりの]顔をしていた。 | She looked as if she was about to cry. | Dia tampak seolah-olah hampir menangis.
+e 店員は「早く帰れ」と言わ[んばかりに]掃除を始めた。 | The clerk started cleaning as if to tell us to leave. | Pegawai itu mulai bersih-bersih seolah-olah menyuruh kami cepat pulang.
+
+@ 〜ば〜で / 〜たら〜たで
+= if it does …, then (there's another problem) | kalau … pun, tetap saja
+f V-ba + V-ta + で・V-ta + ら + V-ta + で
+s regardless
+e お金はなければ困るが、あれ[ば]あった[で]心配が増える。 | No money is a problem, but if you have it, you just get more worries. | Tidak punya uang itu repot, tapi kalau punya pun tetap saja makin khawatir.
+e 雨が降ったら降った[で]、家で本を読めばいい。 | If it rains, well, I'll just read at home. | Kalau hujan ya sudah, baca buku di rumah saja.
+
+@ 〜であれ / 〜であろうと
+= whether, no matter (who/what) | entah, apa pun
+f N + であれ・であろうと
+s regardless
+e 理由は何[であれ]、暴力は許されない。 | Whatever the reason, violence isn't acceptable. | Apa pun alasannya, kekerasan tidak dibenarkan.
+e 相手が誰[であろうと]、言うべきことは言う。 | No matter who it is, I say what needs to be said. | Siapa pun lawannya, yang perlu dikatakan akan saya katakan.
+
+@ 〜であれ〜であれ
+= whether X or Y | baik X maupun Y
+f N1 + であれ + N2 + であれ
+s regardless
+e 子供[であれ]大人[であれ]、ルールは同じだ。 | Children or adults, the rules are the same. | Baik anak-anak maupun orang dewasa, aturannya sama.
+e 晴れ[であれ]雨[であれ]、試合は行う。 | Rain or shine, the game goes ahead. | Baik cerah maupun hujan, pertandingan tetap diadakan.
+
+@ 〜(よ)うが / 〜(よ)うと
+= no matter (how/what) | bagaimanapun, biarpun
+f V-vol + が・と
+s regardless
+e 誰が何と言お[うと]、私の気持ちは変わらない。 | Whatever anyone says, my feelings won't change. | Biarpun orang bilang apa, perasaan saya tidak berubah.
+e 雨が降ろ[うが]、出かけるつもりだ。 | I'm going out even if it rains. | Biarpun hujan, saya tetap mau pergi.
+
+@ 〜(よ)うが〜まいが
+= whether or not | mau … atau tidak
+f V-vol + が + V-dict + まいが
+s regardless
+e 行こ[うが]行く[まいが]、あなたの自由だ。 | Whether you go or not is up to you. | Mau pergi atau tidak, terserah kamu.
+e 彼が来よ[うが]来る[まいが]、始めよう。 | Whether he comes or not, let's start. | Dia datang atau tidak, kita mulai saja.
+
+@ 〜まい
+= will not; probably not | tidak akan; mungkin tidak
+f V-dict + まい
+s mustnot
+e もう二度と遅刻はする[まい]。 | I will never be late again. | Saya tidak akan terlambat lagi.
+e この雨では、彼は来る[まい]。 | In this rain, he probably won't come. | Dengan hujan begini, dia mungkin tidak datang.
+
+@ 〜べくもない
+= there's no way to (even hope) | tidak mungkin sama sekali
+f V-dict + べくもない
+s mustnot
+e 素人の私には、プロの技術は望む[べくもない]。 | An amateur like me can't hope to match a pro's skill. | Bagi amatir seperti saya, tidak mungkin berharap punya keterampilan profesional.
+e 真相は知る[べくもなかった]。 | There was no way to know the truth. | Tidak ada cara untuk mengetahui kebenarannya.
+
+@ 〜もさることながら
+= not only … but also (even more) | selain … , terlebih lagi
+f N + もさることながら
+s letalone
+e この店は味[もさることながら]、雰囲気がいい。 | Not only is the food good, the atmosphere is great. | Selain rasanya, suasana toko ini juga bagus.
+e 彼は能力[もさることながら]、人柄がすばらしい。 | Not just his skill, his character is wonderful too. | Selain kemampuannya, kepribadiannya luar biasa.
+
+@ 〜はおろか
+= let alone, not to mention | jangankan
+f N + はおろか
+s letalone
+e 彼は漢字[はおろか]、ひらがなも書けない。 | He can't write hiragana, let alone kanji. | Jangankan kanji, hiragana pun dia tidak bisa menulis.
+e 忙しくて、旅行[はおろか]、休日もない。 | I'm so busy I don't even have days off, let alone trips. | Saking sibuknya, jangankan jalan-jalan, hari libur pun tidak ada.
+
+@ 〜ばこそ
+= precisely because | justru karena
+f V-ba + こそ
+s because
+e あなたのことを思え[ばこそ]、厳しく言うのです。 | It's precisely because I care about you that I'm strict. | Justru karena memikirkanmu, saya bicara tegas.
+e 健康であれ[ばこそ]、仕事もできる。 | It's because you're healthy that you can work. | Justru karena sehat, kita bisa bekerja.
+
+@ 〜こととて
+= because, since (apologetic, formal) | karena (meminta maaf, formal)
+f plain form・N-の + こととて
+s because
+e 慣れない[こととて]、ご迷惑をおかけしました。 | Since I wasn't used to it, I caused you trouble. | Karena belum terbiasa, saya telah merepotkan Anda.
+e 子供のした[こととて]、許してやってください。 | It was a child's doing, so please forgive him. | Karena itu ulah anak kecil, mohon dimaafkan.
+
+@ 〜ことなしに
+= without | tanpa
+f V-dict + ことなしに
+s nara
+e 努力する[ことなしに]、成功はない。 | There's no success without effort. | Tanpa berusaha, tidak ada keberhasilan.
+e 人と関わる[ことなしに]生きていくことはできない。 | You can't live without dealing with people. | Tidak bisa hidup tanpa berhubungan dengan orang lain.
+
+@ 〜ものを
+= if only (regret) | padahal kalau saja
+f plain form + ものを
+e 言ってくれれば手伝った[ものを]。 | If only you'd told me, I'd have helped. | Padahal kalau kamu bilang, saya pasti bantu.
+e もっと早く病院に行けばよかった[ものを]。 | If only he'd gone to the hospital sooner. | Padahal kalau saja lebih cepat ke rumah sakit.
+
+@ 〜ものとする
+= shall be (deemed) (rules, contracts) | dianggap, ditetapkan (aturan)
+f plain form + ものとする
+e 期限までに連絡がない場合は、欠席とみなす[ものとする]。 | If there's no contact by the deadline, it shall be treated as absence. | Jika tidak ada kabar sampai batas waktu, dianggap tidak hadir.
+e 契約は一年ごとに更新される[ものとする]。 | The contract shall be renewed every year. | Kontrak ditetapkan diperpanjang setiap tahun.
+
+@ 〜手前 | てまえ
+= since (in front of others, for appearance) | karena sudah (demi gengsi/muka)
+f plain form・N-の + 手前
+s because
+e 「必ず行く」と言った[手前]、行かないわけにはいかない。 | Since I said I'd definitely go, I can't not go. | Karena sudah bilang "pasti datang", tidak enak kalau tidak datang.
+e 子供の[手前]、泣くわけにはいかなかった。 | In front of the children, I couldn't cry. | Di depan anak-anak, saya tidak bisa menangis.
+
+@ 〜とはいえ
+= although, that said | meskipun begitu, walaupun
+f plain form・N + とはいえ
+s to
+e 春[とはいえ]、まだ寒い。 | It's spring, but it's still cold. | Meskipun sudah musim semi, masih dingin.
+e 冗談だった[とはいえ]、言い過ぎた。 | It was a joke, but I went too far. | Walaupun bercanda, saya kelewatan.
+
+@ 〜ところを見ると | ところをみると
+= judging from (the fact that) | dilihat dari
+f plain form + ところを見ると
+s because
+e 笑っている[ところを見ると]、試験はうまくいったようだ。 | Judging by her smile, the exam went well. | Dilihat dari senyumnya, sepertinya ujiannya lancar.
+e 返事がない[ところを見ると]、忙しいのだろう。 | Since there's no reply, they must be busy. | Dilihat dari tidak adanya jawaban, mungkin dia sibuk.
+
+@ 〜きらいがある
+= tend to (bad habit) | punya kecenderungan (buruk)
+f V-dict・N-の + きらいがある
+e 彼は物事を大げさに言う[きらいがある]。 | He tends to exaggerate things. | Dia cenderung membesar-besarkan sesuatu.
+e 最近の若者は、本を読まない[きらいがある]。 | Young people these days tend not to read. | Anak muda zaman sekarang cenderung tidak membaca buku.
+
+@ 〜にかこつけて
+= using … as an excuse | dengan dalih
+f N + にかこつけて
+s ignore
+e 仕事[にかこつけて]、旅行を楽しんだ。 | Using work as an excuse, he enjoyed a trip. | Dengan dalih pekerjaan, dia menikmati perjalanan.
+e 病気[にかこつけて]、会議を休んだ。 | He skipped the meeting, using illness as an excuse. | Dengan dalih sakit, dia bolos rapat.
+
+@ 〜にして
+= even (for), only at; and also | bahkan; baru pada; sekaligus
+f N + にして
+s situation
+e 彼は四十歳[にして]、初めて結婚した。 | He married for the first time only at forty. | Dia baru menikah pertama kali pada usia empat puluh.
+e これは名人[にして]初めてできる技だ。 | Only a master can pull off this technique. | Ini teknik yang hanya bisa dilakukan seorang ahli.
+
+@ 〜をもってすれば
+= with (this ability), even | dengan (kemampuan) …, bahkan
+f N + をもってすれば
+s wo
+e 彼の実力[をもってすれば]、優勝も夢ではない。 | With his ability, even winning isn't a dream. | Dengan kemampuannya, juara pun bukan mimpi.
+e 今の技術[をもってすれば]、簡単に作れる。 | With today's technology, it's easy to make. | Dengan teknologi sekarang, mudah dibuat.
+
+@ 〜を経て | をへて
+= via, after going through | melalui, setelah melewati
+f N + を経て
+s wo
+e 三年の研究[を経て]、新薬が完成した。 | After three years of research, the new drug was completed. | Setelah tiga tahun penelitian, obat baru selesai dibuat.
+e 香港[を経て]、ロンドンへ行った。 | I went to London via Hong Kong. | Saya pergi ke London melalui Hong Kong.
+
+@ 〜がゆえ(に)
+= because (formal, written) | karena (formal, tulisan)
+f plain form (Na/N + である) + がゆえ(に)
+s because
+e 若い[がゆえに]、失敗も多い。 | Because they're young, they make many mistakes. | Karena masih muda, kesalahannya juga banyak.
+e 有名である[がゆえに]、自由がない。 | Because he's famous, he has no freedom. | Karena terkenal, dia tidak punya kebebasan.
+
+@ 〜だに
+= even (just to) | bahkan hanya
+f N・V-dict + だに
+s letalone
+e 地震のことは、想像する[だに]恐ろしい。 | Even imagining an earthquake is frightening. | Bahkan hanya membayangkan gempa sudah menakutkan.
+e 彼が優勝するとは、夢に[だに]思わなかった。 | I never dreamed he'd win. | Bahkan dalam mimpi pun saya tidak menyangka dia akan juara.

@@ -1,18 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import type { MessageKey } from '../i18n';
 import { useI18n } from '../i18n';
+import { NAV_ITEMS } from '../navigation';
+import ContinueSessionCard from '../components/ContinueSessionCard';
+import type { ContinueSession } from '../components/ContinueSessionCard';
 
-// Landing page menu: one card per section of the app
-const HOME_MENU: { path: string; glyph: string; label: MessageKey }[] = [
-  { path: '/words', glyph: '語', label: 'home.menu.words' },
-  { path: '/kanji', glyph: '字', label: 'home.menu.kanji' },
-  { path: '/practice', glyph: '話', label: 'home.menu.practice' },
-  { path: '/jlpt', glyph: '試', label: 'home.menu.jlpt' },
-];
-
-/** Landing page: the four sections of the app. */
-export default function HomePage() {
+/** Landing page: the sections of the app. */
+export default function HomePage({ savedSession }: { savedSession?: ContinueSession }) {
   const navigate = useNavigate();
   const { t } = useI18n();
 
@@ -28,9 +22,11 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* The four sections of the app */}
+      {savedSession && <ContinueSessionCard {...savedSession} />}
+
+      {/* The sections of the app (the odd last card spans the row) */}
       <nav className="home-menu animate-in" style={{ animationDelay: '100ms' }}>
-        {HOME_MENU.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <button key={item.path} className="home-menu-card" onClick={() => navigate(item.path)}>
             <span className="home-menu-glyph" lang="ja" aria-hidden="true">{item.glyph}</span>
             <span className="home-menu-label">{t(item.label)}</span>

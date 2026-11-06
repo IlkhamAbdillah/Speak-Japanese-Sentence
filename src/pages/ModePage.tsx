@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, BookOpen, ChevronRight, Bot } from 'lucide-react';
+import { Mic, BookOpen, ChevronRight, Settings } from 'lucide-react';
 import type { UserSettings, MicPermission, AppMode } from '../types';
 import { isConversationMode } from '../types';
 import { useI18n } from '../i18n';
@@ -8,6 +8,8 @@ import ModePicker from '../components/ModePicker';
 import SessionSetupDialog from '../components/SessionSetupDialog';
 import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
 import { aiHostOf } from '../services/ai';
+import ContinueSessionCard from '../components/ContinueSessionCard';
+import type { ContinueSession } from '../components/ContinueSessionCard';
 
 interface ModePageProps {
   /** practice on /practice (Speaking Practice), jlpt on /jlpt (JLPT Mock Test) */
@@ -17,9 +19,11 @@ interface ModePageProps {
   onMicPermissionChange: (perm: MicPermission) => void;
   onSettingsChange: (settings: UserSettings) => void;
   onStartPractice: () => void;
+  /** A session of this mode left in progress */
+  savedSession?: ContinueSession;
 }
 
-/** One mode's page: its practice types / test sections, AI Setup, and Select (opens the setup dialog). */
+/** One mode's page: its practice types / test sections and Select (opens the setup dialog). The AI is set up in Settings (header). */
 export default function ModePage({
   mode,
   settings: savedSettings,
@@ -27,6 +31,7 @@ export default function ModePage({
   onMicPermissionChange,
   onSettingsChange,
   onStartPractice,
+  savedSession,
 }: ModePageProps) {
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -67,6 +72,8 @@ export default function ModePage({
         <h1 className="welcome-title">{t(mode === 'jlpt' ? 'home.menu.jlpt' : 'home.menu.practice')}</h1>
       </section>
 
+      {savedSession && <ContinueSessionCard {...savedSession} />}
+
       {!isSpeechRecognitionSupported() && (
         <div className="alert alert-warning" style={{ maxWidth: 560, margin: '0 auto var(--space-lg)' }}>
           ⚠️ {t('home.speechUnsupported')}
@@ -103,8 +110,11 @@ export default function ModePage({
         />
 
         {!hasValidAuth && (
-          <div className="alert alert-warning" style={{ marginBottom: 'var(--space-md)' }}>
-            {t('home.apiKeyMissing')}
+          <div className="alert alert-warning setup-dialog-alert" style={{ marginBottom: 'var(--space-md)' }}>
+            <span style={{ flex: 1 }}>{t('home.apiKeyMissing')}</span>
+            <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings', { state: { from: mode === 'jlpt' ? '/jlpt' : '/practice' } })}>
+              <Settings size={14} /> {t('header.settings')}
+            </button>
           </div>
         )}
 
@@ -115,13 +125,6 @@ export default function ModePage({
         )}
 
         <div className="start-card-actions">
-          <button
-            className="btn btn-secondary btn-lg"
-            onClick={() => navigate('/settings', { state: { from: mode === 'jlpt' ? '/jlpt' : '/practice' } })}
-          >
-            <Bot size={18} />
-            {t('common.aiSetup')}
-          </button>
           <button className="btn btn-primary btn-lg" onClick={() => setShowSetup(true)}>
             {t('home.select')}
             <ChevronRight size={18} />

@@ -5,7 +5,7 @@ import { isConversationMode } from './types';
 import type { PresetQuestions } from './hooks/useSession';
 import type { MistakeGroup, MistakePracticeMode } from './services/mistakes';
 import { practiceQuestions } from './services/mistakes';
-import { loadSettings, saveSettings, loadActiveSession, clearActiveSession } from './services/storage';
+import { loadSettings, saveSettings, clearActiveSession, loadSavedSession, discardActiveSession } from './services/storage';
 import { LanguageContext } from './i18n';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
@@ -19,14 +19,20 @@ import ModePage from './pages/ModePage';
 
 // The kanji details (readings, meanings of 2,000+ kanji) load only when the page is opened
 const KanjiPage = lazy(() => import('./pages/KanjiPage'));
+// The grammar list (400+ points with examples) too
+const GrammarPage = lazy(() => import('./pages/GrammarPage'));
+// The particle list and practice (shares the grammar data module)
+const ParticlesPage = lazy(() => import('./pages/ParticlesPage'));
 
 function AppInner() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<UserSettings>(() => loadSettings());
   const [micPermission, setMicPermission] = useState<MicPermission>('not-requested');
-  // A session still in progress when the page was reloaded is continued
-  const [resuming, setResuming] = useState(() => loadActiveSession(settings) !== null);
-  const [practiceActive, setPracticeActive] = useState(resuming);
+  // Continue the saved session in progress instead of starting a new one
+  const [resuming, setResuming] = useState(false);
+  const [practiceActive, setPracticeActive] = useState(false);
+  // A session left in progress (tab closed, page reloaded): Home and its mode page offer to continue it
+  const [savedSession, setSavedSession] = useState<Session | null>(() => loadSavedSession());
   const [recapSessionId, setRecapSessionId] = useState<string | null>(null);
   // Questions to practise again (Retry Wrong Answers) instead of generating new ones
   const [preset, setPreset] = useState<PresetQuestions | null>(null);
@@ -38,6 +44,7 @@ function AppInner() {
 
   const handleStartPractice = useCallback(() => {
     clearActiveSession();
+    setSavedSession(null);
     setResuming(false);
     setPreset(null);
     setPracticeActive(true);
@@ -47,6 +54,7 @@ function AppInner() {
   const handleFinishPractice = useCallback(
     (sessionId: string) => {
       setPracticeActive(false);
+      setSavedSession(loadSavedSession());
       setRecapSessionId(sessionId);
       navigate(`/recap/${sessionId}`);
     },
@@ -56,11 +64,13 @@ function AppInner() {
   // Back to the page of the mode that was being practised
   const handleExitPractice = useCallback(() => {
     setPracticeActive(false);
+    setSavedSession(loadSavedSession());
     navigate(settings.appMode === 'jlpt' ? '/jlpt' : '/practice');
   }, [navigate, settings.appMode]);
 
   const handlePracticeAgain = useCallback(() => {
     clearActiveSession();
+    setSavedSession(null);
     setResuming(false);
     setPreset(null);
     setPracticeActive(true);
@@ -82,11 +92,44 @@ function AppInner() {
         : settings.translationFormat,
     });
     clearActiveSession();
+    setSavedSession(null);
     setResuming(false);
     setPreset({ questions, story });
     setPracticeActive(true);
     setRecapSessionId(null);
   }, [settings, handleSettingsChange]);
+
+  // Continue the saved session: switch to its mode, then the practice page restores it
+  const handleContinueSession = useCallback(() => {
+    if (!savedSession) return;
+    const appMode = savedSession.appMode as AppMode;
+    handleSettingsChange({
+      ...settings,
+      appMode,
+      exerciseMode: savedSession.mode,
+      jlptSection: savedSession.jlptSection ?? settings.jlptSection,
+      jlptLevel: savedSession.jlptLevel,
+      translationFormat: appMode === 'practice' && savedSession.mode === 'translation'
+        ? (savedSession.story ? 'story' : 'sentences')
+        : settings.translationFormat,
+    });
+    navigate(appMode === 'jlpt' ? '/jlpt' : '/practice');
+    setSavedSession(null);
+    setResuming(true);
+    setPreset(null);
+    setPracticeActive(true);
+    setRecapSessionId(null);
+  }, [savedSession, settings, handleSettingsChange, navigate]);
+
+  const handleDiscardSession = useCallback(() => {
+    discardActiveSession();
+    setSavedSession(null);
+  }, []);
+
+  const continueCard = (mode?: AppMode) =>
+    savedSession && (!mode || savedSession.appMode === mode)
+      ? { session: savedSession, onContinue: handleContinueSession, onDiscard: handleDiscardSession }
+      : undefined;
 
   // Recap: the wrong answers of that session
   const handleRetryWrong = useCallback((sess: Session) => {
@@ -137,13 +180,14 @@ function AppInner() {
           onLanguageChange={(lang) => handleSettingsChange({ ...settings, instructionLanguage: lang })}
         />
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage savedSession={continueCard()} />} />
           <Route
             path="/practice"
             element={
               <ModePage
                 mode="practice"
                 settings={settings}
+                savedSession={continueCard('practice')}
                 micPermission={micPermission}
                 onMicPermissionChange={setMicPermission}
                 onSettingsChange={handleSettingsChange}
@@ -157,6 +201,7 @@ function AppInner() {
               <ModePage
                 mode="jlpt"
                 settings={settings}
+                savedSession={continueCard('jlpt')}
                 micPermission={micPermission}
                 onMicPermissionChange={setMicPermission}
                 onSettingsChange={handleSettingsChange}
@@ -187,6 +232,28 @@ function AppInner() {
             element={
               <Suspense fallback={null}>
                 <KanjiPage
+                  settings={settings}
+                  onSettingsChange={handleSettingsChange}
+                />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/grammar"
+            element={
+              <Suspense fallback={null}>
+                <GrammarPage
+                  settings={settings}
+                  onSettingsChange={handleSettingsChange}
+                />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/particles"
+            element={
+              <Suspense fallback={null}>
+                <ParticlesPage
                   settings={settings}
                   onSettingsChange={handleSettingsChange}
                 />

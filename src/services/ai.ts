@@ -24,7 +24,7 @@ import { isKanjiAllowedAt, kanjiIn } from './kanjiCurriculum';
 // which counts against this budget too.
 const MAX_OUTPUT_TOKENS = 16000;
 
-interface ChatMessage {
+export interface ChatMessage {
   role: 'system' | 'user';
   content: string;
 }
@@ -380,6 +380,24 @@ async function callProvider(
     case 'ollama':
       return callOllama(model, messages, baseUrl, apiKey);
   }
+}
+
+/**
+ * One call with the learner's AI, for features that build their own prompt in their
+ * own module (e.g. particle practice, kept out of the main bundle with its page).
+ */
+export function callAI(ai: AIConfig, messages: ChatMessage[]): Promise<string> {
+  return callProvider(ai.provider, ai.apiKey, ai.model, messages, ai.baseUrl);
+}
+
+/** Parse the JSON value in an AI reply (text around it is ignored, see extractJSON). */
+export function parseAIJson(raw: string): unknown {
+  return JSON.parse(extractJSON(raw));
+}
+
+/** Closing rule for a prompt whose reply must be JSON only. */
+export function jsonOnlyRule(opening: '[' | '{'): string {
+  return JSON_ONLY_RULE(opening);
 }
 
 // ─── Connection Test ────────────────────────────────────

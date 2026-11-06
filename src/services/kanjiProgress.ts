@@ -1,5 +1,7 @@
 import type { JLPTLevel, KanjiProgress, Session } from '../types';
 import { getCurriculum, kanjiIn } from './kanjiCurriculum';
+import type { ReviewStatus } from './review';
+import { fromNow, isDue, KNOWN_STREAK, reviewStatus, scheduleReview } from './review';
 
 // ─── Kanji progress ─────────────────────────────────────
 // Pure functions over the saved progress (storage.ts keeps it in localStorage).
@@ -8,26 +10,12 @@ import { getCurriculum, kanjiIn } from './kanjiCurriculum';
 
 export type KanjiProgressMap = Record<string, KanjiProgress>;
 
-const HOUR = 60 * 60 * 1000;
-const DAY = 24 * HOUR;
-
-/** Wait before a kanji comes back, by its streak after the answer. */
-const REVIEW_INTERVALS = [4 * HOUR, 1 * DAY, 3 * DAY, 7 * DAY, 14 * DAY, 30 * DAY];
-
-/** This many good practices in a row = mastered. */
-export const KNOWN_STREAK = 3;
-
 /** Words remembered per kanji (shown on its card as the words practised). */
 const MAX_WORDS = 5;
 
-export type KanjiStatus = 'new' | 'learning' | 'known';
-
-export function kanjiStatus(p: KanjiProgress | undefined): KanjiStatus {
-  if (!p) return 'new';
-  return p.streak >= KNOWN_STREAK ? 'known' : 'learning';
-}
-
-export const isDue = (p: KanjiProgress | undefined, now: number) => !!p && p.dueAt <= now;
+export type KanjiStatus = ReviewStatus;
+export const kanjiStatus = (p: KanjiProgress | undefined): KanjiStatus => reviewStatus(p);
+export { fromNow, isDue, KNOWN_STREAK };
 
 export interface KanjiAnswer {
   /** Answered right in the end (a practice: a good practice) */
@@ -52,10 +40,8 @@ export function recordKanjiResult(
   now: number
 ): KanjiProgressMap {
   const prev = progress[kanji];
-  const early = answer.firstTry && !!prev && !isDue(prev, now);
   // Right after a retry still counts as correct, but isn't mastery: the streak restarts
-  const streak = early ? prev.streak : answer.firstTry ? (prev?.streak ?? 0) + 1 : 0;
-  const dueAt = early ? prev.dueAt : now + REVIEW_INTERVALS[Math.min(streak, REVIEW_INTERVALS.length - 1)];
+  const { streak, dueAt } = scheduleReview(prev, answer.firstTry, now);
   const words = [...(prev?.words ?? []).filter((w) => !answer.words.includes(w)), ...answer.words].slice(-MAX_WORDS);
   return {
     ...progress,
@@ -99,13 +85,4 @@ export function progressFromSessions(sessions: Session[]): KanjiProgressMap {
     }
   }
   return progress;
-}
-
-/** "in 3 hr" / "in 2 days", short enough for the kanji card's top line. */
-export function fromNow(time: number, now: number, locale: string): string {
-  const minutes = Math.max(1, Math.round((time - now) / 60000));
-  const format = new Intl.RelativeTimeFormat(locale, { style: 'short', numeric: 'always' });
-  if (minutes < 60) return format.format(minutes, 'minute');
-  if (minutes < 36 * 60) return format.format(Math.round(minutes / 60), 'hour');
-  return format.format(Math.round(minutes / 1440), 'day');
 }

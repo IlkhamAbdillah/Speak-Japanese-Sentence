@@ -19,10 +19,13 @@
     "listening": "Mendengarkan…",
     "noAnswer": "(tidak ada jawaban)",
     "randomTopic": "Topik acak",
-    "home": "Beranda",
-    "aiSetup": "Pengaturan AI"
+    "home": "Beranda"
   },
   "header": {
+    "settings": "Pengaturan",
+    "learn": "Belajar",
+    "practice": "Latihan",
+    "menu": "Menu",
     "micReady": "Siap",
     "home": "Beranda",
     "mistakes": "Kesalahan",
@@ -67,6 +70,12 @@
     "testSection": "Bagian Tes"
   },
   "home": {
+    "continueTitle": "Lanjutkan sesi terakhir?",
+    "continue": "Lanjutkan",
+    "discard": "Buang",
+    "continueMessages": "{count} pesan terkirim",
+    "discardTitle": "Buang sesi ini?",
+    "discardConversation": "Percakapan sejauh ini tetap ada di riwayat Anda.",
     "startConversation": "Mulai Percakapan",
     "startMockTest": "Mulai Simulasi",
     "startPractice": "Mulai Latihan",
@@ -75,13 +84,15 @@
     "speechUnsupported": "Browser Anda tidak mendukung Speech Recognition. Gunakan Chrome atau Edge untuk fitur penuh.",
     "micDenied": "Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.",
     "enableMic": "Aktifkan Mikrofon",
-    "apiKeyMissing": "API key belum dikonfigurasi. Buka Pengaturan AI untuk menambahkannya.",
+    "apiKeyMissing": "AI belum diatur. Tambahkan di Pengaturan.",
     "statAccuracy": "Akurasi",
     "statCorrect": "Benar",
     "select": "Pilih",
     "menu": {
       "words": "Daftar Kotoba",
       "kanji": "Daftar Kanji",
+      "grammar": "Daftar Bunpou",
+      "particles": "Daftar Partikel",
       "practice": "Latihan Berbicara",
       "jlpt": "Simulasi JLPT"
     },
@@ -105,7 +116,7 @@
     "kanjiSource": "Daftar kanji: {source}"
   },
   "settings": {
-    "title": "Pengaturan AI",
+    "title": "Pengaturan",
     "subtitle": "Pilih AI yang membuat soal dan memeriksa jawaban Anda.",
     "aiProvider": "Provider AI",
     "provider": "Provider",
@@ -513,5 +524,95 @@
       "early": "Latihan bagus! {kanji} belum waktunya diulang, jadi progresnya tetap · diulang {date}",
       "notCounted": "Latihan bagus perlu {need} dari {total} benar di percobaan pertama. Hitungannya mulai lagi · diulang {date}"
     }
+  },
+  "grammar": {
+    "navLabel": "Tata bahasa",
+    "title": "Tata bahasa",
+    "subtitle": "Pola tata bahasa JLPT, N5 sampai N1, beserta contoh kalimat.",
+    "tabList": "Daftar tata bahasa",
+    "searchPlaceholder": "Cari: pola (kana atau romaji) atau arti…",
+    "count": "{count} pola",
+    "noMatch": "Tidak ada pola yang cocok dengan “{query}”.",
+    "position": "{current} / {total}",
+    "previous": "Pola sebelumnya",
+    "next": "Pola berikutnya",
+    "formation": "Cara menyambung",
+    "examples": "Contoh",
+    "review": "Tata bahasa yang perlu diulang",
+    "practice": {
+      "button": "Latih tata bahasa ini",
+      "needsAI": "Atur AI untuk berlatih",
+      "notPractised": "Belum dilatih",
+      "back": "Kembali ke pola tata bahasa",
+      "next": "Berikutnya: {pattern}",
+      "nextTip": "Tekan Enter untuk pola berikutnya",
+      "review": "Soal untuk diulang",
+      "exitText": "Latihan ini tidak akan dihitung untuk progres pola ini.",
+      "instructionSay": "Ucapkan dalam bahasa Jepang dengan {pattern}",
+      "words": "Kosakata penting",
+      "answerPlaceholder": "Ketik kalimatnya dalam bahasa Jepang…",
+      "generatingTitle": "Menulis latihan…",
+      "generationFailed": "Gagal menulis latihan"
+    },
+    "quiz": {
+      "types": {
+        "blank": "Isi titik-titik",
+        "meaning": "Arti → pola",
+        "mixed": "Campuran"
+      },
+      "instruction": {
+        "blank": "Mana yang cocok untuk titik-titiknya?",
+        "meaning": "Pola mana yang artinya ini?"
+      }
+    },
+    "info": {
+      "title": "Tentang daftar ini",
+      "source": "Pola tata bahasa, arti, dan contoh kalimat ditulis khusus untuk aplikasi ini.",
+      "levels": "Level mengikuti daftar belajar JLPT yang umum (JLPT tidak lagi menerbitkan daftar tata bahasa resmi sejak 2010), jadi di sumber lain ada pola yang satu level lebih tinggi atau lebih rendah.",
+      "legendTitle": "“Cara menyambung”",
+      "noun": "kata benda",
+      "adjI": "kata sifat-い (tanpa い: A−い)",
+      "adjNa": "kata sifat-な",
+      "vDict": "bentuk kamus",
+      "vMasu": "bentuk dasar ます",
+      "vTe": "bentuk て / bentuk た",
+      "vNai": "bentuk ない (dasarnya: V-nai stem)",
+      "vBa": "bentuk ば",
+      "vVol": "bentuk ajakan (volitional)",
+      "plain": "bentuk biasa"
+    }
+  },
+  "particles": {
+    "title": "Partikel",
+    "subtitle": "Partikel bahasa Jepang dan penggunaannya, dengan contoh kalimat dan latihan.",
+    "tabList": "Daftar partikel",
+    "tabPractice": "Latihan",
+    "searchPlaceholder": "Cari: partikel (kana atau romaji) atau arti…",
+    "noMatch": "Tidak ada penggunaan partikel yang cocok dengan “{query}”.",
+    "count": "{count} penggunaan",
+    "source": "Sumber",
+    "sources": {
+      "ai": "Baru dari AI",
+      "list": "Dari daftar"
+    },
+    "sourceHelp": {
+      "ai": "AI menulis kalimat baru setiap kali, sesuai level yang kamu pilih.",
+      "list": "Contoh kalimat dari daftar partikel, tanpa AI."
+    },
+    "level": "Level kalimat",
+    "start": "Mulai latihan",
+    "generatingTitle": "Menulis kalimat…",
+    "generatingText": "AI sedang menulis latihan partikel untukmu.",
+    "instruction": "Isi partikelnya",
+    "instructionMany": "Isi partikel-partikelnya",
+    "blank": "Titik-titik {n}",
+    "keypad": "Partikel",
+    "clear": "Hapus",
+    "typeTip": "Ketuk partikel, atau ketik romajinya (wa, o, ni, kara; Spasi setelah ka, yo, de…). Backspace menghapus.",
+    "askAI": "Jawabanku juga benar?",
+    "accepted": "Menurut AI jawabanmu juga benar",
+    "review": "Kalimat yang perlu diulang",
+    "newPractice": "Latihan baru",
+    "countLabel": "Jumlah kalimat"
   }
 }

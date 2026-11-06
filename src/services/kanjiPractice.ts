@@ -16,7 +16,7 @@ export const KANJI_WORDS_SOURCE = data.source;
 export const PRACTICE_QUESTION_COUNT = 5;
 
 /** Right on the first try this share of a practice = a good practice (streak + 1) */
-export const PRACTICE_PASS_RATE = 0.8;
+export { PRACTICE_PASS_RATE } from './review';
 
 export interface PracticeWord {
   written: string;

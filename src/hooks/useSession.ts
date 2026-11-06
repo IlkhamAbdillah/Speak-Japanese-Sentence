@@ -448,6 +448,9 @@ export function useSession(): UseSessionReturn {
         endedAt: Date.now(),
       };
       saveSession(finalSession);
+      // Cleared here too: the page may unmount before the save effect sees the finished session
+      activeRef.current = null;
+      clearActiveSession();
     } else {
       // Reset for next question
       revealedRef.current = false;
@@ -546,6 +549,9 @@ export function useSession(): UseSessionReturn {
         endedAt: Date.now(),
       };
       saveSession(finalSession);
+      // The page unmounts right after this, before the save effect runs
+      activeRef.current = null;
+      clearActiveSession();
       sessionRef.current = finalSession;
       setSession(finalSession);
     } else {

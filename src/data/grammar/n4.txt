@@ -1,0 +1,620 @@
+# JLPT N4 grammar. Format: see README.md in this folder.
+
+@ 〜ことができる
+= can, be able to | bisa, dapat
+f V-dict + ことができる
+s decide
+e 私はピアノを弾く[ことができます]。 | I can play the piano. | Saya bisa bermain piano.
+e ここでは写真を撮る[ことができません]。 | You can't take photos here. | Di sini tidak bisa memotret.
+
+@ 〜られる (potential)
+= can (potential form) | bisa (bentuk potensial)
+f group 1: V-e + る・group 2: V + られる・来られる・できる
+s voice
+e 漢字が[読めます]か。 | Can you read kanji? | Kamu bisa membaca kanji?
+e 辛い物は食べ[られません]。 | I can't eat spicy food. | Saya tidak bisa makan makanan pedas.
+
+@ 〜が見える / 〜が聞こえる | がみえる / がきこえる
+= can be seen / heard | terlihat / terdengar
+f N + が + 見える・聞こえる
+s voice
+e 窓から海[が見えます]。 | You can see the sea from the window. | Dari jendela terlihat laut.
+e 隣の部屋から音楽[が聞こえます]。 | I can hear music from the next room. | Dari kamar sebelah terdengar musik.
+
+@ 〜ようになる
+= come to (be able to), start to | menjadi bisa, mulai
+f V-dict・V-pot + ようになる
+s decide
+e 日本語が話せる[ようになりました]。 | I've become able to speak Japanese. | Saya sudah bisa berbicara bahasa Jepang.
+e 最近、野菜を食べる[ようになった]。 | Lately I've started eating vegetables. | Akhir-akhir ini saya mulai makan sayur.
+
+@ 〜ようにする
+= make sure to, try to (as a habit) | berusaha untuk (kebiasaan)
+f V-dict・V-nai + ようにする
+s decide
+e 毎日運動する[ようにしています]。 | I make a point of exercising every day. | Saya berusaha berolahraga setiap hari.
+e 夜は甘い物を食べない[ようにしています]。 | I try not to eat sweets at night. | Saya berusaha tidak makan yang manis-manis di malam hari.
+
+@ 〜ように (purpose)
+= so that, in order to | supaya, agar
+f V-dict・V-pot・V-nai + ように
+s purpose
+e 忘れない[ように]、メモします。 | I'll write it down so I don't forget. | Supaya tidak lupa, saya mencatatnya.
+e みんなに聞こえる[ように]、大きい声で話してください。 | Please speak loudly so everyone can hear. | Tolong bicara dengan suara keras agar semua bisa mendengar.
+
+@ 〜ために (purpose) | ために
+= in order to, for | untuk, demi
+f V-dict・N-の + ために
+s purpose
+e 留学する[ために]、お金をためています。 | I'm saving money to study abroad. | Saya menabung untuk belajar di luar negeri.
+e 家族の[ために]働いています。 | I work for my family. | Saya bekerja demi keluarga.
+
+@ 〜ために (reason)
+= because of, due to | karena, akibat
+f plain form・N-の + ために
+s purpose
+e 事故の[ために]、電車が遅れました。 | The train was late because of an accident. | Kereta terlambat karena kecelakaan.
+e 大雨の[ために]、試合が中止になった。 | The game was called off because of heavy rain. | Pertandingan dibatalkan karena hujan lebat.
+
+@ 〜ことにする
+= decide to | memutuskan untuk
+f V-dict・V-nai + ことにする
+s decide
+e 来年、日本に留学する[ことにしました]。 | I've decided to study in Japan next year. | Saya memutuskan untuk belajar di Jepang tahun depan.
+e もうお酒は飲まない[ことにした]。 | I've decided not to drink anymore. | Saya memutuskan untuk tidak minum alkohol lagi.
+
+@ 〜ことになる
+= it has been decided that (by others) | diputuskan bahwa (oleh pihak lain)
+f V-dict・V-nai + ことになる
+s decide
+e 来月、大阪に転勤する[ことになりました]。 | It's been decided that I'll transfer to Osaka next month. | Bulan depan saya dipindahtugaskan ke Osaka.
+e 会議は金曜日に行う[ことになった]。 | The meeting is to be held on Friday. | Rapatnya diputuskan diadakan hari Jumat.
+
+@ 〜ことがある
+= sometimes (happens) | kadang-kadang
+f V-dict・V-nai + ことがある
+s decide
+e 忙しいときは、朝ご飯を食べない[ことがあります]。 | When I'm busy, I sometimes skip breakfast. | Kalau sibuk, kadang saya tidak sarapan.
+e この道は夜、暗くて危ない[ことがある]。 | This road is sometimes dark and dangerous at night. | Jalan ini kadang gelap dan berbahaya di malam hari.
+
+@ 〜(よ)うと思う | ようとおもう
+= I'm thinking of (doing) | saya berpikir untuk
+f V-vol + と思う
+s intend
+e 週末は海へ行こ[うと思います]。 | I'm thinking of going to the beach this weekend. | Saya berpikir untuk pergi ke pantai akhir pekan ini.
+e 新しいパソコンを買お[うと思っています]。 | I'm thinking of buying a new computer. | Saya berencana membeli komputer baru.
+
+@ 〜(よ)うとする
+= try to, be about to | mencoba, hendak
+f V-vol + とする
+s intend
+e 寝[ようとした]とき、電話が鳴った。 | Just as I was about to sleep, the phone rang. | Ketika saya hendak tidur, telepon berdering.
+e 赤ちゃんが立と[うとしています]。 | The baby is trying to stand up. | Bayinya sedang mencoba berdiri.
+
+@ 〜予定 | よてい
+= plan to, be scheduled to | dijadwalkan, rencananya
+f V-dict・N-の + 予定
+s intend
+e 三時に東京に着く[予定]です。 | We're scheduled to arrive in Tokyo at three. | Rencananya kami tiba di Tokyo jam tiga.
+e 来週は出張の[予定]があります。 | I have a business trip planned next week. | Minggu depan saya ada jadwal dinas luar.
+
+@ 〜てみる
+= try doing (and see) | mencoba
+f V-て + みる
+s teaux
+e このケーキを食べ[てみて]ください。 | Try eating this cake. | Coba makan kue ini.
+e 着物を着[てみたい]です。 | I'd like to try wearing a kimono. | Saya ingin mencoba memakai kimono.
+
+@ 〜ておく
+= do in advance; leave as is | melakukan sebelumnya; membiarkan
+f V-て + おく
+s teaux
+e 旅行の前に、ホテルを予約し[ておきます]。 | I'll book a hotel before the trip. | Sebelum perjalanan, saya memesan hotel dulu.
+e 窓は開け[ておいて]ください。 | Please leave the window open. | Tolong biarkan jendelanya terbuka.
+
+@ 〜てしまう
+= end up doing; do completely (often with regret) | terlanjur; sampai habis (sering menyesal)
+f V-て + しまう
+s teaux
+e 電車にかさを忘れ[てしまいました]。 | I left my umbrella on the train. | Payung saya ketinggalan di kereta.
+e 宿題をもう全部やっ[てしまった]。 | I've already finished all my homework. | PR-nya sudah saya kerjakan semua.
+
+@ 〜ちゃう / 〜じゃう
+= end up doing (casual てしまう) | terlanjur (santai)
+f V-て → ちゃう・でじゃう
+s teaux
+e ケーキ、全部食べ[ちゃった]。 | I ate the whole cake. | Kuenya sudah aku makan semua.
+e 財布をなくし[ちゃった]。 | I lost my wallet. | Dompetku hilang.
+
+@ 〜てある
+= has been done (and stays that way) | sudah di… (dan tetap begitu)
+f V-て (transitive) + ある
+s teaux
+e 壁に地図が貼っ[てあります]。 | A map has been put up on the wall. | Di dinding sudah ditempel peta.
+e ビールは冷蔵庫に冷やし[てある]よ。 | The beer has been chilled in the fridge. | Birnya sudah didinginkan di kulkas.
+
+@ 〜ていく / 〜てくる
+= go on …ing / come to …; go/come doing | terus …; mulai …; pergi/datang sambil
+f V-て + いく・くる
+s teaux
+e だんだん寒くなっ[てきました]。 | It's been getting colder. | Lama-kelamaan menjadi dingin.
+e これからも日本語を勉強し[ていきます]。 | I'll keep studying Japanese from now on. | Mulai sekarang saya akan terus belajar bahasa Jepang.
+
+@ 〜てあげる
+= do for someone (I give the favour) | melakukan untuk orang lain
+f V-て + あげる
+s give
+e 妹に本を読ん[であげました]。 | I read a book to my younger sister. | Saya membacakan buku untuk adik perempuan saya.
+e 道を教え[てあげた]。 | I showed them the way. | Saya memberi tahu jalannya.
+
+@ 〜てくれる
+= someone does for me | (orang lain) melakukan untuk saya
+f V-て + くれる
+s give
+e 友達が駅まで送っ[てくれました]。 | My friend took me to the station. | Teman mengantar saya sampai stasiun.
+e 母がお弁当を作っ[てくれた]。 | My mother made me a lunch box. | Ibu membuatkan saya bekal.
+
+@ 〜てもらう
+= have someone do for me | minta dilakukan oleh orang lain
+f N-に + V-て + もらう
+s give
+e 先生に作文を直し[てもらいました]。 | I had my teacher correct my essay. | Karangan saya diperbaiki oleh guru.
+e 友達に写真を撮っ[てもらった]。 | I had a friend take my photo. | Saya minta difoto oleh teman.
+
+@ 〜ていただけませんか
+= could you please…? (very polite) | bisakah Anda…? (sangat sopan)
+f V-て + いただけませんか
+s give
+e もう少しゆっくり話し[ていただけませんか]。 | Could you please speak a little more slowly? | Bisakah Anda berbicara sedikit lebih pelan?
+e この書類を見[ていただけませんか]。 | Could you please look at this document? | Bisakah Anda memeriksa dokumen ini?
+
+@ 〜てくれませんか
+= would you…? (request) | maukah kamu…? (permintaan)
+f V-て + くれませんか
+s give
+e ちょっと手伝っ[てくれませんか]。 | Would you help me a little? | Maukah kamu membantu sebentar?
+e 窓を閉め[てくれませんか]。 | Would you close the window? | Maukah kamu menutup jendela?
+
+@ あげる / くれる / もらう
+= give (to others) / give (to me) / receive | memberi / diberi (ke saya) / menerima
+f N-に + N-を + あげる・くれる・もらう
+s give
+e 私は弟に時計を[あげました]。 | I gave my brother a watch. | Saya memberi adik laki-laki saya jam tangan.
+e 友達が花を[くれました]。 | My friend gave me flowers. | Teman memberi saya bunga.
+
+@ 〜ば (conditional)
+= if | jika, kalau
+f V-ba・A-ければ・Na/N + なら(ば)
+s cond
+e 安けれ[ば]、買います。 | If it's cheap, I'll buy it. | Kalau murah, saya beli.
+e 急げ[ば]、間に合いますよ。 | If you hurry, you'll make it. | Kalau bergegas, kamu masih sempat.
+
+@ 〜たら
+= if, when (once…) | kalau, setelah
+f V-ta・A-かった・Na/N-だった + ら
+s cond
+e 雨が降っ[たら]、行きません。 | If it rains, I won't go. | Kalau hujan, saya tidak pergi.
+e 駅に着い[たら]、電話してください。 | Call me when you get to the station. | Setelah sampai di stasiun, tolong telepon saya.
+
+@ 〜と (conditional)
+= whenever, if (natural result) | kalau…, pasti (akibat alami)
+f V-dict・A-い・Na/N-だ + と
+s cond
+e 春になる[と]、花が咲きます。 | When spring comes, flowers bloom. | Kalau musim semi tiba, bunga bermekaran.
+e このボタンを押す[と]、水が出ます。 | If you press this button, water comes out. | Kalau tombol ini ditekan, air keluar.
+
+@ 〜なら
+= if (it's the case that); as for | kalau (memang begitu); kalau soal
+f plain form・N + なら
+s cond
+e 京都へ行く[なら]、秋がいいですよ。 | If you're going to Kyoto, autumn is good. | Kalau mau ke Kyoto, musim gugur bagus.
+e 日本料理[なら]、すしが一番好きです。 | As for Japanese food, I like sushi best. | Kalau soal masakan Jepang, saya paling suka sushi.
+
+@ 〜ても
+= even if, even though | walaupun, meskipun
+f V-て・A-くて・Na/N-で + も
+s cond
+e 雨が降っ[ても]、行きます。 | I'll go even if it rains. | Walaupun hujan, saya tetap pergi.
+e いくら考え[ても]、分かりません。 | No matter how much I think, I don't get it. | Sekeras apa pun saya berpikir, tetap tidak mengerti.
+
+@ 〜のに (although)
+= although, despite (unexpected) | padahal
+f plain form (Na/N + な) + のに
+s cond
+e 薬を飲んだ[のに]、まだ熱がある。 | Although I took medicine, I still have a fever. | Padahal sudah minum obat, masih demam.
+e 日曜日な[のに]、会社へ行きました。 | Even though it was Sunday, I went to work. | Padahal hari Minggu, saya pergi ke kantor.
+
+@ 〜し
+= and also, what's more (listing reasons) | lagi pula, dan juga (menyebut alasan)
+f plain form + し
+s purpose
+e この店は安い[し]、おいしいです。 | This shop is cheap, and the food is good. | Toko ini murah, lagi pula enak.
+e 雨も降っている[し]、今日は家にいよう。 | It's raining, among other things, so let's stay home today. | Lagi pula hujan, hari ini di rumah saja.
+
+@ 〜そうだ (looks like) | そうだ
+= looks like, seems (from appearance) | kelihatannya
+f V-masu stem・A (−い)・Na + そうだ
+s evidence
+e このケーキはおいし[そうです]ね。 | This cake looks delicious. | Kue ini kelihatannya enak.
+e 雨が降り[そうです]。 | It looks like it's going to rain. | Sepertinya akan hujan.
+
+@ 〜そうだ (hearsay)
+= I hear that, they say | katanya, kabarnya
+f plain form + そうだ
+s evidence
+e 天気予報によると、明日は雪が降る[そうです]。 | According to the forecast, it will snow tomorrow. | Menurut prakiraan cuaca, katanya besok turun salju.
+e 田中さんは来月結婚する[そうだ]。 | I hear Tanaka is getting married next month. | Kabarnya Tanaka akan menikah bulan depan.
+
+@ 〜ようだ / 〜みたいだ
+= seems, appears (from evidence) | tampaknya, sepertinya
+f plain form (Na + な・N + の) + ようだ・(Na/N) + みたいだ
+s evidence
+e 誰も家にいない[ようです]。 | It seems nobody is home. | Tampaknya tidak ada orang di rumah.
+e 彼は疲れている[みたい]。 | He seems tired. | Dia sepertinya capek.
+
+@ 〜らしい
+= apparently, I hear | konon, rupanya
+f plain form (Na/N without だ) + らしい
+s evidence
+e あの店は来月閉まる[らしい]よ。 | Apparently that shop is closing next month. | Konon toko itu tutup bulan depan.
+e 山田さんは風邪[らしい]です。 | Apparently Yamada has a cold. | Rupanya Yamada masuk angin.
+
+@ 〜かもしれない
+= might, maybe | mungkin
+f plain form (Na/N without だ) + かもしれない
+s evidence
+e 明日は雨[かもしれません]。 | It might rain tomorrow. | Besok mungkin hujan.
+e 道が込んでいるから、遅れる[かもしれない]。 | The roads are busy, so I might be late. | Jalannya macet, jadi mungkin saya terlambat.
+
+@ 〜はずだ
+= should (be), expected to be | seharusnya
+f plain form (Na + な・N + の) + はずだ
+s evidence
+e 彼はもう家に着いた[はずです]。 | He should have arrived home by now. | Dia seharusnya sudah sampai di rumah.
+e 会議は三時に終わる[はずだ]。 | The meeting should end at three. | Rapatnya seharusnya selesai jam tiga.
+
+@ 〜はずがない
+= can't possibly be | tidak mungkin
+f plain form + はずがない
+s evidence
+e 彼がうそをつく[はずがない]。 | There's no way he would lie. | Tidak mungkin dia berbohong.
+e こんな難しい問題、子供に分かる[はずがない]。 | A child can't possibly understand such a hard problem. | Soal sesulit ini tidak mungkin dimengerti anak-anak.
+
+@ 〜と思う | とおもう
+= I think that | saya pikir
+f plain form + と思う
+s evidence
+e 明日は晴れる[と思います]。 | I think it will be sunny tomorrow. | Saya pikir besok cerah.
+e この映画は面白い[と思う]。 | I think this movie is interesting. | Menurutku film ini menarik.
+
+@ 〜と言う | という
+= say that (quoting) | berkata bahwa
+f quote / plain form + と言う
+s evidence
+e 先生は明日テストがある[と言いました]。 | The teacher said there's a test tomorrow. | Guru berkata bahwa besok ada ujian.
+e 彼は「すぐ行く」[と言った]。 | He said, "I'll come right away." | Dia berkata, "Aku segera datang."
+
+@ 〜かどうか
+= whether or not | apakah … atau tidak
+f plain form (Na/N without だ) + かどうか
+s demo
+e 彼が来る[かどうか]分かりません。 | I don't know whether he will come. | Saya tidak tahu apakah dia datang atau tidak.
+e このサイズでいい[かどうか]、着てみます。 | I'll try it on to see whether this size is OK. | Saya coba pakai untuk melihat ukurannya pas atau tidak.
+
+@ 疑問詞 + か (embedded question) | ぎもんし + か
+= (I don't know) what/where/when… | (tidak tahu) apa/di mana/kapan…
+f question word + plain form + か
+s demo
+e 会議が何時に始まる[か]知っていますか。 | Do you know what time the meeting starts? | Tahukah kamu rapat dimulai jam berapa?
+e どこに財布を置いた[か]忘れました。 | I forgot where I put my wallet. | Saya lupa menaruh dompet di mana.
+
+@ 〜のが好き / 〜のが上手 | のがすき / のがじょうず
+= like / be good at doing | suka / pandai melakukan
+f V-dict + の + が好き・上手・下手
+s noun
+e 私は絵を描く[のが好き]です。 | I like drawing pictures. | Saya suka menggambar.
+e 兄は料理する[のが上手]です。 | My brother is good at cooking. | Kakak laki-laki saya pandai memasak.
+
+@ 〜のを忘れる | のをわすれる
+= forget to do | lupa melakukan
+f V-dict + のを忘れる
+s noun
+e 宿題を出す[のを忘れました]。 | I forgot to hand in my homework. | Saya lupa mengumpulkan PR.
+e 電気を消す[のを忘れないで]ね。 | Don't forget to turn off the light. | Jangan lupa matikan lampunya, ya.
+
+@ 〜んです / 〜のです
+= it's that…, you see (explaining) | soalnya, begini (menjelaskan)
+f plain form (Na/N + な) + んです
+s evidence
+e 頭が痛い[んです]。 | (It's that) I have a headache. | Soalnya kepala saya sakit.
+e どうして遅れた[んですか]。 | Why were you late? | Kenapa terlambat?
+
+@ 〜んですが
+= …, but (leading into a request or question) | begini…, (pengantar permintaan)
+f plain form + んですが
+s evidence
+e 道が分からない[んですが]、教えていただけませんか。 | I don't know the way; could you tell me? | Saya tidak tahu jalannya, bisakah Anda memberi tahu?
+e 窓を開けたい[んですが]、いいですか。 | I'd like to open the window — is that OK? | Saya ingin membuka jendela, boleh?
+
+@ 〜やすい / 〜にくい
+= easy to / hard to (do) | mudah / sulit untuk
+f V-masu stem + やすい・にくい
+s compound
+e このペンは書き[やすい]です。 | This pen is easy to write with. | Pulpen ini mudah dipakai menulis.
+e この薬は苦くて飲み[にくい]。 | This medicine is bitter and hard to take. | Obat ini pahit dan sulit diminum.
+
+@ 〜始める / 〜終わる / 〜続ける | はじめる / おわる / つづける
+= start / finish / keep on (doing) | mulai / selesai / terus
+f V-masu stem + 始める・終わる・続ける
+s compound
+e 雨が降り[始めました]。 | It started to rain. | Hujan mulai turun.
+e この本はやっと読み[終わった]。 | I finally finished reading this book. | Akhirnya saya selesai membaca buku ini.
+
+@ 〜出す | だす
+= burst out, suddenly start | tiba-tiba mulai
+f V-masu stem + 出す
+s compound
+e 子供が急に泣き[出した]。 | The child suddenly burst into tears. | Anak itu tiba-tiba menangis.
+e 彼は突然笑い[出しました]。 | He suddenly started laughing. | Dia tiba-tiba tertawa.
+
+@ 〜なさい
+= do… (command, parent/teacher) | …lah! (perintah orang tua/guru)
+f V-masu stem + なさい
+s command
+e 早く寝[なさい]。 | Go to bed now. | Cepat tidur!
+e 野菜も食べ[なさい]。 | Eat your vegetables too. | Makan sayurnya juga!
+
+@ 命令形 (imperative) | めいれいけい
+= do it! (blunt command) | lakukan! (perintah kasar)
+f group 1: V-e・group 2: V-ろ・来い・しろ
+s command
+e 早く[起きろ]！ | Get up already! | Cepat bangun!
+e がんばれ、[走れ]！ | Come on, run! | Ayo, lari!
+
+@ 〜な (prohibition)
+= don't! (blunt) | jangan! (kasar)
+f V-dict + な
+s command
+e ここで泳ぐ[な]。 | Don't swim here. | Jangan berenang di sini!
+e 危ないから、触る[な]！ | It's dangerous, don't touch it! | Bahaya, jangan disentuh!
+
+@ 〜られる (passive)
+= be done (passive) | di- (pasif)
+f group 1: V-a + れる・group 2: V + られる・来られる・される
+s voice
+e 先生に褒め[られました]。 | I was praised by the teacher. | Saya dipuji oleh guru.
+e 電車で足を踏ま[れた]。 | I got my foot stepped on in the train. | Kaki saya terinjak di kereta.
+
+@ 〜させる (causative)
+= make / let someone do | menyuruh, membiarkan
+f group 1: V-a + せる・group 2: V + させる・来させる・させる
+s voice
+e 母は弟に野菜を食べ[させました]。 | Mom made my brother eat vegetables. | Ibu menyuruh adik laki-laki saya makan sayur.
+e 子供を公園で遊ば[せた]。 | I let the children play in the park. | Saya membiarkan anak-anak bermain di taman.
+
+@ 〜させてください
+= please let me… | izinkan saya…
+f V-caus-て + ください
+s give
+e 私にやら[せてください]。 | Please let me do it. | Izinkan saya melakukannya.
+e 少し考え[させてください]。 | Please let me think about it a little. | Izinkan saya memikirkannya sebentar.
+
+@ 〜させられる (causative passive)
+= be made to do | dipaksa untuk
+f group 1: V-a + される/せられる・group 2: V + させられる
+s voice
+e 子供のとき、ピアノを習わ[された]。 | As a child, I was made to take piano lessons. | Waktu kecil, saya disuruh les piano.
+e 部長にお酒を飲ま[されました]。 | I was made to drink by my manager. | Saya dipaksa minum oleh manajer.
+
+@ 尊敬語 (honorific verbs) | そんけいご
+= respectful verbs for others' actions (いらっしゃる, 召し上がる…) | kata kerja hormat untuk tindakan orang lain
+f いらっしゃる・召し上がる・おっしゃる・ご覧になる
+s keigo
+e 社長は今、会議室に[いらっしゃいます]。 | The president is in the meeting room now. | Direktur sekarang ada di ruang rapat.
+e 先生は何と[おっしゃいました]か。 | What did the teacher say? | Apa yang dikatakan Bapak/Ibu guru?
+
+@ 謙譲語 (humble verbs) | けんじょうご
+= humble verbs for my own actions (参る, 申す, いたす…) | kata kerja merendah untuk tindakan sendiri
+f 参る・申す・いたす・伺う・拝見する
+s keigo
+e 私は田中と[申します]。 | My name is Tanaka. | Nama saya Tanaka.
+e 明日、そちらに[伺います]。 | I will visit you tomorrow. | Besok saya akan berkunjung ke sana.
+
+@ お〜になる
+= (someone) does (honorific) | (orang lain) melakukan (hormat)
+f お + V-masu stem + になる
+s keigo
+e 先生はもうお帰り[になりました]。 | The teacher has already gone home. | Bapak guru sudah pulang.
+e この本をお読み[になりました]か。 | Have you read this book? | Apakah Anda sudah membaca buku ini?
+
+@ お〜する
+= I do (for you) (humble) | saya melakukan (merendah)
+f お・ご + V-masu stem・N + する
+s keigo
+e 荷物をお持ち[します]。 | Let me carry your bag. | Saya bawakan barangnya.
+e 後でご連絡[します]。 | I'll contact you later. | Nanti saya hubungi.
+
+@ お〜ください
+= please (do) (polite request) | silakan (permintaan sopan)
+f お・ご + V-masu stem・N + ください
+s keigo
+e こちらでお待ち[ください]。 | Please wait here. | Silakan tunggu di sini.
+e ご自由にお取り[ください]。 | Please help yourself. | Silakan ambil dengan bebas.
+
+@ 〜がする
+= there is a (smell/sound/taste/feeling) | tercium, terdengar, terasa
+f smell・sound・taste・feeling + がする
+e 台所からいいにおい[がします]。 | There's a nice smell from the kitchen. | Dari dapur tercium bau harum.
+e 変な音[がした]。 | I heard a strange sound. | Terdengar suara aneh.
+
+@ 〜のように / 〜のような
+= like, as if (comparison) | seperti
+f N + のように (+ V/A)・のような (+ N)
+s extent
+e 彼女は花[のように]きれいだ。 | She is beautiful like a flower. | Dia cantik seperti bunga.
+e 夢[のような]話ですね。 | It sounds like a dream. | Seperti cerita mimpi, ya.
+
+@ 〜ばかり
+= nothing but, only | hanya … saja, melulu
+f N + ばかり・V-て + ばかり
+s just
+e 弟はゲーム[ばかり]しています。 | My brother does nothing but play games. | Adik laki-laki saya main game melulu.
+e 甘い物[ばかり]食べてはいけません。 | You shouldn't eat only sweets. | Jangan makan yang manis-manis saja.
+
+@ 〜たばかり
+= just did | baru saja
+f V-ta + ばかり
+s just
+e 日本に来た[ばかり]です。 | I've just come to Japan. | Saya baru saja datang ke Jepang.
+e 今起きた[ばかり]で、まだ眠い。 | I just woke up, so I'm still sleepy. | Saya baru bangun, jadi masih mengantuk.
+
+@ 〜ところだ
+= be about to / be in the middle of / have just | baru akan / sedang / baru saja
+f V-dict・V-ている・V-ta + ところだ
+s just
+e 今から出かける[ところです]。 | I'm just about to go out. | Saya baru akan keluar.
+e 今、晩ご飯を食べている[ところだ]。 | I'm in the middle of eating dinner. | Saya sedang makan malam.
+
+@ 〜までに
+= by (a deadline) | sebelum, paling lambat
+f N・V-dict + までに
+s time
+e 金曜日[までに]レポートを出してください。 | Please hand in the report by Friday. | Tolong serahkan laporannya paling lambat hari Jumat.
+e 暗くなる[までに]帰ります。 | I'll be back before it gets dark. | Saya pulang sebelum gelap.
+
+@ 〜間 / 〜間に | あいだ / あいだに
+= during, while (the whole time / at some point) | selama / sewaktu
+f V-dict・V-ている・N-の + 間・間に
+s time
+e 夏休みの[間]、ずっと国にいました。 | I was back home the whole summer break. | Selama liburan musim panas, saya terus di kampung.
+e 母が寝ている[間に]、掃除をした。 | While my mother was asleep, I cleaned. | Sewaktu ibu tidur, saya bersih-bersih.
+
+@ 〜うちに
+= while (still), before (it changes) | selagi
+f V-dict・V-ている・V-nai・A-い・Na-な・N-の + うちに
+s time
+e 熱い[うちに]食べてください。 | Please eat it while it's hot. | Silakan dimakan selagi panas.
+e 若い[うちに]、いろいろな所へ行きたい。 | I want to go to many places while I'm young. | Selagi muda, saya ingin pergi ke banyak tempat.
+
+@ 〜こと (verb → noun)
+= the act of …ing (turns a verb into a noun) | hal … (mengubah kata kerja jadi kata benda)
+f V-dict + こと
+s noun
+e 私の趣味は写真を撮る[こと]です。 | My hobby is taking photos. | Hobi saya memotret.
+e 毎日続ける[こと]が大切です。 | Keeping it up every day is important. | Yang penting adalah melakukannya setiap hari.
+
+@ 〜さ
+= -ness (adjective → noun) | ke-an (kata sifat → kata benda)
+f A (−い)・Na + さ
+s noun
+e この山の高[さ]はどのくらいですか。 | How high is this mountain? | Berapa tinggi gunung ini?
+e 命の大切[さ]を学んだ。 | I learned how precious life is. | Saya belajar betapa berharganya nyawa.
+
+@ 〜がる
+= (someone else) shows signs of feeling… | (orang lain) tampak merasa…
+f A (−い)・Na + がる
+e 弟は新しいゲームを欲し[がっています]。 | My brother wants the new game. | Adik laki-laki saya menginginkan game baru.
+e 子供が犬を怖[がる]。 | The child is scared of the dog. | Anak itu takut pada anjing.
+
+@ 〜という意味 | といういみ
+= means… | artinya
+f N + という意味
+s noun
+e 「ありがとう」は「thank you」[という意味]です。 | "Arigatou" means "thank you". | "Arigatou" artinya "terima kasih".
+e この言葉はどう[いう意味]ですか。 | What does this word mean? | Kata ini artinya apa?
+
+@ 〜ことにしている
+= make it a rule to | menjadikan kebiasaan
+f V-dict・V-nai + ことにしている
+s decide
+e 毎朝、三十分歩く[ことにしています]。 | I make it a rule to walk thirty minutes every morning. | Saya membiasakan diri berjalan tiga puluh menit setiap pagi.
+e 夜十時以降は食べない[ことにしている]。 | I make it a rule not to eat after 10 p.m. | Saya membiasakan diri tidak makan setelah jam sepuluh malam.
+
+@ 〜ことになっている
+= it's a rule that, be supposed to | aturannya, seharusnya
+f V-dict・V-nai + ことになっている
+s decide
+e この部屋では靴を脱ぐ[ことになっています]。 | In this room you're supposed to take your shoes off. | Di kamar ini aturannya sepatu harus dilepas.
+e 会議には社長も出る[ことになっている]。 | The president is supposed to attend the meeting too. | Direktur juga dijadwalkan hadir di rapat.
+
+@ 〜ばよかった
+= I wish I had…, should have… | seharusnya (menyesal)
+f V-ba + よかった
+s cond
+e もっと勉強すれ[ばよかった]。 | I wish I had studied more. | Seharusnya saya belajar lebih banyak.
+e 傘を持ってくれ[ばよかった]。 | I should have brought an umbrella. | Seharusnya saya membawa payung.
+
+@ 〜ばいい
+= you just need to, you should | cukup, sebaiknya
+f V-ba + いい
+s cond
+e どうすれ[ばいい]ですか。 | What should I do? | Saya harus bagaimana?
+e 分からなかったら、先生に聞け[ばいい]。 | If you don't understand, just ask the teacher. | Kalau tidak mengerti, tanya saja ke guru.
+
+@ 〜たらどうですか
+= why don't you…? (suggestion) | bagaimana kalau…? (saran)
+f V-ta + らどうですか
+s cond
+e 少し休ん[だらどうですか]。 | Why don't you rest a bit? | Bagaimana kalau istirahat sebentar?
+e 医者に行っ[たらどう]？ | Why don't you go to a doctor? | Bagaimana kalau ke dokter?
+
+@ 〜ず(に)
+= without doing (written ないで) | tanpa (tertulis)
+f V-nai stem + ず(に)・せず(に)
+e 辞書を使わ[ずに]読みました。 | I read it without using a dictionary. | Saya membacanya tanpa kamus.
+e 何も言わ[ずに]帰ってしまった。 | He went home without saying anything. | Dia pulang tanpa berkata apa-apa.
+
+@ 〜って
+= (casual quote) they say, called | katanya; yang namanya (santai)
+f plain form・N + って
+s evidence
+e 明日は休みだ[って]。 | They say tomorrow's a day off. | Katanya besok libur.
+e 「ハチ」[って]犬、知ってる？ | Do you know a dog called Hachi? | Kamu tahu anjing yang namanya Hachi?
+
+@ 〜とか〜とか
+= things like X and Y (casual) | seperti X dan Y (santai)
+f N・plain form + とか
+e 休みの日は映画[とか]買い物[とか]に行きます。 | On days off I go to movies, shopping and so on. | Pada hari libur saya pergi nonton film, belanja, dan lain-lain.
+e 野菜[とか]果物[とか]をもっと食べたほうがいい。 | You should eat more things like vegetables and fruit. | Sebaiknya makan lebih banyak sayur, buah, dan sejenisnya.
+
+@ 〜でも (suggestion)
+= … or something | … atau apa gitu
+f N + でも
+s demo
+e お茶[でも]飲みませんか。 | Would you like some tea or something? | Mau minum teh atau apa?
+e 映画[でも]見に行こうか。 | Shall we go see a movie or something? | Bagaimana kalau kita nonton film atau apa gitu?
+
+@ 疑問詞 + でも | ぎもんし + でも
+= any…, every… (whatever, whenever) | apa pun, kapan pun
+f question word + でも
+s demo
+e 質問があったら、いつ[でも]聞いてください。 | If you have questions, ask any time. | Kalau ada pertanyaan, tanyakan kapan saja.
+e 彼は何[でも]食べます。 | He eats anything. | Dia makan apa saja.
+
+@ 〜くらい (extent) / 〜ほど
+= to the extent that, so … that | sampai-sampai, begitu … sampai
+f plain form + くらい・ほど
+s extent
+e 足が痛くて、歩けない[ほど]だ。 | My leg hurts so much I can't walk. | Kaki saya sakit sampai tidak bisa berjalan.
+e 泣きたい[くらい]うれしかった。 | I was so happy I wanted to cry. | Saya senang sampai ingin menangis.
+
+@ 〜ほど〜ない
+= not as … as | tidak se… seperti
+f N + ほど + negative
+s extent
+e 今日は昨日[ほど]寒く[ない]。 | Today isn't as cold as yesterday. | Hari ini tidak sedingin kemarin.
+e 私は兄[ほど]背が高く[ありません]。 | I'm not as tall as my older brother. | Saya tidak setinggi kakak laki-laki saya.
+
+@ 〜過ぎ / 〜前 (time) | すぎ / まえ
+= past / to (the hour) | lewat / kurang (jam)
+f time + 過ぎ・前
+s time
+e 今、三時五分[過ぎ]です。 | It's now five past three. | Sekarang jam tiga lewat lima menit.
+e 九時十分[前]に着きました。 | I arrived at ten to nine. | Saya tiba jam sembilan kurang sepuluh.
+
+@ 〜中 | ちゅう / じゅう
+= in the middle of; throughout | sedang; sepanjang
+f N + 中
+s time
+e 部長は今、会議[中]です。 | The manager is in a meeting now. | Manajer sedang rapat sekarang.
+e 一日[中]雨が降っていた。 | It rained all day. | Hujan turun sepanjang hari.

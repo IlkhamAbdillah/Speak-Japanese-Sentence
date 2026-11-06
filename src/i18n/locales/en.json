@@ -19,10 +19,13 @@
     "listening": "Listening…",
     "noAnswer": "(no answer)",
     "randomTopic": "Random topic",
-    "home": "Home",
-    "aiSetup": "AI Setup"
+    "home": "Home"
   },
   "header": {
+    "settings": "Settings",
+    "learn": "Learn",
+    "practice": "Practice",
+    "menu": "Menu",
     "micReady": "Ready",
     "home": "Home",
     "mistakes": "Mistakes",
@@ -67,6 +70,12 @@
     "testSection": "Test Section"
   },
   "home": {
+    "continueTitle": "Continue last session?",
+    "continue": "Continue",
+    "discard": "Discard",
+    "continueMessages": "{count} messages sent",
+    "discardTitle": "Discard this session?",
+    "discardConversation": "The conversation so far stays in your history.",
     "startConversation": "Start Conversation",
     "startMockTest": "Start Mock Test",
     "startPractice": "Start Practice",
@@ -75,13 +84,15 @@
     "speechUnsupported": "Your browser does not support Speech Recognition. Use Chrome or Edge for full features.",
     "micDenied": "Microphone access denied. Please allow microphone access in your browser settings.",
     "enableMic": "Enable Microphone",
-    "apiKeyMissing": "API key not configured. Open AI Setup to add one.",
+    "apiKeyMissing": "No AI set up yet. Add one in Settings.",
     "statAccuracy": "Accuracy",
     "statCorrect": "Correct",
     "select": "Select",
     "menu": {
       "words": "Kotoba List",
       "kanji": "Kanji List",
+      "grammar": "Bunpou List",
+      "particles": "Particle List",
       "practice": "Speaking Practice",
       "jlpt": "JLPT Mock Test"
     },
@@ -105,7 +116,7 @@
     "kanjiSource": "Kanji list: {source}"
   },
   "settings": {
-    "title": "AI Setup",
+    "title": "Settings",
     "subtitle": "Choose the AI that writes your questions and checks your answers.",
     "aiProvider": "AI Provider",
     "provider": "Provider",
@@ -513,5 +524,95 @@
       "early": "Good practice! {kanji} isn't due for review yet, so its progress stays the same · next review {date}",
       "notCounted": "A good practice needs {need} of {total} right on the first try. The streak starts again · next review {date}"
     }
+  },
+  "grammar": {
+    "navLabel": "Grammar",
+    "title": "Grammar",
+    "subtitle": "JLPT grammar points, N5 to N1, with example sentences.",
+    "tabList": "Grammar list",
+    "searchPlaceholder": "Search: pattern (kana or romaji) or meaning…",
+    "count": "{count} points",
+    "noMatch": "No grammar point matches “{query}”.",
+    "position": "{current} / {total}",
+    "previous": "Previous point",
+    "next": "Next point",
+    "formation": "How it attaches",
+    "examples": "Examples",
+    "review": "Grammar to review",
+    "practice": {
+      "button": "Practice this grammar",
+      "needsAI": "Set up AI to practise",
+      "notPractised": "Not practised yet",
+      "back": "Back to the grammar point",
+      "next": "Next: {pattern}",
+      "nextTip": "Press Enter for the next grammar point",
+      "review": "Questions to review",
+      "exitText": "It won't count towards this grammar point's progress.",
+      "instructionSay": "Say it in Japanese with {pattern}",
+      "words": "Key words",
+      "answerPlaceholder": "Type the sentence in Japanese…",
+      "generatingTitle": "Writing exercises…",
+      "generationFailed": "Couldn't write the exercises"
+    },
+    "quiz": {
+      "types": {
+        "blank": "Fill the blank",
+        "meaning": "Meaning → pattern",
+        "mixed": "Mixed"
+      },
+      "instruction": {
+        "blank": "Which fits the blank?",
+        "meaning": "Which pattern means this?"
+      }
+    },
+    "info": {
+      "title": "About this list",
+      "source": "Grammar points, meanings and example sentences were written for this app.",
+      "levels": "Levels follow the usual JLPT study lists (the JLPT has published no official grammar list since 2010), so some points sit one level higher or lower elsewhere.",
+      "legendTitle": "“How it attaches”",
+      "noun": "noun",
+      "adjI": "い-adjective (drop い: A−い)",
+      "adjNa": "な-adjective",
+      "vDict": "dictionary form",
+      "vMasu": "ます stem",
+      "vTe": "て form / た form",
+      "vNai": "ない form (stem: V-nai stem)",
+      "vBa": "ば form",
+      "vVol": "volitional",
+      "plain": "plain forms"
+    }
+  },
+  "particles": {
+    "title": "Particles",
+    "subtitle": "Japanese particles and their uses, with example sentences and practice.",
+    "tabList": "Particle list",
+    "tabPractice": "Practice",
+    "searchPlaceholder": "Search: particle (kana or romaji) or meaning…",
+    "noMatch": "No particle use matches “{query}”.",
+    "count": "{count} uses",
+    "source": "Source",
+    "sources": {
+      "ai": "New from AI",
+      "list": "From the list"
+    },
+    "sourceHelp": {
+      "ai": "The AI writes new sentences each time, at the level you pick.",
+      "list": "The example sentences of the particle list, no AI needed."
+    },
+    "level": "Level of the sentences",
+    "start": "Start practice",
+    "generatingTitle": "Writing sentences…",
+    "generatingText": "The AI is writing particle exercises for you.",
+    "instruction": "Fill in the particle",
+    "instructionMany": "Fill in the particles",
+    "blank": "Blank {n}",
+    "keypad": "Particles",
+    "clear": "Clear",
+    "typeTip": "Tap a particle, or type it in romaji (wa, o, ni, kara; Space after ka, yo, de…). Backspace clears.",
+    "askAI": "Mine works too?",
+    "accepted": "The AI says your answer works too",
+    "review": "Sentences to review",
+    "newPractice": "New practice",
+    "countLabel": "Sentences"
   }
 }

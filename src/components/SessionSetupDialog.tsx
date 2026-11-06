@@ -241,8 +241,8 @@ export default function SessionSetupDialog({
           <div className="alert alert-warning setup-dialog-alert">
             <span style={{ flex: 1 }}>{blockedReason}</span>
             {settings.aiProvider !== 'ollama' && !settings.apiKey.trim() && (
-              <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings')}>
-                {t('common.aiSetup')}
+              <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings', { state: { from: settings.appMode === 'jlpt' ? '/jlpt' : '/practice' } })}>
+                {t('header.settings')}
               </button>
             )}
           </div>

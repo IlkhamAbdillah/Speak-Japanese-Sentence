@@ -1,8 +1,9 @@
 import type { UserSettings, Session, Attempt, EvaluationResponse } from '../types';
-import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, JLPT_LEVELS, AI_PROVIDER_MODELS } from '../types';
+import { DEFAULT_SETTINGS, EXERCISE_MODES, JLPT_SECTIONS, TRANSLATION_FORMATS, STORY_PARAGRAPHS, STORY_TOPICS, STORY_TENSES, VOCAB_CATEGORIES, VOCAB_QUIZ_TYPES, VOCAB_QUIZ_COUNTS, VERB_GROUP_FILTERS, ADJ_TYPE_FILTERS, VOCAB_FREQUENCY_FILTERS, VOCAB_FREQUENCIES, VOCAB_JLPT_VALUES, VERB_GROUP_VALUES, ADJ_TYPE_VALUES, KANJI_STATUS_FILTERS, KANJI_STATUS_VALUES, KANJI_QUIZ_TYPES, GRAMMAR_QUIZ_TYPES, PARTICLE_QUIZ_SOURCES, PARTICLE_QUIZ_COUNTS, JLPT_LEVELS, AI_PROVIDER_MODELS } from '../types';
 import { LANGUAGES } from '../i18n';
 import type { KanjiProgressMap } from './kanjiProgress';
 import { progressFromSessions } from './kanjiProgress';
+import type { GrammarProgressMap } from './grammarProgress';
 
 const KEYS = {
   settings: 'sjp_settings',
@@ -10,6 +11,7 @@ const KEYS = {
   version: 'sjp_schema_version',
   active: 'sjp_active_session',
   kanjiProgress: 'sjp_kanji_progress',
+  grammarProgress: 'sjp_grammar_progress',
   dismissedMistakes: 'sjp_dismissed_mistakes',
 } as const;
 
@@ -102,6 +104,18 @@ export function loadSettings(): UserSettings {
   if (!VOCAB_QUIZ_COUNTS.includes(settings.kanjiQuizCount)) settings.kanjiQuizCount = DEFAULT_SETTINGS.kanjiQuizCount;
   settings.kanjiQuizJlpt = Array.isArray(settings.kanjiQuizJlpt) ? onlyValid(settings.kanjiQuizJlpt, JLPT_LEVELS) : DEFAULT_SETTINGS.kanjiQuizJlpt;
   settings.kanjiQuizStatus = onlyValid(settings.kanjiQuizStatus, KANJI_STATUS_VALUES);
+  settings.grammarCollapsed = onlyValid(settings.grammarCollapsed, JLPT_LEVELS);
+  if (!GRAMMAR_QUIZ_TYPES.includes(settings.grammarQuizType)) settings.grammarQuizType = DEFAULT_SETTINGS.grammarQuizType;
+  if (!VOCAB_QUIZ_COUNTS.includes(settings.grammarQuizCount)) settings.grammarQuizCount = DEFAULT_SETTINGS.grammarQuizCount;
+  settings.grammarQuizJlpt = Array.isArray(settings.grammarQuizJlpt) ? onlyValid(settings.grammarQuizJlpt, JLPT_LEVELS) : DEFAULT_SETTINGS.grammarQuizJlpt;
+  // Particles moved to their own page; the practice always uses every particle (user-requested)
+  delete (settings as { grammarCategory?: unknown }).grammarCategory;
+  delete (settings as { particleQuizFocus?: unknown }).particleQuizFocus;
+  const isStringList = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === 'string');
+  if (!isStringList(settings.particleCollapsed)) settings.particleCollapsed = [];
+  if (!PARTICLE_QUIZ_SOURCES.includes(settings.particleQuizSource)) settings.particleQuizSource = DEFAULT_SETTINGS.particleQuizSource;
+  if (!JLPT_LEVELS.includes(settings.particleQuizLevel)) settings.particleQuizLevel = DEFAULT_SETTINGS.particleQuizLevel;
+  if (!PARTICLE_QUIZ_COUNTS.includes(settings.particleQuizCount)) settings.particleQuizCount = DEFAULT_SETTINGS.particleQuizCount;
   // Retired cloud models (e.g. gemini-2.5-flash, gpt-4o): switch to the provider's default.
   // Custom URL models are free text, so they stay.
   const models = AI_PROVIDER_MODELS[settings.aiProvider];
@@ -206,6 +220,26 @@ export function loadActiveSession(settings: UserSettings): ActiveSession | null 
   return sameMode ? { ...active, attempts: active.attempts ?? [], lastEvaluation: active.lastEvaluation ?? null } : null;
 }
 
+/** The saved session in progress, whatever mode it was started in (the Continue card). */
+export function loadSavedSession(): Session | null {
+  const sess = safeGet<ActiveSession | null>(KEYS.active, null)?.session;
+  if (!sess || sess.status !== 'in-progress') return null;
+  if (sess.appMode !== 'practice' && sess.appMode !== 'jlpt') return null;
+  return sess;
+}
+
+/**
+ * Drops the saved session in progress. Answered questions are kept in the history
+ * as an abandoned session, like exiting it (conversations are saved as they go).
+ */
+export function discardActiveSession(): void {
+  const sess = loadSavedSession();
+  if (sess && !sess.conversation && sess.results.length > 0) {
+    saveSession({ ...sess, status: 'abandoned', endedAt: Date.now() });
+  }
+  clearActiveSession();
+}
+
 // ─── Kanji progress (across sessions) ───────────────────
 
 /** Progress per kanji. The first time, it is rebuilt from the saved kanji sessions. */
@@ -219,6 +253,17 @@ export function loadKanjiProgress(): KanjiProgressMap {
 
 export function saveKanjiProgress(progress: KanjiProgressMap): boolean {
   return safeSet(KEYS.kanjiProgress, progress);
+}
+
+// ─── Grammar progress ───────────────────────────────────
+
+export function loadGrammarProgress(): GrammarProgressMap {
+  const saved = safeGet<GrammarProgressMap | null>(KEYS.grammarProgress, null);
+  return saved && typeof saved === 'object' ? saved : {};
+}
+
+export function saveGrammarProgress(progress: GrammarProgressMap): boolean {
+  return safeSet(KEYS.grammarProgress, progress);
 }
 
 // ─── Mistakes removed from the Mistakes page ───────────

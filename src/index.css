@@ -1836,16 +1836,6 @@ button.mode-card {
   color: var(--accent-primary);
 }
 
-/* Narrow screens: icons only in the header */
-@media (max-width: 640px) {
-  .header-nav-label {
-    display: none;
-  }
-
-  .header-nav-link {
-    padding: var(--space-sm);
-  }
-}
 
 /* ─── Kanji voice tip ─────────────────────────────────── */
 
@@ -3624,4 +3614,733 @@ button.kanji-reading:hover {
   .kanji-tile {
     contain-intrinsic-size: auto 67px auto 66px;
   }
+}
+
+/* ─── Home: an odd last card fills its row (5 sections) ─ */
+
+.home-menu-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* ─── Grammar list (文法): rows, card, quiz ──────────── */
+
+.grammar-row {
+  grid-template-columns: auto minmax(140px, 1fr) 1.6fr auto;
+  width: 100%;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.grammar-row:hover {
+  background: var(--surface-1);
+}
+
+.grammar-row:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+.grammar-row-pattern {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-japanese);
+  overflow-wrap: anywhere;
+}
+
+.grammar-row-meaning {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.grammar-row-chevron {
+  color: var(--text-tertiary);
+}
+
+/* Results list: no number column */
+.grammar-row:not(:has(.vocab-row-number)) {
+  grid-template-columns: minmax(140px, 1fr) 1.6fr auto;
+}
+
+@media (max-width: 640px) {
+  .grammar-row,
+  .grammar-row:not(:has(.vocab-row-number)) {
+    grid-template-columns: 1fr auto;
+    row-gap: 2px;
+  }
+
+  .grammar-row-pattern,
+  .grammar-row-meaning {
+    grid-column: 1;
+  }
+
+  .grammar-row-chevron {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* The marked grammar part of an example, and the quiz blank */
+.grammar-mark {
+  background: none;
+  color: var(--accent-primary-hover);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-primary);
+  text-underline-offset: 4px;
+}
+
+.grammar-blank {
+  display: inline-block;
+  margin: 0 2px;
+  border-bottom: 2px solid var(--accent-primary);
+  line-height: 1.2;
+}
+
+/* Card */
+.grammar-detail {
+  max-width: 480px;
+}
+
+.grammar-detail-pattern {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-sm) 2px;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-japanese);
+  overflow-wrap: anywhere;
+}
+
+.grammar-detail-fields {
+  grid-template-columns: auto 1fr;
+}
+
+.grammar-formation {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.grammar-examples {
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.grammar-examples-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.grammar-example-list {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.grammar-example-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.grammar-example-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.grammar-example-ja {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.7;
+}
+
+.grammar-example-translation {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.grammar-listen {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+/* ⓘ: the formation abbreviations */
+.grammar-info-legend {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.grammar-info-legend div {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: var(--space-sm);
+}
+
+.grammar-info-legend dt {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.grammar-info-legend dd {
+  margin: 0;
+}
+
+/* Quiz: a sentence instead of one big word, longer choices */
+.grammar-quiz-sentence {
+  margin: var(--space-sm) 0 0;
+  font-size: clamp(1.2rem, 4.5vw, 1.45rem);
+  line-height: 1.6;
+}
+
+.grammar-quiz-card {
+  position: relative;
+}
+
+.grammar-quiz-listen {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+}
+
+.grammar-quiz-translation {
+  margin: var(--space-sm) 0 0;
+  line-height: 1.5;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.grammar-quiz-meaning {
+  margin: var(--space-sm) 0 0;
+}
+
+.grammar-quiz-choices .choice-text {
+  font-size: var(--text-lg);
+  overflow-wrap: anywhere;
+}
+
+.grammar-sheet-meaning {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+
+
+/* Example formations mix Latin and kana (N + の + N) */
+.grammar-formation {
+  font-family: 'Inter', var(--font-jp);
+}
+
+/* Grammar quiz sheet: patterns are longer than a kanji word */
+.grammar-quiz .kanji-sheet .vocab-word {
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+
+/* ─── Particles (助詞): list category, practice ──────── */
+
+
+
+/* A blank in the sentence: tap to select / clear it */
+.particle-blank {
+  display: inline-block;
+  min-width: 2.2em;
+  margin: 0 3px;
+  padding: 0 6px;
+  border: none;
+  border-bottom: 2px solid var(--border-strong);
+  border-radius: 4px 4px 0 0;
+  background: var(--surface-2);
+  color: var(--text-japanese);
+  font: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+
+.particle-blank:disabled {
+  cursor: default;
+}
+
+.particle-blank.active {
+  border-bottom-color: var(--accent-primary);
+  background: var(--accent-primary-muted);
+  box-shadow: 0 0 0 1px var(--accent-primary) inset;
+}
+
+.particle-blank.right {
+  border-bottom-color: var(--color-success);
+  background: var(--color-success-muted);
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.particle-blank.wrong {
+  border-bottom-color: var(--color-error);
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--color-error);
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
+/* The keypad: every particle the practice asks */
+.particle-keypad {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.particle-key {
+  min-height: 42px;
+  padding: 4px 2px;
+  white-space: nowrap;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.particle-key:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--accent-primary);
+}
+
+.particle-key:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.particle-key-back {
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+}
+
+.particle-tip {
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .particle-keypad {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .particle-key {
+    min-height: 40px;
+  }
+}
+
+/* Why each blank takes its particle, the AI's verdict */
+.particle-reasons p,
+.particle-verdict {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.particle-reason-key {
+  font-weight: 700;
+  color: var(--color-success);
+  margin-right: 4px;
+}
+
+.particle-verdict svg {
+  vertical-align: -2px;
+  color: var(--accent-primary);
+}
+
+.particle-verdict-error {
+  color: var(--color-error);
+}
+
+.particle-sheet-accepted {
+  border-left-color: var(--color-success);
+}
+
+.particle-ask {
+  margin-top: var(--space-xs);
+  padding-left: 0;
+}
+
+.particle-reasons,
+.particle-verdict {
+  font-family: 'Inter', var(--font-jp);
+}
+
+.particle-review-row {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.particle-review-row:last-child {
+  border-bottom: none;
+}
+
+.particle-review-row p {
+  margin: 0;
+}
+
+/* ─── Continue last session (Home / mode page) ───────── */
+
+.continue-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  max-width: 640px;
+  margin: 0 auto var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface-1);
+  border: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+}
+
+.continue-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.continue-card-title {
+  margin: 0 0 var(--space-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.continue-card-meta {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.continue-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .continue-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .continue-card-actions > .btn {
+    flex: 1;
+  }
+}
+
+/* ─── Grammar practice (one point, AI) ───────────────── */
+
+/* Progress on the list: a coloured edge like the vocab group stripe */
+.grammar-row-learning::before,
+.grammar-row-known::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 2px;
+}
+
+.grammar-row-learning::before { background: var(--kanji-learning); }
+.grammar-row-known::before { background: var(--kanji-known); }
+
+.grammar-detail .kanji-practice-button {
+  margin-top: var(--space-md);
+}
+
+.grammar-practice-pattern {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-japanese);
+}
+
+.grammar-practice-prompt {
+  margin: var(--space-sm) 0 0;
+  font-size: var(--text-xl);
+  line-height: 1.5;
+}
+
+.grammar-practice-words {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.grammar-practice .kanji-meaning-hint {
+  margin-top: var(--space-sm);
+}
+
+.grammar-practice-feedback,
+.grammar-practice-hint,
+.grammar-practice-corrected,
+.grammar-practice-explanation {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.grammar-practice-hint {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: flex-start;
+}
+
+.grammar-practice-hint svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent-primary);
+}
+
+.grammar-practice-corrected .jp-text {
+  color: var(--text-japanese);
+}
+
+.grammar-practice-answer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-lg);
+  color: var(--text-japanese);
+  line-height: 1.5;
+}
+
+.grammar-practice-review-row {
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+
+.grammar-practice-review-translation {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* AI text mixes Japanese into English / Indonesian: Japanese characters fall back to the Japanese font */
+.grammar-practice,
+.grammar-practice-review-row {
+  font-family: 'Inter', var(--font-jp);
+}
+
+/* ─── Header navigation (grouped menus; ☰ panel on phones) ─── */
+
+.header-logo {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.header-nav {
+  margin: 0 auto 0 var(--space-xl);
+}
+
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.header-nav-link.open {
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-chevron {
+  transition: transform var(--transition-fast);
+}
+
+.header-nav-link.open .nav-dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-menu {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  min-width: 220px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xs);
+  z-index: 150;
+  animation: fadeIn 150ms ease;
+}
+
+.nav-menu-end {
+  left: auto;
+  right: 0;
+  min-width: 180px;
+}
+
+.nav-menu-item,
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-menu-item:hover,
+.mobile-nav-item:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.nav-menu-item.active,
+.mobile-nav-item.active {
+  color: var(--accent-primary);
+}
+
+.nav-item-glyph {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-primary-muted);
+  color: var(--accent-primary);
+  font-family: var(--font-jp);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.header-menu-button {
+  display: none;
+}
+
+/* Phones: logo + ☰; the menus move into one panel under the header */
+@media (max-width: 767px) {
+  .header-nav,
+  .header-lang,
+  .header-settings,
+  .header-end .header-nav-label {
+    display: none;
+  }
+
+  .header-menu-button {
+    display: flex;
+    padding: var(--space-sm);
+  }
+
+  .header-end .mic-status {
+    padding: var(--space-sm);
+  }
+}
+
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 64px 0 0;
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 150ms ease;
+}
+
+.mobile-nav {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+  animation: fadeIn 150ms ease;
+}
+
+.mobile-nav-group + .mobile-nav-group {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mobile-nav-title {
+  margin: var(--space-xs) 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.mobile-nav-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs);
+}
+
+.mobile-nav-item {
+  padding: var(--space-sm);
+}
+
+.mobile-nav-langs {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.mobile-nav-lang {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.mobile-nav-lang.active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }

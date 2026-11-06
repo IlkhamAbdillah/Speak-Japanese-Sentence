@@ -71,6 +71,20 @@ export type StoryTense = 'random' | 'past' | 'present' | 'future';
 
 export const STORY_TENSES: StoryTense[] = ['random', 'past', 'present', 'future'];
 
+// ─── Grammar list (文法) ────────────────────────────────
+// Grammar quiz (Grammar page, no AI): blank: an example sentence with the grammar part
+// blanked out, pick the part; meaning: the meaning, pick the pattern; mixed: either per question
+export type GrammarQuizType = 'mixed' | 'blank' | 'meaning';
+
+export const GRAMMAR_QUIZ_TYPES: GrammarQuizType[] = ['blank', 'meaning', 'mixed'];
+
+/** Particle practice: new sentences from the AI, or the particle list's examples (no AI) */
+export type ParticleQuizSource = 'ai' | 'list';
+export const PARTICLE_QUIZ_SOURCES: ParticleQuizSource[] = ['ai', 'list'];
+
+/** Particle practice sentences; 0 = every use of the list (list source only) */
+export const PARTICLE_QUIZ_COUNTS = [5, 10, 20, 0];
+
 // ─── Word list (verbs / adjectives / adverbs / conjunctions / onomatopoeia) ─
 // A fixed list (src/data/vocab/words.json) with its own quiz, checked locally (no AI)
 // No "all": the lists cover completely different areas (user-requested)
@@ -378,6 +392,18 @@ export interface UserSettings {
   /** Kanji quiz filters (multi-select); empty = no filter */
   kanjiQuizJlpt: JLPTLevel[];
   kanjiQuizStatus: KanjiStatusValue[];
+  /** Grammar list: collapsed JLPT sections */
+  grammarCollapsed: JLPTLevel[];
+  /** Grammar quiz: question type, count (VOCAB_QUIZ_COUNTS; 0 = all) and levels (multi-select; empty = all) */
+  grammarQuizType: GrammarQuizType;
+  grammarQuizCount: number;
+  grammarQuizJlpt: JLPTLevel[];
+  /** Particle list: collapsed particles (は, に…) */
+  particleCollapsed: string[];
+  /** Particle practice: source, JLPT level of the AI sentences, count (always every particle, user-requested) */
+  particleQuizSource: ParticleQuizSource;
+  particleQuizLevel: JLPTLevel;
+  particleQuizCount: number;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -417,6 +443,14 @@ export const DEFAULT_SETTINGS: UserSettings = {
   kanjiQuizCount: 10,
   kanjiQuizJlpt: ['N5'],
   kanjiQuizStatus: [],
+  grammarCollapsed: [],
+  grammarQuizType: 'blank',
+  grammarQuizCount: 10,
+  grammarQuizJlpt: ['N5'],
+  particleCollapsed: [],
+  particleQuizSource: 'ai',
+  particleQuizLevel: 'N5',
+  particleQuizCount: 10,
 };
 
 // ─── Kanji progress ─────────────────────────────────────
