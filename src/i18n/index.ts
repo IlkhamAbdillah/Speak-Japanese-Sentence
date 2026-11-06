@@ -39,11 +39,17 @@ function lookup(messages: unknown, key: string): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
+/** `{alt}` in any text: the Alt key as the keyboard shows it ("Alt+" or ⌥ on a Mac), for shortcuts like {alt}V */
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+export const ALT_KEY = IS_MAC ? '⌥' : 'Alt+';
+const DEFAULT_PARAMS: TranslateParams = { alt: ALT_KEY };
+
 /** Looks up `key` in the language (falling back to English) and fills in `{name}` placeholders. */
 export function translate(lang: InstructionLanguage, key: MessageKey, params?: TranslateParams): string {
   const text = lookup(LANGUAGES[lang], key) ?? lookup(LANGUAGES.en, key) ?? key;
-  if (!params) return text;
-  return text.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
+  if (!text.includes('{')) return text;
+  const all = { ...DEFAULT_PARAMS, ...params };
+  return text.replace(/\{(\w+)\}/g, (match, name: string) => (name in all ? String(all[name]) : match));
 }
 
 export function languageMeta(lang: InstructionLanguage): Messages['meta'] {

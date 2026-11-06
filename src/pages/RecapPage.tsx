@@ -346,21 +346,21 @@ export default function RecapPage({ sessionId: propSessionId, onPracticeAgain, o
         );
       })}
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
-        <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
-          <RotateCcw size={16} /> {t('recap.practiceAgain')}
+      {/* Actions: the one that carries on (primary) on the right (user-requested) */}
+      <div className="action-row">
+        <button className="btn btn-ghost" onClick={() => navigate('/')}>
+          <Home size={16} /> {t('common.home')}
         </button>
-        {canRetryWrong && (
-          <button className="btn btn-secondary btn-lg" onClick={() => onRetryWrong(session)}>
-            <RotateCcw size={16} /> {t('recap.retryWrong')} ({wrongCount})
-          </button>
-        )}
         <button className="btn btn-secondary" onClick={() => navigate('/mistakes')}>
           <ListX size={16} /> {t('header.mistakes')}
         </button>
-        <button className="btn btn-ghost" onClick={() => navigate('/')}>
-          <Home size={16} /> {t('common.home')}
+        {canRetryWrong && (
+          <button className="btn btn-secondary" onClick={() => onRetryWrong(session)}>
+            <RotateCcw size={16} /> {t('recap.retryWrong')} ({wrongCount})
+          </button>
+        )}
+        <button className="btn btn-primary" onClick={onPracticeAgain}>
+          <RotateCcw size={16} /> {t('recap.practiceAgain')}
         </button>
       </div>
     </div>
@@ -433,15 +433,15 @@ function ConversationRecap({ session, onPracticeAgain }: {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-2xl)', flexWrap: 'wrap' }}>
-        <button className="btn btn-primary btn-lg" onClick={onPracticeAgain}>
-          <RotateCcw size={16} /> {t('recap.chatAgain')}
+      <div className="action-row">
+        <button className="btn btn-ghost" onClick={() => navigate('/')}>
+          <Home size={16} /> {t('common.home')}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate('/mistakes')}>
           <ListX size={16} /> {t('header.mistakes')}
         </button>
-        <button className="btn btn-ghost" onClick={() => navigate('/')}>
-          <Home size={16} /> {t('common.home')}
+        <button className="btn btn-primary" onClick={onPracticeAgain}>
+          <RotateCcw size={16} /> {t('recap.chatAgain')}
         </button>
       </div>
     </div>

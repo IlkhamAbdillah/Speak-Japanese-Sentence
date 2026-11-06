@@ -41,6 +41,8 @@ interface UseSessionReturn {
   sessionElapsedMs: number;
   /** With `preset`, practise those questions again instead of generating new ones */
   startSession: (settings: UserSettings, preset?: PresetQuestions) => Promise<void>;
+  /** Start the timers when the learner presses Start after the questions are written */
+  beginSession: () => void;
   /** Continue a session saved before the page was reloaded */
   restoreSession: (settings: UserSettings, saved: ActiveSession) => void;
   startListening: () => void;
@@ -240,6 +242,16 @@ export function useSession(): UseSessionReturn {
     },
     [resetTimer, startTimer]
   );
+
+  // The learner pressed Start after the questions were written: the timers start from now
+  // (they ran while the How to answer card was on screen)
+  const beginSession = useCallback(() => {
+    sessionStartRef.current = Date.now();
+    setSessionElapsedMs(0);
+    updateSession((prev) => ({ ...prev, startedAt: Date.now() }));
+    resetTimer();
+    startTimer();
+  }, [resetTimer, startTimer, updateSession]);
 
   const restoreSession = useCallback(
     (settings: UserSettings, saved: ActiveSession) => {
@@ -586,6 +598,7 @@ export function useSession(): UseSessionReturn {
     elapsedMs,
     sessionElapsedMs,
     startSession,
+    beginSession,
     restoreSession,
     startListening,
     stopListening: stopListeningFn,

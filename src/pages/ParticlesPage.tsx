@@ -13,6 +13,8 @@ import { GrammarRow } from '../components/GrammarRow';
 import GrammarDetailDialog from '../components/GrammarDetailDialog';
 import GrammarInfoDialog from '../components/GrammarInfoDialog';
 import ParticleQuiz from '../components/ParticleQuiz';
+import GeneratingScreen from '../components/GeneratingScreen';
+import AnswerTips from '../components/AnswerTips';
 import SettingsButton from '../components/SettingsButton';
 import { useI18n } from '../i18n';
 
@@ -37,6 +39,8 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
   // Each practice (also a retry of the wrong sentences) starts with fresh state
   const [practiceNumber, setPracticeNumber] = useState(0);
   const [generating, setGenerating] = useState(false);
+  // AI sentences wait on the How to answer screen until Start (user-requested); the list's start at once
+  const [practiceStarted, setPracticeStarted] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   // A cancelled generation's result is ignored
   const generation = useRef(0);
@@ -81,11 +85,13 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
   const startPractice = async () => {
     setGenerationError(null);
     if (source === 'list') {
+      setPracticeStarted(true);
       setPractice(buildParticleListQuiz(PARTICLE_POINTS, count, lang));
       setPracticeNumber((n) => n + 1);
       return;
     }
     const id = ++generation.current;
+    setPracticeStarted(false);
     setGenerating(true);
     try {
       const questions = await generateParticleQuestions(aiConfigFromSettings(settings), settings.particleQuizLevel, lang, count);
@@ -105,6 +111,20 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
   const judge = (question: ParticleQuestion, answers: string[]) =>
     judgeParticleAnswer(aiConfigFromSettings(settings), lang, question, answers);
 
+  // While the AI writes, and until Start: How to answer
+  if (generating || (practice && !practiceStarted)) {
+    return (
+      <GeneratingScreen
+        ready={!generating}
+        title={t('particles.generatingTitle')}
+        text={t('particles.generatingText')}
+        tips={<AnswerTips kind="particle" />}
+        onBack={() => { cancelGeneration(); setPractice(null); }}
+        onStart={() => setPracticeStarted(true)}
+      />
+    );
+  }
+
   if (practice) {
     return (
       <div className="app-main kanji-quiz-main">
@@ -117,26 +137,14 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
           }}
           onExit={() => setPractice(null)}
           onJudge={hasAI ? judge : undefined}
+          // The How to answer screen already explained the keypad for AI sentences
+          showTypeTip={source === 'list'}
           onOpenSettings={() => navigate('/settings', { state: { from: '/particles' } })}
         />
       </div>
     );
   }
 
-  if (generating) {
-    return (
-      <div className="app-main">
-        <div className="empty-state">
-          <div className="spinner spinner-lg" style={{ margin: '0 auto var(--space-lg)' }}></div>
-          <p className="empty-state-title">{t('particles.generatingTitle')}</p>
-          <p className="empty-state-text">{t('particles.generatingText')}</p>
-          <button className="btn btn-secondary" onClick={cancelGeneration} style={{ marginTop: 'var(--space-lg)' }}>
-            {t('common.cancel')}
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="app-main">

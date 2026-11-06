@@ -4,11 +4,15 @@ import type { UserSettings } from '../types';
 import { useConversation } from '../hooks/useConversation';
 import { loadActiveSession } from '../services/storage';
 import { usePushToTalk } from '../hooks/usePushToTalk';
+import { useMicShortcut } from '../hooks/useMicShortcut';
 import ChatBubble from '../components/ChatBubble';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 import SettingsButton from '../components/SettingsButton';
+import { Kbd } from '../components/Kbd';
+import topicData from '../data/conversation/topics.json';
+import type { InstructionLanguage } from '../i18n';
 import {
   startRecognition,
   stopRecognition,
@@ -16,6 +20,9 @@ import {
   isSpeechRecognitionSupported,
   prefersPushToTalk,
 } from '../services/speech';
+
+// Ready-made situations for Random topic (src/data/conversation/topics.json)
+const TOPICS = topicData.topics as (Partial<Record<InstructionLanguage, string>> & { en: string })[];
 
 interface ConversationPageProps {
   settings: UserSettings;
@@ -28,7 +35,7 @@ interface ConversationPageProps {
 }
 
 export default function ConversationPage({ settings, onFinish, onExit, onOpenSettings, resume: resumeSaved }: ConversationPageProps) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { session, messages, isWaitingForAI, error, start, resume, send, retry, end } = useConversation(settings);
 
   // Continue the conversation that was open when the page was reloaded
@@ -43,6 +50,7 @@ export default function ConversationPage({ settings, onFinish, onExit, onOpenSet
   }, []);
 
   const [topicInput, setTopicInput] = useState('');
+  const topicRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState('');
   const [isListening, setIsListening] = useState(false);
   // Push-to-talk: the phone stopped listening while the mic is still held
@@ -115,6 +123,8 @@ export default function ConversationPage({ settings, onFinish, onExit, onOpenSet
     },
   });
   const micHandlers = pushToTalk ? ptt.handlers : { onClick: toggleListening };
+  // V = the mic button on laptops (user-requested)
+  useMicShortcut(toggleListening, !!session && isSpeechRecognitionSupported(), isListening);
 
   const handleEnd = () => {
     stopRecognition();
@@ -126,6 +136,14 @@ export default function ConversationPage({ settings, onFinish, onExit, onOpenSet
   const userMessageCount = messages.filter((m) => m.role === 'user').length;
 
   // ─── Topic setup ──────────────────────────────────────
+  // Random topic: a situation from the app's list in the UI language, never the one in the box
+  const fillRandomTopic = () => {
+    const current = topicInput.trim();
+    const choices = TOPICS.map((topic) => topic[lang] ?? topic.en).filter((topic) => topic !== current);
+    setTopicInput(choices[Math.floor(Math.random() * choices.length)]);
+    topicRef.current?.focus();
+  };
+
   if (!session) {
     return (
       <div className="app-main" style={{ maxWidth: 640 }}>
@@ -144,29 +162,41 @@ export default function ConversationPage({ settings, onFinish, onExit, onOpenSet
               {t('conversation.topicLabel')}
             </label>
             <textarea
+              ref={topicRef}
               className="form-input chat-topic-input"
               rows={3}
+              autoFocus
               placeholder={t('conversation.topicPlaceholder')}
               value={topicInput}
               onChange={(e) => setTopicInput(e.target.value)}
+              onKeyDown={(e) => {
+                // Enter starts (Shift+Enter = new line); not while the IME is converting
+                if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  if (topicInput.trim()) start(topicInput.trim());
+                }
+              }}
             />
           </div>
 
+          {/* Primary (start with the topic) on the right (user-requested) */}
           <div className="start-card-actions" style={{ flexWrap: 'wrap' }}>
+            <button className="btn btn-ghost" onClick={onExit}>
+              {t('common.back')}
+            </button>
+            {/* Fills the box with a ready-made situation to start with or edit (user-requested) */}
+            <button className="btn btn-secondary" onClick={fillRandomTopic}>
+              <Shuffle size={16} />
+              {t('common.randomTopic')}
+            </button>
             <button
               className="btn btn-primary"
               disabled={!topicInput.trim()}
               onClick={() => start(topicInput.trim())}
             >
               <MessageCircle size={16} />
-              {t('conversation.startWithTopic')}
-            </button>
-            <button className="btn btn-secondary" onClick={() => start(null)}>
-              <Shuffle size={16} />
-              {t('common.randomTopic')}
-            </button>
-            <button className="btn btn-ghost" onClick={onExit}>
-              {t('common.back')}
+              {t('practice.startSession')}
+              <Kbd k="Enter" />
             </button>
           </div>
         </div>

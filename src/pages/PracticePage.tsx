@@ -21,7 +21,12 @@ import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoice
 import MultipleChoice from '../components/MultipleChoice';
 import ConfirmDialog from '../components/ConfirmDialog';
 import SettingsButton from '../components/SettingsButton';
+import AnswerTips from '../components/AnswerTips';
+import { tipsForSettings } from '../services/tips';
+import GeneratingScreen from '../components/GeneratingScreen';
+import { Kbd } from '../components/Kbd';
 import { useEscapeKey } from '../hooks/useEscapeKey';
+import { useMicShortcut } from '../hooks/useMicShortcut';
 import { isSpeechRecognitionSupported, prefersPushToTalk, SILENCE_SUBMIT_MS } from '../services/speech';
 import { loadActiveSession } from '../services/storage';
 import { useI18n } from '../i18n';
@@ -57,6 +62,7 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
     evaluationErrorIsAI,
     sessionElapsedMs,
     startSession,
+    beginSession,
     restoreSession,
     startListening,
     stopListening,
@@ -74,8 +80,11 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
   } = useSession();
 
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  // New questions from the AI wait on the How to answer card until the learner presses
+  // Start (user-requested); a resumed session or a retry of saved questions starts right away
+  const [started, setStarted] = useState(!!resume || !!preset);
   // Esc asks before ending the session (user-requested)
-  useEscapeKey(() => setShowConfirmEnd(true), !!session && session.status !== 'completed' && !showConfirmEnd);
+  useEscapeKey(() => setShowConfirmEnd(true), started && !!session && session.status !== 'completed' && !showConfirmEnd);
   const [editedTranscript, setEditedTranscript] = useState('');
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 
@@ -97,6 +106,12 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
   const isSingleAttempt = isSingleAttemptMode(settings);
   const isKanji = isKanjiMode(settings);
   const isChoice = isMultipleChoiceMode(settings);
+  // V = the mic button on laptops (user-requested)
+  useMicShortcut(
+    () => (speechState === 'listening' ? stopListening() : startListening()),
+    started && !!currentQuestion && !isChoice && !micDisabled && isSpeechRecognitionSupported(),
+    speechState === 'listening',
+  );
   const maxAttempts = getMaxAttempts(settings);
 
   // Clear per-question UI state whenever we move on
@@ -149,6 +164,48 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
     }
   }, [session?.status, session?.sessionId, onFinish]);
 
+  // Start: the questions are written and the learner is ready
+  const canBegin = !started && !isGenerating && !!session && !generationError;
+  const handleBegin = useCallback(() => {
+    if (!canBegin) return;
+    beginSession();
+    setStarted(true);
+  }, [canBegin, beginSession]);
+  // Back before starting: nothing was answered, so the session is dropped
+  const handleLeaveBeforeStart = useCallback(() => {
+    endSession();
+    onExit();
+  }, [endSession, onExit]);
+  // Keyboard during the session (user-requested: no mouse needed). The actions depend on
+  // the question's state, worked out in the render below, so they are read from a ref.
+  // Alt + letter works even with the answer box focused and the Japanese IME on.
+  const keysRef = useRef<{ alt: Record<string, () => void>; enter?: () => void; digit?: (n: number) => void }>({ alt: {} });
+  useEffect(() => {
+    if (!started) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.repeat) return;
+      const keys = keysRef.current;
+      if (e.altKey) {
+        const action = e.code.startsWith('Key') ? keys.alt[e.code.slice(3)] : undefined;
+        if (action) {
+          e.preventDefault();
+          action();
+        }
+        return;
+      }
+      // Plain keys only when no text field or button has them (the answer box handles its own Enter)
+      if (e.isComposing || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'Enter' && keys.enter && !(e.target instanceof HTMLButtonElement)) {
+        e.preventDefault();
+        keys.enter();
+      } else if (/^[1-9]$/.test(e.key) && keys.digit) {
+        keys.digit(Number(e.key));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [started]);
+
   const handleEndSession = useCallback(() => {
     endSession();
     if (session && session.results.length > 0) {
@@ -173,20 +230,17 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
     return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  // Loading state
-  if (isGenerating) {
+  // While the AI writes, and after it, until Start: how to answer in this mode (user-requested)
+  if (isGenerating || (!started && session && !generationError)) {
     return (
-      <div className="app-main">
-        <div className="empty-state">
-          <div className="spinner spinner-lg" style={{ margin: '0 auto var(--space-lg)' }}></div>
-          <p className="empty-state-title">
-            {t(isStoryMode(settings) ? 'story.generatingTitle' : 'practice.generatingTitle')}
-          </p>
-          <p className="empty-state-text">
-            {t(isStoryMode(settings) ? 'story.generatingText' : 'practice.generatingText')}
-          </p>
-        </div>
-      </div>
+      <GeneratingScreen
+        ready={!isGenerating && !!session}
+        title={t(isStoryMode(settings) ? 'story.generatingTitle' : 'practice.generatingTitle')}
+        text={t(isStoryMode(settings) ? 'story.generatingText' : 'practice.generatingText')}
+        tips={<AnswerTips {...tipsForSettings(settings)} />}
+        onBack={handleLeaveBeforeStart}
+        onStart={handleBegin}
+      />
     );
   }
 
@@ -204,13 +258,13 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
             <span>{generationError}</span>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
-            <button className="btn btn-primary" onClick={() => startSession(settings)}>
-              <RotateCcw size={16} /> {t('common.retry')}
-            </button>
             <button className="btn btn-secondary" onClick={onExit}>
               {t('practice.goBack')}
             </button>
             <SettingsButton onClick={onOpenSettings} large />
+            <button className="btn btn-primary" onClick={() => startSession(settings)}>
+              <RotateCcw size={16} /> {t('common.retry')}
+            </button>
           </div>
         </div>
       </div>
@@ -239,6 +293,32 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
   const openedHints = hintsAllowed ? hintSteps.slice(0, hintsUsed) : [];
 
   const speechSupported = isSpeechRecognitionSupported();
+  const busy = speechState === 'listening' || speechState === 'processing' || speechState === 'evaluating';
+  const wrong = !!lastEvaluation && !lastEvaluation.correct;
+  const tryAgain = () => {
+    retryQuestion();
+    setEditedTranscript('');
+  };
+  const canHint = !isChoice && !lastEvaluation && !busy && hintsAllowed && hintsUsed < hintSteps.length;
+  const canReveal = !isChoice && !busy && (!lastEvaluation || (wrong && !(answerShown || isSingleAttempt || isChoice)));
+  const canTryAgain = wrong && lastEvaluation.nextAction === 'retry';
+  const canNext = wrong && (lastEvaluation.nextAction !== 'retry' || (answerShown || isSingleAttempt || isChoice));
+  keysRef.current = {
+    alt: {
+      ...(canHint ? { H: openHint } : {}),
+      ...(canReveal ? { A: revealAnswer } : {}),
+      ...(canTryAgain ? { R: tryAgain } : {}),
+      ...(canNext ? { N: goToNextQuestion } : {}),
+    },
+    // Enter after a wrong answer: the highlighted button (Try Again, else Next)
+    enter: canTryAgain ? tryAgain
+      : canNext ? goToNextQuestion
+        : isChoice && !lastEvaluation && selectedChoice !== null ? () => submitChoice(selectedChoice)
+          : undefined,
+    digit: isChoice && !lastEvaluation && currentQuestion.choices
+      ? (n) => { if (n <= currentQuestion.choices!.length) setSelectedChoice(n - 1); }
+      : undefined,
+  };
   const micHandlers = pushToTalk
     ? ptt.handlers
     : { onClick: speechState === 'listening' ? stopListening : startListening };
@@ -253,7 +333,7 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
 
   const getSpeechStateLabel = () => {
     const labels: Record<string, MessageKey> = {
-      idle: pushToTalk ? 'practice.speech.idleHold' : 'practice.speech.idle',
+      // No idle text under the mic: the How to answer card explained it (user-requested)
       listening: pushToTalk
         ? ptt.cancelArmed
           ? 'common.releaseToCancel'
@@ -317,7 +397,6 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
                 {t('practice.kanjiInstruction')}
               </p>
               <p className="kanji-display">{currentQuestion.prompt}</p>
-              {speechSupported && <p className="kanji-voice-tip">{t('practice.kanjiVoiceTip')}</p>}
             </>
           ) : isChoice ? (
             <>
@@ -384,7 +463,7 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
                 disabled={selectedChoice === null}
                 onClick={() => selectedChoice !== null && submitChoice(selectedChoice)}
               >
-                <Send size={16} /> {t('practice.submitChoice')}
+                <Send size={16} /> {t('practice.submitChoice')} <Kbd k="Enter" />
               </button>
             )}
           </>
@@ -457,18 +536,18 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
                 <MicOff size={28} />
               </button>
             )}
-            <span className="speech-state-label">{getSpeechStateLabel()}</span>
+            {getSpeechStateLabel() && <span className="speech-state-label">{getSpeechStateLabel()}</span>}
             {/* See the answer without answering. Kanji: that gives up the question.
                 Practice: Try Again or Next (counted wrong) follow. */}
             {!isChoice && !lastEvaluation && speechState !== 'processing' && speechState !== 'listening' && speechState !== 'evaluating' && (
               <div className="answer-help-actions">
                 {hintsAllowed && hintsUsed < hintSteps.length && (
                   <button className="btn btn-ghost btn-sm" onClick={openHint}>
-                    <Lightbulb size={14} /> {t('practice.hint')}
+                    <Lightbulb size={14} /> {t('practice.hint')} <Kbd k="H" alt />
                   </button>
                 )}
                 <button className="btn btn-ghost btn-sm" onClick={revealAnswer}>
-                  <Eye size={14} /> {t('practice.showAnswer')}
+                  <Eye size={14} /> {t('practice.showAnswer')} <Kbd k="A" alt />
                 </button>
               </div>
             )}
@@ -583,14 +662,12 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
               </div>
             )}
 
-            {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
-              {lastEvaluation.nextAction === 'retry' && (
-                <button className="btn btn-primary btn-lg" onClick={() => {
-                  retryQuestion();
-                  setEditedTranscript('');
-                }}>
-                  <RotateCcw size={16} /> {t('practice.tryAgain')}
+            {/* Action buttons: the highlighted one (Try Again, else Next) on the right (user-requested) */}
+            <div className="action-row action-row-tight">
+              {!answerVisible && (
+                // In kanji mode showing the answer means giving up on the question
+                <button className="btn btn-ghost" onClick={revealAnswer}>
+                  <Eye size={16} /> {t('practice.showAnswer')} <Kbd k="A" alt />
                 </button>
               )}
               {/* Once the answer is shown, moving on is allowed even with attempts left */}
@@ -603,12 +680,12 @@ export default function PracticePage({ settings, onFinish, onExit, onOpenSetting
                   {isLast
                     ? t('practice.finish')
                     : t(story ? 'practice.nextSentence' : 'practice.nextQuestion')}
+                  {lastEvaluation.nextAction === 'retry' ? <Kbd k="N" alt /> : <Kbd k="Enter" />}
                 </button>
               )}
-              {!answerVisible && (
-                // In kanji mode showing the answer means giving up on the question
-                <button className="btn btn-ghost" onClick={revealAnswer}>
-                  <Eye size={16} /> {t('practice.showAnswer')}
+              {lastEvaluation.nextAction === 'retry' && (
+                <button className="btn btn-primary btn-lg" onClick={tryAgain}>
+                  <RotateCcw size={16} /> {t('practice.tryAgain')} <Kbd k="Enter" />
                 </button>
               )}
             </div>

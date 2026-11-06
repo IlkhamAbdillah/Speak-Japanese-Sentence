@@ -20,6 +20,8 @@ interface ParticleQuizProps {
   onJudge?: (question: ParticleQuestion, answers: string[]) => Promise<ParticleVerdict>;
   /** Next to an AI error (the AI settings may be wrong) */
   onOpenSettings?: () => void;
+  /** The keypad / romaji tip under the keypad (off when the How to answer screen showed it) */
+  showTypeTip?: boolean;
 }
 
 /** How long "Correct!" stays on screen before the next question, as in the other quizzes. */
@@ -35,7 +37,7 @@ type Phase = 'answering' | 'correct' | 'wrong' | 'revealed' | 'accepted';
  * again, shown, or (with an AI) checked by the AI when the learner thinks it works too.
  * Score = right on the first try without Show answer. Nothing is saved.
  */
-export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOpenSettings }: ParticleQuizProps) {
+export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOpenSettings, showTypeTip = true }: ParticleQuizProps) {
   const { t, lang } = useI18n();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -394,7 +396,7 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
             <Delete size={18} />
           </button>
         </div>
-        {!answered && !pushToTalk && <p className="vocab-tip particle-tip">{t('particles.typeTip')}</p>}
+        {!answered && !pushToTalk && showTypeTip && <p className="vocab-tip particle-tip">{t('particles.typeTip')}</p>}
       </div>
 
       <div className="kanji-sheet-slot">{sheet}</div>

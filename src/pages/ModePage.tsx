@@ -1,15 +1,34 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, BookOpen, ChevronRight, Settings } from 'lucide-react';
+import { Mic, BookOpen, ChevronRight, ExternalLink, Settings } from 'lucide-react';
 import type { UserSettings, MicPermission, AppMode } from '../types';
 import { isConversationMode, hasAISetup } from '../types';
+import type { MessageKey } from '../i18n';
 import { useI18n } from '../i18n';
 import ModePicker from '../components/ModePicker';
+import { Kbd } from '../components/Kbd';
 import SessionSetupDialog from '../components/SessionSetupDialog';
 import { isSpeechRecognitionSupported, requestMicPermission } from '../services/speech';
 import { aiHostOf } from '../services/ai';
 import ContinueSessionCard from '../components/ContinueSessionCard';
 import type { ContinueSession } from '../components/ContinueSessionCard';
+
+// Other free JLPT sites on the JLPT Mock Test page, split into practice tests and study material (user-requested)
+const JLPT_LINKS: { title: MessageKey; links: { url: string; name: string }[] }[] = [
+  {
+    title: 'jlptLinks.tests',
+    links: [
+      { url: 'https://bunpro.jp/jlpt_practice_tests', name: 'Bunpro' },
+      { url: 'https://mazii.net/id-ID/learning-hub/exam?type=jlpt&level=5', name: 'Mazii' },
+    ],
+  },
+  {
+    title: 'jlptLinks.materials',
+    links: [
+      { url: 'https://japanesetest4you.com/', name: 'Japanesetest4you' },
+    ],
+  },
+];
 
 interface ModePageProps {
   /** practice on /practice (Speaking Practice), jlpt on /jlpt (JLPT Mock Test) */
@@ -107,6 +126,8 @@ export default function ModePage({
           exerciseMode={settings.exerciseMode}
           jlptSection={settings.jlptSection}
           onChange={(partial) => changeSettings({ ...settings, ...partial })}
+          onConfirm={() => setShowSetup(true)}
+          keyboard={!showSetup}
         />
 
         {!hasValidAuth && (
@@ -128,9 +149,30 @@ export default function ModePage({
           <button className="btn btn-primary btn-lg" onClick={() => setShowSetup(true)}>
             {t('home.select')}
             <ChevronRight size={18} />
+            <Kbd k="Enter" />
           </button>
         </div>
       </section>
+
+      {/* JLPT Mock Test: more free practice tests elsewhere (user-requested) */}
+      {mode === 'jlpt' && (
+        <section className="start-card jlpt-links animate-in" style={{ animationDelay: '150ms' }}>
+          <h2 className="card-title">{t('jlptLinks.title')}</h2>
+          {JLPT_LINKS.map((group) => (
+            <div key={group.title} className="jlpt-links-group">
+              <h3 className="jlpt-links-heading">{t(group.title)}</h3>
+              <div className="jlpt-links-list">
+                {group.links.map((link) => (
+                  <a key={link.url} className="jlpt-link" href={link.url} target="_blank" rel="noreferrer">
+                    <span className="jlpt-link-label">{link.name}</span>
+                    <ExternalLink size={16} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       {showSetup && (
         <SessionSetupDialog

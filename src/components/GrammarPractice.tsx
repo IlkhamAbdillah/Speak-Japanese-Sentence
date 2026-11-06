@@ -16,6 +16,9 @@ import {
   stopRecognition,
 } from '../services/speech';
 import { usePushToTalk } from '../hooks/usePushToTalk';
+import { useMicShortcut } from '../hooks/useMicShortcut';
+import { useAltShortcuts } from '../hooks/useAltShortcuts';
+import { Kbd } from './Kbd';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import ConfirmDialog from './ConfirmDialog';
 import SettingsButton from './SettingsButton';
@@ -225,6 +228,8 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
     onCancel: cancelListening,
     disabled: micDisabled || listening,
   });
+  // V = the mic button on laptops (user-requested)
+  useMicShortcut(() => (listening ? cancelListening() : startListening()), !finished && !micDisabled && isSpeechRecognitionSupported(), listening);
 
   // Leaving the practice stops the mic and drops a pending grade
   useEffect(() => () => {
@@ -302,6 +307,13 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
     return () => window.removeEventListener('keydown', onKey);
   }, [phase]);
 
+  // Alt + letter: the answer box is focused, so plain letters would type (user-requested: no mouse needed)
+  useAltShortcuts({
+    A: !finished && ((phase === 'answering' && !listening) || phase === 'wrong') && reveal,
+    R: !finished && phase === 'wrong' && tryAgain,
+    H: !finished && phase === 'answering' && (() => setShowWords(true)),
+  });
+
   // ─── Results ──────────────────────────────────────────
   if (finished || !question) {
     const correctCount = outcomes.filter(Boolean).length;
@@ -366,14 +378,14 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
         ? t('common.releaseToCancel')
         : listening
           ? t(micStopped ? 'practice.speech.micStoppedHold' : 'practice.speech.listeningHold')
-          : t('practice.speech.idleHold')
+          : ''
       : listening
         ? t('practice.speech.listening', { seconds: SILENCE_SUBMIT_MS / 1000 })
-        : t('practice.speech.idle');
+        : '';
 
   const nextButton = (
     <button className="btn btn-primary btn-lg" onClick={goNext} autoFocus>
-      {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} />
+      {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} /> <Kbd k="Enter" />
     </button>
   );
 
@@ -399,10 +411,10 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
       </div>
       <div className="kanji-sheet-actions">
         <button className="btn btn-secondary" onClick={reveal}>
-          <Eye size={16} /> {t('words.showAnswer')}
+          <Eye size={16} /> {t('words.showAnswer')} <Kbd k="Enter" />
         </button>
         <button className="btn btn-primary" onClick={tryAgain}>
-          <RotateCcw size={16} /> {t('words.tryAgain')}
+          <RotateCcw size={16} /> {t('words.tryAgain')} <Kbd k="R" />
         </button>
       </div>
     </div>
@@ -470,7 +482,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
                 </ul>
               ) : (
                 <button className="btn btn-ghost btn-sm kanji-meaning-hint" onClick={() => setShowWords(true)} title="H">
-                  <Lightbulb size={14} /> {t('grammar.practice.words')}
+                  <Lightbulb size={14} /> {t('grammar.practice.words')} <Kbd k="H" alt />
                 </button>
               ))}
         </div>
@@ -523,11 +535,11 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
                   <MicOff size={28} />
                 </button>
               )}
-              {(phase === 'answering' || phase === 'checking') && <span className="speech-state-label">{micLabel}</span>}
+              {(phase === 'answering' || phase === 'checking') && micLabel && <span className="speech-state-label">{micLabel}</span>}
               {phase === 'answering' && !listening && (
                 <div className="answer-help-actions">
                   <button className="btn btn-ghost btn-sm" onClick={reveal}>
-                    <Eye size={14} /> {t('words.showAnswer')}
+                    <Eye size={14} /> {t('words.showAnswer')} <Kbd k="A" alt />
                   </button>
                 </div>
               )}

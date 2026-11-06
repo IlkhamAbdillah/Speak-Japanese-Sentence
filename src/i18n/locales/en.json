@@ -77,7 +77,7 @@
     "continueMessages": "{count} messages sent",
     "discardTitle": "Discard this session?",
     "discardConversation": "The conversation so far stays in your history.",
-    "startConversation": "Start Conversation",
+    "startConversation": "Create Topic",
     "startMockTest": "Start Mock Test",
     "startPractice": "Start Practice",
     "welcomeTitle": "Ready to Speak Japanese?",
@@ -113,8 +113,7 @@
     "topic": "Topic",
     "storyDesc": "Translate a short story into Japanese, one sentence at a time",
     "tense": "Time",
-    "customTopicPlaceholder": "Write your topic, e.g. a trip to Kyoto with a friend",
-    "kanjiSource": "Kanji list: {source}"
+    "customTopicPlaceholder": "Write your topic, e.g. a trip to Kyoto with a friend"
   },
   "settings": {
     "removeAI": "Remove AI Settings",
@@ -154,6 +153,9 @@
     "save": "Save Changes"
   },
   "practice": {
+    "readyTitle": "Your questions are ready",
+    "startSession": "Start",
+    "writingQuestions": "Writing questions…",
     "generatingTitle": "Generating practice questions...",
     "generatingText": "AI is preparing questions based on your configuration.",
     "generationFailed": "Failed to generate questions",
@@ -161,8 +163,7 @@
     "questionOf": "Question {current} of {total}",
     "endSession": "End Session",
     "sessionTime": "Time in this session",
-    "kanjiInstruction": "How is this word read? Type it in hiragana or say it.",
-    "kanjiVoiceTip": "Speaking? Short words are hard to recognise, so you can say 「それは ___ です」, or for a one-kana reading the row and the kana, e.g. 「それは はひふへほ の ひ」.",
+    "kanjiInstruction": "Type it in hiragana or say it.",
     "readingInstruction": "Read the text above, then choose the best answer.",
     "attempt": "Attempt {current}/{max}",
     "submitChoice": "Submit",
@@ -187,12 +188,10 @@
     "endWithoutResults": "This session has no completed questions and will be discarded.",
     "endConfirm": "End Session",
     "speech": {
-      "idle": "Tap to speak",
-      "idleHold": "Hold the mic to talk",
-      "listening": "Listening... submits {seconds}s after you stop talking · tap ■ to cancel",
-      "listeningKanji": "Listening... tap ■ to cancel",
-      "listeningHold": "Listening... release to submit · slide away to cancel",
-      "micStoppedHold": "Mic stopped · release to submit · slide away to cancel",
+      "listening": "Listening... submits {seconds}s after you stop talking\n{alt}V or ■ cancels",
+      "listeningKanji": "Listening...\n{alt}V or ■ cancels",
+      "listeningHold": "Listening... release to submit\nSlide away to cancel",
+      "micStoppedHold": "Mic stopped · release to submit\nSlide away to cancel",
       "processing": "Processing...",
       "evaluating": "Evaluating...",
       "correct": "Correct!",
@@ -248,10 +247,9 @@
   },
   "conversation": {
     "endTextEmpty": "You haven't sent a message yet, so nothing will be saved.",
-    "intro": "Chat with AI in Japanese. Choose your own topic, or let the AI start a random one.",
-    "topicLabel": "Topic / context (optional)",
+    "intro": "Chat with AI in Japanese. Write a topic, or press Random topic to get one.",
+    "topicLabel": "Topic / situation",
     "topicPlaceholder": "e.g. Ordering food at a restaurant, you are the waiter",
-    "startWithTopic": "Start with this topic",
     "partner": "AI Chat Partner",
     "typing": "typing…",
     "end": "End",
@@ -621,5 +619,28 @@
   "docs": {
     "title": "How SpeakJP works",
     "onThisPage": "On this page"
+  },
+  "tips": {
+    "title": "How to answer",
+    "speak": "Press {alt}V and speak, or type and press Enter.",
+    "speakKanji": "Press {alt}V and say the reading, or type it in hiragana.",
+    "hold": "Hold the mic and speak, or type your answer.",
+    "holdKanji": "Hold the mic and say the reading, or type it in hiragana.",
+    "type": "Type your answer and press Enter.",
+    "typeKanji": "Type the reading in hiragana and press Enter.",
+    "kanjiPhrase": "Short words: say 「それは ___ です」.",
+    "helpHint": "Stuck? {alt}H Hint · {alt}A Answer",
+    "helpWords": "Stuck? {alt}H Key words · {alt}A Answer",
+    "help": "Stuck? {alt}A Answer",
+    "helpTouch": "Stuck? Show answer is under the mic.",
+    "choice": "Press 1–4, then Enter.",
+    "particleType": "Tap a particle or type it in romaji (wa, o, ni…).",
+    "particleTouch": "Tap a particle to fill each blank.",
+    "particleAI": "Sure yours fits? Mine works too? asks the AI."
+  },
+  "jlptLinks": {
+    "tests": "Practice tests",
+    "materials": "Study material",
+    "title": "More free JLPT resources"
   }
 }

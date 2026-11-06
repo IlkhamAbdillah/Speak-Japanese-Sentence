@@ -54,6 +54,8 @@ All lists can be searched in kana, kanji, romaji (`tabemasu`, `tame ni`) or by m
 | **JLPT Mock Test: Kanji** | The app picks the target kanji of your level and the AI writes a word for each. You say or type the reading, and it is checked locally |
 | **JLPT Mock Test: Reading** | A reading passage with 3 multiple-choice questions in the style of the real test |
 
+The JLPT Mock Test page also links to more free practice tests on [Bunpro](https://bunpro.jp/jlpt_practice_tests) and [Mazii](https://mazii.net/id-ID/learning-hub/exam?type=jlpt&level=5), and to study material on [Japanesetest4you](https://japanesetest4you.com/). While the AI writes the questions, a **How to answer** card explains the mic, typing and the help buttons for that mode.
+
 Each session can set the JLPT level (N5–N1), the number of questions, the attempts per
 question (1 = exam style) and hints. The AI answers with a verdict (natural / slightly
 unnatural / grammar errors / partial / incorrect), short feedback, a nudge before the
@@ -70,7 +72,7 @@ say it.
 - **Recap and Retry wrong answers** after every session.
 - **Continue last session**: closing the tab or reloading keeps the session. Home and
   the mode page offer to continue it or discard it.
-- **Keyboard friendly**: Enter submits, 1–4 picks a choice, R tries again, Esc asks
+- **No mouse needed**: Alt+V (⌥V on a Mac) turns the mic on and off, even with the Japanese IME on; Alt+H Hint, Alt+A Show answer, Alt+R Try again, Alt+N Next (shown as badges on the buttons); ←/→ pick the practice type and Enter selects and starts it, Enter submits, 1–4 picks a choice, R tries again, Esc asks
   before ending a session, ←/→ steps through cards.
 
 ---

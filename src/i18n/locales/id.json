@@ -77,7 +77,7 @@
     "continueMessages": "{count} pesan terkirim",
     "discardTitle": "Buang sesi ini?",
     "discardConversation": "Percakapan sejauh ini tetap ada di riwayat Anda.",
-    "startConversation": "Mulai Percakapan",
+    "startConversation": "Buat Topik",
     "startMockTest": "Mulai Simulasi",
     "startPractice": "Mulai Latihan",
     "welcomeTitle": "Siap Berbicara Bahasa Jepang?",
@@ -113,8 +113,7 @@
     "topic": "Topik",
     "storyDesc": "Terjemahkan cerita pendek ke bahasa Jepang, satu kalimat demi satu kalimat",
     "tense": "Waktu Cerita",
-    "customTopicPlaceholder": "Tulis topik Anda, mis. jalan-jalan ke Kyoto bersama teman",
-    "kanjiSource": "Daftar kanji: {source}"
+    "customTopicPlaceholder": "Tulis topik Anda, mis. jalan-jalan ke Kyoto bersama teman"
   },
   "settings": {
     "removeAI": "Hapus Pengaturan AI",
@@ -154,6 +153,9 @@
     "save": "Simpan Perubahan"
   },
   "practice": {
+    "readyTitle": "Soalnya sudah siap",
+    "startSession": "Mulai",
+    "writingQuestions": "Menulis soal…",
     "generatingTitle": "Membuat soal latihan...",
     "generatingText": "AI sedang menyiapkan soal berdasarkan konfigurasi Anda.",
     "generationFailed": "Gagal membuat soal",
@@ -161,8 +163,7 @@
     "questionOf": "Soal {current} dari {total}",
     "endSession": "Akhiri Sesi",
     "sessionTime": "Waktu di sesi ini",
-    "kanjiInstruction": "Bagaimana cara membaca kata ini? Tulis dalam hiragana atau ucapkan.",
-    "kanjiVoiceTip": "Pakai suara? Kata pendek sulit dikenali, jadi ucapkan 「それは ___ です」, atau untuk bacaan satu kana sebutkan barisnya lalu kananya, mis. 「それは はひふへほ の ひ」.",
+    "kanjiInstruction": "Tulis dalam hiragana atau ucapkan.",
     "readingInstruction": "Baca teks di atas, lalu pilih jawaban yang paling tepat.",
     "attempt": "Percobaan {current}/{max}",
     "submitChoice": "Kirim Jawaban",
@@ -187,12 +188,10 @@
     "endWithoutResults": "Sesi ini belum memiliki soal yang diselesaikan dan akan dihapus.",
     "endConfirm": "Akhiri",
     "speech": {
-      "idle": "Ketuk untuk berbicara",
-      "idleHold": "Tahan mikrofon untuk bicara",
-      "listening": "Mendengarkan... terkirim {seconds} detik setelah berhenti bicara · ketuk ■ untuk batal",
-      "listeningKanji": "Mendengarkan... ketuk ■ untuk batal",
-      "listeningHold": "Mendengarkan... lepas untuk mengirim · geser menjauh untuk batal",
-      "micStoppedHold": "Mikrofon berhenti · lepas untuk mengirim · geser menjauh untuk batal",
+      "listening": "Mendengarkan... terkirim {seconds} detik setelah berhenti bicara\n{alt}V atau ■ untuk batal",
+      "listeningKanji": "Mendengarkan...\n{alt}V atau ■ untuk batal",
+      "listeningHold": "Mendengarkan... lepas untuk mengirim\nGeser menjauh untuk batal",
+      "micStoppedHold": "Mikrofon berhenti · lepas untuk mengirim\nGeser menjauh untuk batal",
       "processing": "Memproses...",
       "evaluating": "Mengevaluasi...",
       "correct": "Benar!",
@@ -248,10 +247,9 @@
   },
   "conversation": {
     "endTextEmpty": "Kamu belum mengirim pesan, jadi tidak ada yang disimpan.",
-    "intro": "Mengobrol dengan AI dalam bahasa Jepang. Tentukan topik sendiri atau biarkan AI memilih topik acak.",
-    "topicLabel": "Topik / konteks (opsional)",
+    "intro": "Mengobrol dengan AI dalam bahasa Jepang. Tulis topik, atau tekan Topik acak untuk mendapatkannya.",
+    "topicLabel": "Topik / situasi",
     "topicPlaceholder": "mis. Memesan makanan di restoran, kamu pelayannya",
-    "startWithTopic": "Mulai dengan topik ini",
     "partner": "Teman Bicara AI",
     "typing": "sedang mengetik…",
     "end": "Selesai",
@@ -621,5 +619,28 @@
   "docs": {
     "title": "Cara kerja SpeakJP",
     "onThisPage": "Di halaman ini"
+  },
+  "tips": {
+    "title": "Cara menjawab",
+    "speak": "Tekan {alt}V lalu bicara, atau ketik lalu Enter.",
+    "speakKanji": "Tekan {alt}V lalu ucapkan bacaannya, atau ketik dalam hiragana.",
+    "hold": "Tahan mic lalu bicara, atau ketik jawabanmu.",
+    "holdKanji": "Tahan mic lalu ucapkan bacaannya, atau ketik dalam hiragana.",
+    "type": "Ketik jawabanmu lalu tekan Enter.",
+    "typeKanji": "Ketik bacaannya dalam hiragana lalu tekan Enter.",
+    "kanjiPhrase": "Kata pendek: ucapkan 「それは ___ です」.",
+    "helpHint": "Bingung? {alt}H Petunjuk · {alt}A Jawaban",
+    "helpWords": "Bingung? {alt}H Kosakata · {alt}A Jawaban",
+    "help": "Bingung? {alt}A Jawaban",
+    "helpTouch": "Bingung? Lihat Jawaban ada di bawah mic.",
+    "choice": "Tekan 1–4, lalu Enter.",
+    "particleType": "Ketuk partikel atau ketik dalam romaji (wa, o, ni…).",
+    "particleTouch": "Ketuk partikel untuk mengisi tiap bagian kosong.",
+    "particleAI": "Yakin jawabanmu cocok? Jawabanku juga benar? menanyakannya ke AI."
+  },
+  "jlptLinks": {
+    "tests": "Tes latihan",
+    "materials": "Materi belajar",
+    "title": "Sumber JLPT gratis lainnya"
   }
 }

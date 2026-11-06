@@ -176,6 +176,7 @@ interim results on.
 - **Push-to-talk** (`hooks/usePushToTalk.ts`) is used when the device has a coarse
   pointer (a touch screen). Sliding 80 px away before releasing cancels. On phones the
   mic is not restarted after a pause, because Android plays its mic sound every time.
+- **Keyboard:** on laptops **Alt+V** (⌥V on a Mac) works like clicking the mic (start, or ■ while listening). Learners usually have the Japanese IME on, and the IME takes plain letters but never Alt combinations, so all quiz shortcuts use Alt: Alt+H Hint, Alt+A Show answer, Alt+R Try again, Alt+N Next. They are matched on the physical key (`e.code`), because Option+letter types a symbol on a Mac. Plain V also works while the box is empty and the IME is off.
 - **Cancelling** with ■ discards what was heard; it never submits.
 - **Kanji answers** may be said in a sentence: 「それは しょく です」. `stripKanjiTemplate`
   removes the phrase before the check.

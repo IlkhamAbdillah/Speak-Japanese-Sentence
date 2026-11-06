@@ -181,6 +181,7 @@ Mengeceknya di aplikasi lebih murah, lebih cepat, dan hasilnya selalu sama.
 - **Tekan dan tahan** (`hooks/usePushToTalk.ts`) dipakai jika perangkat memakai pointer
   kasar (layar sentuh). Menggeser jari 80 px sebelum melepas akan membatalkan. Di HP mic
   tidak dimulai ulang setelah jeda, karena Android membunyikan suara mic setiap kali.
+- **Keyboard:** di laptop **Alt+V** (⌥V di Mac) sama dengan mengklik mic (mulai, atau ■ saat mendengarkan). Pengguna biasanya menyalakan IME Jepang, dan IME mengambil huruf biasa tetapi tidak pernah kombinasi Alt, jadi semua shortcut kuis memakai Alt: Alt+H Petunjuk, Alt+A Lihat jawaban, Alt+R Coba lagi, Alt+N Berikutnya. Shortcut dicocokkan dengan tombol fisiknya (`e.code`), karena Option+huruf mengetik simbol di Mac. V biasa juga bisa jika kotak jawaban kosong dan IME mati.
 - **Membatalkan** dengan ■ membuang apa yang terdengar; tidak pernah mengirim jawaban.
 - **Jawaban kanji** boleh diucapkan dalam kalimat: 「それは しょく です」. `stripKanjiTemplate`
   membuang frasa itu sebelum dicek.

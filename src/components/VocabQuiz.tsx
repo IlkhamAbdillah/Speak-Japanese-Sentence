@@ -12,6 +12,9 @@ import {
   stopRecognition,
 } from '../services/speech';
 import { usePushToTalk } from '../hooks/usePushToTalk';
+import { useMicShortcut } from '../hooks/useMicShortcut';
+import { useAltShortcuts } from '../hooks/useAltShortcuts';
+import { Kbd } from './Kbd';
 import MultipleChoice from './MultipleChoice';
 import VocabRow from './VocabRow';
 import ConfirmDialog from './ConfirmDialog';
@@ -165,6 +168,8 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
     onCancel: cancelListening,
     disabled: micDisabled || listening,
   });
+  // V = the mic button on laptops (user-requested)
+  useMicShortcut(() => (listening ? cancelListening() : startListening()), !finished && !!question && !question.choices && !micDisabled && isSpeechRecognitionSupported(), listening);
 
   // Leaving the quiz stops the mic
   useEffect(() => () => stopRecognition(), []);
@@ -201,6 +206,13 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [phase, question]);
+
+  // Alt + letter: the answer box is focused, so plain letters would type (user-requested: no mouse needed)
+  const sayQuestion = !finished && !!question && !question.choices;
+  useAltShortcuts({
+    A: sayQuestion && ((phase === 'answering' && !listening) || phase === 'wrong') && reveal,
+    R: sayQuestion && phase === 'wrong' && tryAgain,
+  });
 
   // ─── Results ──────────────────────────────────────────
   if (finished || !question || !entry) {
@@ -252,10 +264,10 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
       ? t('common.releaseToCancel')
       : listening
         ? t(micStopped ? 'practice.speech.micStoppedHold' : 'practice.speech.listeningHold')
-        : t('practice.speech.idleHold')
+        : ''
     : listening
       ? t('practice.speech.listeningKanji')
-      : t('practice.speech.idle');
+      : '';
 
   return (
     <div className="vocab-quiz">
@@ -353,11 +365,11 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
                   <MicOff size={28} />
                 </button>
               )}
-              {phase === 'answering' && <span className="speech-state-label">{micLabel}</span>}
+              {phase === 'answering' && micLabel && <span className="speech-state-label">{micLabel}</span>}
               {phase === 'answering' && !listening && (
                 <div className="answer-help-actions">
                   <button className="btn btn-ghost btn-sm" onClick={reveal}>
-                    <Eye size={14} /> {t('words.showAnswer')}
+                    <Eye size={14} /> {t('words.showAnswer')} <Kbd k="A" alt />
                   </button>
                 </div>
               )}
@@ -381,10 +393,10 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
             <p className="feedback-text">{t('words.yourAnswer', { answer: lastAnswer })}</p>
             <div className="vocab-actions">
               <button className="btn btn-secondary" onClick={reveal}>
-                <Eye size={16} /> {t('words.showAnswer')}
+                <Eye size={16} /> {t('words.showAnswer')} <Kbd k="A" alt />
               </button>
               <button className="btn btn-primary" onClick={tryAgain}>
-                <RotateCcw size={16} /> {t('words.tryAgain')}
+                <RotateCcw size={16} /> {t('words.tryAgain')} <Kbd k="Enter" />
               </button>
             </div>
           </div>
@@ -411,7 +423,7 @@ export default function VocabQuiz({ questions, onRetry, onExit, showDetails }: V
             </div>
             <div className="vocab-answer-meaning">{meaningOf(entry, lang)}</div>
             <button className="btn btn-primary btn-lg" onClick={goNext} autoFocus>
-              {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} />
+              {isLast ? t('words.seeResults') : t('words.next')} <SkipForward size={16} /> <Kbd k="Enter" />
             </button>
           </div>
         )}

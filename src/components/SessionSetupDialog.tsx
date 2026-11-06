@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, X } from 'lucide-react';
 import type { UserSettings } from '../types';
@@ -13,12 +13,11 @@ import {
   hasAISetup,
   hasAttemptChoice,
   isConversationMode,
-  isKanjiMode,
   isMultipleChoiceMode,
   isStoryMode,
 } from '../types';
 import { useI18n } from '../i18n';
-import { getCurriculum } from '../services/kanjiCurriculum';
+import { Kbd } from './Kbd';
 
 interface SessionSetupDialogProps {
   settings: UserSettings;
@@ -46,9 +45,22 @@ export default function SessionSetupDialog({
   const navigate = useNavigate();
   const { t } = useI18n();
 
+  // Esc closes; Enter presses Start (user-requested), unless a focused button or a
+  // multi-line field has the key, or Start is disabled
+  const canStartRef = useRef(false);
+  const onStartRef = useRef(onStart);
+  useEffect(() => {
+    onStartRef.current = onStart;
+  });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      else if (e.key === 'Enter' && !e.repeat && !e.isComposing && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+        if (!canStartRef.current) return;
+        e.preventDefault();
+        onStartRef.current();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -61,10 +73,11 @@ export default function SessionSetupDialog({
   const isTranslation = settings.appMode === 'practice' && settings.exerciseMode === 'translation';
   const isStory = isStoryMode(settings);
   const missingCustomTopic = isStory && settings.storyTopic === 'custom' && !settings.storyCustomTopic.trim();
+  const canStart = !blockedReason && !missingCustomTopic;
+  useEffect(() => {
+    canStartRef.current = canStart;
+  });
 
-  // Kanji: where the level's kanji list comes from (no progress here: that is the Kanji page's practice)
-  const isKanji = isKanjiMode(settings);
-  const curriculum = getCurriculum(settings.jlptLevel);
 
   const title = settings.appMode === 'practice'
     ? t(`modes.exercise.${settings.exerciseMode}.label`)
@@ -204,10 +217,6 @@ export default function SessionSetupDialog({
           </div>
         )}
 
-        {isKanji && (
-          <p className="setup-field-help">{t('setup.kanjiSource', { source: curriculum.source })}</p>
-        )}
-
         {hasAttemptChoice(settings) && (
           <div className="setup-field">
             <div className="setup-field-label">{t('setup.maxAttempts')}</div>
@@ -253,8 +262,8 @@ export default function SessionSetupDialog({
           <button className="btn btn-secondary" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn btn-primary" onClick={onStart} disabled={!!blockedReason || missingCustomTopic}>
-            <Play size={16} /> {startLabel}
+          <button className="btn btn-primary" onClick={onStart} disabled={!canStart}>
+            <Play size={16} /> {startLabel} <Kbd k="Enter" />
           </button>
         </div>
       </div>

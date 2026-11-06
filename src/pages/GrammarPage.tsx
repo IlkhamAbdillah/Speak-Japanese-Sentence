@@ -10,6 +10,8 @@ import GrammarDetailDialog from '../components/GrammarDetailDialog';
 import GrammarInfoDialog from '../components/GrammarInfoDialog';
 import GrammarQuiz from '../components/GrammarQuiz';
 import GrammarPractice from '../components/GrammarPractice';
+import GeneratingScreen from '../components/GeneratingScreen';
+import AnswerTips from '../components/AnswerTips';
 import SettingsButton from '../components/SettingsButton';
 import type { GrammarPracticeQuestion } from '../services/grammarPractice';
 import { evaluateGrammarAnswer, generateGrammarPractice } from '../services/grammarPractice';
@@ -83,6 +85,8 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
   const [practice, setPractice] = useState<{ point: GrammarPoint; questions: GrammarPracticeQuestion[]; counts: boolean } | null>(null);
   const [practiceNote, setPracticeNote] = useState<string | null>(null);
   const [practiceNumber, setPracticeNumber] = useState(0);
+  // New exercises wait on the How to answer screen until Start (user-requested)
+  const [practiceStarted, setPracticeStarted] = useState(false);
   // The point whose exercises the AI is writing, or failed to write
   const [generating, setGenerating] = useState<GrammarPoint | null>(null);
   const [generationError, setGenerationError] = useState<{ point: GrammarPoint; message: string } | null>(null);
@@ -94,6 +98,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
   const startPractice = async (point: GrammarPoint) => {
     const id = ++generation.current;
     setGenerationError(null);
+    setPracticeStarted(false);
     setGenerating(point);
     try {
       const questions = await generateGrammarPractice(aiConfigFromSettings(settings), point, lang);
@@ -196,18 +201,17 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
     />
   );
 
-  if (generating) {
+  // While the AI writes, and until Start: How to answer (user-requested, like Speaking Practice)
+  if (generating || (practice && !practiceStarted)) {
     return (
-      <div className="app-main">
-        <div className="empty-state">
-          <div className="spinner spinner-lg" style={{ margin: '0 auto var(--space-lg)' }}></div>
-          <p className="empty-state-title">{t('grammar.practice.generatingTitle')}</p>
-          <p className="empty-state-text jp-text" lang="ja">{generating.pattern}</p>
-          <button className="btn btn-secondary" onClick={cancelGeneration} style={{ marginTop: 'var(--space-lg)' }}>
-            {t('common.cancel')}
-          </button>
-        </div>
-      </div>
+      <GeneratingScreen
+        ready={!generating}
+        title={t('grammar.practice.generatingTitle')}
+        text={(generating ?? practice?.point)?.pattern}
+        tips={<AnswerTips kind="grammar" />}
+        onBack={() => { cancelGeneration(); setPractice(null); setDirection(null); }}
+        onStart={() => setPracticeStarted(true)}
+      />
     );
   }
 
