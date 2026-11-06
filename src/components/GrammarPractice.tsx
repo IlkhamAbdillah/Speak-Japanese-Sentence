@@ -18,6 +18,7 @@ import {
 import { usePushToTalk } from '../hooks/usePushToTalk';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import ConfirmDialog from './ConfirmDialog';
+import SettingsButton from './SettingsButton';
 import { GrammarSentence } from './GrammarRow';
 import { useI18n } from '../i18n';
 
@@ -32,6 +33,8 @@ interface GrammarPracticeProps {
   onExit: () => void;
   /** Once, when the last question is answered: right on the first try without Show answer, per question */
   onFinish: (outcomes: boolean[]) => void;
+  /** Next to a grading error (the AI settings may be wrong) */
+  onOpenSettings: () => void;
   /** Shown on the results card: what the practice did to the point's progress */
   resultNote?: ReactNode;
   /** The next point's practice from the results card (also Enter) */
@@ -71,7 +74,7 @@ function AnswerSentence({ q }: { q: GrammarPracticeQuestion }) {
  * answer can be tried again (R) or the answer shown (Enter), like the kanji reading
  * practice.
  */
-export default function GrammarPractice({ point, questions, evaluate, onRetry, onExit, onFinish, resultNote, onNext, nextLabel }: GrammarPracticeProps) {
+export default function GrammarPractice({ point, questions, evaluate, onRetry, onExit, onFinish, onOpenSettings, resultNote, onNext, nextLabel }: GrammarPracticeProps) {
   const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -531,7 +534,8 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
             </div>}
             {(micError || checkError) && (
               <div className="alert alert-error kanji-say-error">
-                <AlertCircle size={16} /> <span>{checkError ?? micError}</span>
+                <AlertCircle size={16} /> <span style={{ flex: 1 }}>{checkError ?? micError}</span>
+                {checkError && <SettingsButton onClick={onOpenSettings} />}
               </div>
             )}
           </div>

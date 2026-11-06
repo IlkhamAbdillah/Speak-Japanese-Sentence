@@ -68,6 +68,14 @@ function AppInner() {
     navigate(settings.appMode === 'jlpt' ? '/jlpt' : '/practice');
   }, [navigate, settings.appMode]);
 
+  // An AI error during practice: leave it for Settings, which comes back to the mode's page
+  // (the session stays saved, so the Continue card offers it again)
+  const handleOpenSettings = useCallback(() => {
+    setPracticeActive(false);
+    setSavedSession(loadSavedSession());
+    navigate('/settings', { state: { from: settings.appMode === 'jlpt' ? '/jlpt' : '/practice' } });
+  }, [navigate, settings.appMode]);
+
   const handlePracticeAgain = useCallback(() => {
     clearActiveSession();
     setSavedSession(null);
@@ -157,6 +165,7 @@ function AppInner() {
               resume={resuming}
               onFinish={handleFinishPractice}
               onExit={handleExitPractice}
+              onOpenSettings={handleOpenSettings}
             />
           ) : (
             <PracticePage
@@ -165,6 +174,7 @@ function AppInner() {
               preset={preset ?? undefined}
               onFinish={handleFinishPractice}
               onExit={handleExitPractice}
+              onOpenSettings={handleOpenSettings}
             />
           )}
         </div>

@@ -4442,3 +4442,10 @@ button.kanji-reading:hover {
     padding: var(--space-lg);
   }
 }
+
+.particle-verdict-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}

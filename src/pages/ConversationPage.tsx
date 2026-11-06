@@ -8,6 +8,7 @@ import ChatBubble from '../components/ChatBubble';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
+import SettingsButton from '../components/SettingsButton';
 import {
   startRecognition,
   stopRecognition,
@@ -20,11 +21,13 @@ interface ConversationPageProps {
   settings: UserSettings;
   onFinish: (sessionId: string) => void;
   onExit: () => void;
+  /** Leave the chat for Settings (next to AI errors) */
+  onOpenSettings: () => void;
   /** Continue the conversation saved before a page reload */
   resume?: boolean;
 }
 
-export default function ConversationPage({ settings, onFinish, onExit, resume: resumeSaved }: ConversationPageProps) {
+export default function ConversationPage({ settings, onFinish, onExit, onOpenSettings, resume: resumeSaved }: ConversationPageProps) {
   const { t } = useI18n();
   const { session, messages, isWaitingForAI, error, start, resume, send, retry, end } = useConversation(settings);
 
@@ -218,6 +221,7 @@ export default function ConversationPage({ settings, onFinish, onExit, resume: r
             <button className="btn btn-ghost btn-sm" onClick={retry}>
               <RotateCcw size={14} /> {t('common.retry')}
             </button>
+            <SettingsButton onClick={onOpenSettings} />
           </div>
         )}
       </div>

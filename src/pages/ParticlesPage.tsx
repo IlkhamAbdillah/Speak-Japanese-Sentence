@@ -13,6 +13,7 @@ import { GrammarRow } from '../components/GrammarRow';
 import GrammarDetailDialog from '../components/GrammarDetailDialog';
 import GrammarInfoDialog from '../components/GrammarInfoDialog';
 import ParticleQuiz from '../components/ParticleQuiz';
+import SettingsButton from '../components/SettingsButton';
 import { useI18n } from '../i18n';
 
 interface ParticlesPageProps {
@@ -116,6 +117,7 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
           }}
           onExit={() => setPractice(null)}
           onJudge={hasAI ? judge : undefined}
+          onOpenSettings={() => navigate('/settings', { state: { from: '/particles' } })}
         />
       </div>
     );
@@ -223,7 +225,8 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
           {generationError && (
             <div className="alert alert-error">
               <AlertCircle size={16} />
-              <span>{generationError}</span>
+              <span style={{ flex: 1 }}>{generationError}</span>
+              <SettingsButton onClick={() => navigate('/settings', { state: { from: '/particles' } })} />
             </div>
           )}
           <div className="start-card-actions vocab-start">

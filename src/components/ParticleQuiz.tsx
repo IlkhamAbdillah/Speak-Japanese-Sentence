@@ -6,6 +6,7 @@ import type { ParticleVerdict } from '../services/particleAI';
 import { inLanguage, patternLabel } from '../services/grammar';
 import { isSpeechSynthesisSupported, prefersPushToTalk, speakJapanese } from '../services/speech';
 import ConfirmDialog from './ConfirmDialog';
+import SettingsButton from './SettingsButton';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 
@@ -17,6 +18,8 @@ interface ParticleQuizProps {
   onExit: () => void;
   /** Ask the AI whether the learner's particles work too; missing without an AI set up */
   onJudge?: (question: ParticleQuestion, answers: string[]) => Promise<ParticleVerdict>;
+  /** Next to an AI error (the AI settings may be wrong) */
+  onOpenSettings?: () => void;
 }
 
 /** How long "Correct!" stays on screen before the next question, as in the other quizzes. */
@@ -32,7 +35,7 @@ type Phase = 'answering' | 'correct' | 'wrong' | 'revealed' | 'accepted';
  * again, shown, or (with an AI) checked by the AI when the learner thinks it works too.
  * Score = right on the first try without Show answer. Nothing is saved.
  */
-export default function ParticleQuiz({ questions, onRetry, onExit, onJudge }: ParticleQuizProps) {
+export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOpenSettings }: ParticleQuizProps) {
   const { t, lang } = useI18n();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('answering');
@@ -271,7 +274,12 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge }: Pa
         {verdict?.result && !verdict.result.correct && (
           <p className="particle-verdict"><Sparkles size={14} /> {verdict.result.explanation}</p>
         )}
-        {verdict?.error && <p className="particle-verdict particle-verdict-error">{verdict.error}</p>}
+        {verdict?.error && (
+          <p className="particle-verdict particle-verdict-error">
+            <span>{verdict.error}</span>
+            {onOpenSettings && <SettingsButton onClick={onOpenSettings} />}
+          </p>
+        )}
         {!pushToTalk && (
           <div className="vocab-tip kanji-practice-keys">
             <p>{t('kanjiList.practice.tryAgainKey')}</p>

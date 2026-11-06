@@ -10,6 +10,7 @@ import GrammarDetailDialog from '../components/GrammarDetailDialog';
 import GrammarInfoDialog from '../components/GrammarInfoDialog';
 import GrammarQuiz from '../components/GrammarQuiz';
 import GrammarPractice from '../components/GrammarPractice';
+import SettingsButton from '../components/SettingsButton';
 import type { GrammarPracticeQuestion } from '../services/grammarPractice';
 import { evaluateGrammarAnswer, generateGrammarPractice } from '../services/grammarPractice';
 import type { GrammarProgressMap } from '../services/grammarProgress';
@@ -87,6 +88,8 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
   const [generationError, setGenerationError] = useState<{ point: GrammarPoint; message: string } | null>(null);
   const generation = useRef(0);
   const hasAI = hasAISetup(settings);
+  // Settings comes back to the grammar list (an AI error may mean wrong AI settings)
+  const openSettings = () => navigate('/settings', { state: { from: '/grammar' } });
 
   const startPractice = async (point: GrammarPoint) => {
     const id = ++generation.current;
@@ -188,7 +191,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
       practice={{
         progress: progress[grammarKey(current)],
         onStart: hasAI ? () => startPractice(current) : undefined,
-        onAISetup: () => navigate('/settings', { state: { from: '/grammar' } }),
+        onAISetup: openSettings,
       }}
     />
   );
@@ -221,6 +224,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
             <button className="btn btn-secondary" onClick={() => setGenerationError(null)}>
               {t('grammar.practice.back')}
             </button>
+            <SettingsButton onClick={openSettings} large />
             <button className="btn btn-primary" onClick={() => startPractice(generationError.point)}>
               <RotateCcw size={16} /> {t('common.retry')}
             </button>
@@ -242,6 +246,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
           // Back to the point's card (still `selected`)
           onExit={exitPractice}
           onFinish={finishPractice}
+          onOpenSettings={openSettings}
           resultNote={practiceNote}
           onNext={nextPoint ? practiseNext : undefined}
           nextLabel={nextPoint ? t('grammar.practice.next', { pattern: nextPoint.pattern }) : undefined}

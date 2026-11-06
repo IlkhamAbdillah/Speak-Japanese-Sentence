@@ -20,6 +20,7 @@ import { usePushToTalk } from '../hooks/usePushToTalk';
 import { getSessionModeLabel, isSingleAttemptMode, isKanjiMode, isMultipleChoiceMode, isStoryMode } from '../types';
 import MultipleChoice from '../components/MultipleChoice';
 import ConfirmDialog from '../components/ConfirmDialog';
+import SettingsButton from '../components/SettingsButton';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { isSpeechRecognitionSupported, prefersPushToTalk, SILENCE_SUBMIT_MS } from '../services/speech';
 import { loadActiveSession } from '../services/storage';
@@ -30,6 +31,8 @@ interface PracticePageProps {
   settings: UserSettings;
   onFinish: (sessionId: string) => void;
   onExit: () => void;
+  /** Leave the practice for Settings (shown next to AI errors: the AI settings may be wrong) */
+  onOpenSettings: () => void;
   /** Continue the session saved before a page reload instead of starting a new one */
   resume?: boolean;
   /** Practise these questions again instead of generating new ones */
@@ -39,7 +42,7 @@ interface PracticePageProps {
 /** How long "Correct!" stays on screen before the next question appears. */
 const CORRECT_ADVANCE_MS = 1200;
 
-export default function PracticePage({ settings, onFinish, onExit, resume, preset }: PracticePageProps) {
+export default function PracticePage({ settings, onFinish, onExit, onOpenSettings, resume, preset }: PracticePageProps) {
   const {
     session,
     speechState,
@@ -51,6 +54,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
     isGenerating,
     generationError,
     evaluationError,
+    evaluationErrorIsAI,
     sessionElapsedMs,
     startSession,
     restoreSession,
@@ -206,6 +210,7 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
             <button className="btn btn-secondary" onClick={onExit}>
               {t('practice.goBack')}
             </button>
+            <SettingsButton onClick={onOpenSettings} large />
           </div>
         </div>
       </div>
@@ -475,7 +480,8 @@ export default function PracticePage({ settings, onFinish, onExit, resume, prese
         {evaluationError && (
           <div className="alert alert-error" style={{ maxWidth: 500, width: '100%' }}>
             <AlertCircle size={16} />
-            <span>{evaluationError}</span>
+            <span style={{ flex: 1 }}>{evaluationError}</span>
+            {evaluationErrorIsAI && <SettingsButton onClick={onOpenSettings} />}
           </div>
         )}
 

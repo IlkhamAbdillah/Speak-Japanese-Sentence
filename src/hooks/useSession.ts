@@ -34,6 +34,7 @@ interface UseSessionReturn {
   isGenerating: boolean;
   generationError: string | null;
   evaluationError: string | null;
+  evaluationErrorIsAI: boolean;
   /** Time spent on the current question (stored as the answer's response time) */
   elapsedMs: number;
   /** Time spent in the whole session so far; stops when it ends (the header timer) */
@@ -118,6 +119,8 @@ export function useSession(): UseSessionReturn {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [evaluationError, setEvaluationError] = useState<string | null>(null);
+  // The error came from the AI (not the mic): the page offers Settings next to it
+  const [evaluationErrorIsAI, setEvaluationErrorIsAI] = useState(false);
   const [micStopped, setMicStopped] = useState(false);
   const [answerShown, setAnswerShown] = useState(false);
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -298,6 +301,7 @@ export function useSession(): UseSessionReturn {
     setFinalTranscript('');
     setLastEvaluation(null);
     setEvaluationError(null);
+    setEvaluationErrorIsAI(false);
     setSpeechState('listening');
     setMicStopped(false);
 
@@ -314,6 +318,7 @@ export function useSession(): UseSessionReturn {
       onError: (error) => {
         setSpeechState('error');
         setEvaluationError(error);
+        setEvaluationErrorIsAI(false);
       },
       onStopped: () => setMicStopped(true),
       onEnd: () => {
@@ -334,6 +339,7 @@ export function useSession(): UseSessionReturn {
     if (!started) {
       setSpeechState('error');
       setEvaluationError('Failed to start speech recognition.');
+      setEvaluationErrorIsAI(false);
     }
   }, []);
 
@@ -362,6 +368,7 @@ export function useSession(): UseSessionReturn {
 
       setSpeechState('evaluating');
       setEvaluationError(null);
+      setEvaluationErrorIsAI(false);
       const evaluationId = ++evaluationIdRef.current;
       const attemptNumber = currentAttempts.length + 1;
 
@@ -403,6 +410,7 @@ export function useSession(): UseSessionReturn {
         setEvaluationError(
           err instanceof Error ? err.message : 'Evaluation failed'
         );
+        setEvaluationErrorIsAI(true);
       }
     },
     [currentAttempts, elapsedMs]
@@ -476,6 +484,7 @@ export function useSession(): UseSessionReturn {
     setInterimTranscript('');
     setLastEvaluation(null);
     setEvaluationError(null);
+    setEvaluationErrorIsAI(false);
     setSpeechState('idle');
   }, []);
 
@@ -517,6 +526,7 @@ export function useSession(): UseSessionReturn {
     setAnswerShown(true);
     setInterimTranscript('');
     setEvaluationError(null);
+    setEvaluationErrorIsAI(false);
     setSpeechState('idle');
 
     const settings = settingsRef.current;
@@ -572,6 +582,7 @@ export function useSession(): UseSessionReturn {
     isGenerating,
     generationError,
     evaluationError,
+    evaluationErrorIsAI,
     elapsedMs,
     sessionElapsedMs,
     startSession,

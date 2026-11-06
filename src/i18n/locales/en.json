@@ -589,7 +589,7 @@
     "title": "Particles",
     "subtitle": "Japanese particles and their uses, with example sentences and practice.",
     "tabList": "Particle list",
-    "tabPractice": "Practice",
+    "tabPractice": "Quiz",
     "searchPlaceholder": "Search: particle (kana or romaji) or meaning…",
     "noMatch": "No particle use matches “{query}”.",
     "count": "{count} uses",
