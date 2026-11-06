@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ChevronDown, Info, ListOrdered, Play, Search, Settings, Shuffle, Sparkles } from 'lucide-react';
 import type { UserSettings } from '../types';
-import { JLPT_LEVELS, PARTICLE_QUIZ_COUNTS, PARTICLE_QUIZ_SOURCES } from '../types';
+import { JLPT_LEVELS, PARTICLE_QUIZ_COUNTS, PARTICLE_QUIZ_SOURCES, hasAISetup } from '../types';
 import type { GrammarPoint } from '../services/grammar';
 import { matchesGrammarSearch, PARTICLE_POINTS, PARTICLES } from '../services/grammar';
 import type { ParticleQuestion } from '../services/particles';
@@ -73,7 +73,7 @@ export default function ParticlesPage({ settings, onSettingsChange }: ParticlesP
 
   // ─── Practice ─────────────────────────────────────────
   const source = settings.particleQuizSource;
-  const hasAI = settings.aiProvider === 'ollama' || settings.apiKey.trim().length > 0;
+  const hasAI = hasAISetup(settings);
   // "All" is only for the list's examples; the AI writes a set number of sentences
   const counts = PARTICLE_QUIZ_COUNTS.filter((c) => source === 'list' || c > 0);
   const count = counts.includes(settings.particleQuizCount) ? settings.particleQuizCount : 10;

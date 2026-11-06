@@ -117,6 +117,10 @@
     "kanjiSource": "Kanji list: {source}"
   },
   "settings": {
+    "removeAI": "Remove AI Settings",
+    "removeAIHelp": "Reset provider, model, and API configuration.",
+    "removeAITitle": "Remove AI settings?",
+    "removeAIText": "The provider, API key and custom URL are removed from this device. Features that need AI stop working until you set one up again.",
     "title": "Settings",
     "subtitle": "Choose the AI that writes your questions and checks your answers.",
     "aiProvider": "AI Provider",
@@ -126,8 +130,7 @@
     "connectionFailed": "Connection failed",
     "ollamaInfo": "Any OpenAI-compatible server: a model running on your computer (e.g. http://localhost:11434/v1) or a remote URL (https://example.com/api/v1). Make sure the model is available on that server.",
     "ollamaUrl": "Custom URL",
-    "ollamaUrlPlaceholder": "http://localhost:11434/v1 or https://tunnel.example.com",
-    "ollamaUrlHelp": "Can be http://localhost:11434/v1, local LAN IP, or URL (https://example.com/api/v1). Suffix /v1 is handled automatically.",
+    "ollamaUrlPlaceholder": "http://localhost:11434/v1",
     "model": "Model",
     "fetching": "Fetching...",
     "fetchModels": "Fetch Models",
@@ -148,7 +151,7 @@
     "testConnection": "Test Connection",
     "clearKey": "Clear Key",
     "connected": "Connected",
-    "save": "Save"
+    "save": "Save Changes"
   },
   "practice": {
     "generatingTitle": "Generating practice questions...",

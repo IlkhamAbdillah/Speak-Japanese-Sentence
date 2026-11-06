@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ChevronDown, Info, ListOrdered, Play, RotateCcw, Search, Shuffle } from 'lucide-react';
 import type { JLPTLevel, UserSettings } from '../types';
-import { GRAMMAR_QUIZ_TYPES, JLPT_LEVELS, VOCAB_QUIZ_COUNTS } from '../types';
+import { GRAMMAR_QUIZ_TYPES, JLPT_LEVELS, VOCAB_QUIZ_COUNTS, hasAISetup } from '../types';
 import type { GrammarPoint, GrammarQuestion } from '../services/grammar';
 import { buildGrammarQuiz, GRAMMAR_POINTS, matchesGrammarSearch } from '../services/grammar';
 import { GrammarRow } from '../components/GrammarRow';
@@ -86,7 +86,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
   const [generating, setGenerating] = useState<GrammarPoint | null>(null);
   const [generationError, setGenerationError] = useState<{ point: GrammarPoint; message: string } | null>(null);
   const generation = useRef(0);
-  const hasAI = settings.aiProvider === 'ollama' || settings.apiKey.trim().length > 0;
+  const hasAI = hasAISetup(settings);
 
   const startPractice = async (point: GrammarPoint) => {
     const id = ++generation.current;

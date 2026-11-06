@@ -174,7 +174,8 @@ async function callAnthropic(
 // ─── Ollama / Custom API (Local / Cloudflare Tunnel / URL) ─
 
 export function resolveOllamaUrl(baseUrl?: string): string {
-  let clean = (baseUrl || 'http://localhost:11434/v1').trim().replace(/\/+$/, '');
+  let clean = (baseUrl ?? '').trim().replace(/\/+$/, '');
+  if (!clean) throw new Error('No custom URL set. Add one in Settings.');
   if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
     clean = `https://${clean}`;
   }

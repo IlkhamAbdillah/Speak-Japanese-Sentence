@@ -10,6 +10,7 @@ import {
   STORY_TENSES,
   STORY_CUSTOM_TOPIC_MAX_LENGTH,
   TRANSLATION_FORMATS,
+  hasAISetup,
   hasAttemptChoice,
   isConversationMode,
   isKanjiMode,
@@ -240,7 +241,7 @@ export default function SessionSetupDialog({
         {blockedReason && (
           <div className="alert alert-warning setup-dialog-alert">
             <span style={{ flex: 1 }}>{blockedReason}</span>
-            {settings.aiProvider !== 'ollama' && !settings.apiKey.trim() && (
+            {!hasAISetup(settings) && (
               <button className="btn btn-secondary btn-sm" onClick={() => navigate('/settings', { state: { from: settings.appMode === 'jlpt' ? '/jlpt' : '/practice' } })}>
                 {t('header.settings')}
               </button>

@@ -4348,3 +4348,97 @@ button.kanji-reading:hover {
 .grammar-needs-ai {
   margin: var(--space-sm) 0 0;
 }
+
+/* Settings (user-picked design): one card, the section title with an accent bar,
+   Remove AI Settings as a row between dividers, Save in the middle */
+.settings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl, 20px);
+  padding: var(--space-2xl);
+}
+
+.settings-card .settings-section {
+  margin-bottom: var(--space-lg);
+}
+
+.settings-card .settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.settings-card .settings-section-title::before {
+  content: '';
+  width: 4px;
+  height: 1.4em;
+  border-radius: 2px;
+  background: var(--accent-primary);
+}
+
+.settings-remove-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-lg) 0;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-remove-row:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.settings-remove-icon {
+  flex-shrink: 0;
+  color: var(--color-error);
+}
+
+.settings-remove-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-remove-title {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+.settings-remove-help {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.settings-remove-chevron {
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.settings-remove-row:not(:disabled):hover .settings-remove-chevron {
+  transform: translateX(3px);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xl);
+}
+
+@media (max-width: 520px) {
+  .settings-card {
+    padding: var(--space-lg);
+  }
+}

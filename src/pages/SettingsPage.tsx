@@ -9,9 +9,11 @@ import {
   Loader2,
   Trash2,
   RefreshCw,
+  ChevronRight,
 } from 'lucide-react';
 import type { UserSettings, AIProvider } from '../types';
-import { AI_PROVIDER_LABELS, AI_PROVIDER_MODELS } from '../types';
+import { AI_PROVIDER_LABELS, AI_PROVIDER_MODELS, DEFAULT_SETTINGS, hasAISetup } from '../types';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { testConnection, fetchOllamaModels } from '../services/ai';
 import { saveSettings, clearApiKey } from '../services/storage';
 import { useI18n } from '../i18n';
@@ -40,7 +42,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   };
 
   const handleTestConnection = async () => {
-    if (settings.aiProvider !== 'ollama' && !settings.apiKey) return;
+    if (!hasAISetup(settings)) return;
     setConnStatus('testing');
     setConnError('');
     const result = await testConnection(
@@ -101,6 +103,23 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
     else navigate('/');
   };
 
+  // Remove AI settings: back to no AI at all (default provider, no key, no URL)
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const handleRemoveAI = () => {
+    setConfirmRemove(false);
+    update({
+      aiProvider: DEFAULT_SETTINGS.aiProvider,
+      aiModel: DEFAULT_SETTINGS.aiModel,
+      apiKey: '',
+      ollamaBaseUrl: '',
+    });
+    setConnStatus('idle');
+    setConnError('');
+    setFetchedModels([]);
+    setFetchStatus(null);
+    setManualModelInput(false);
+  };
+
   const handleClearKey = () => {
     clearApiKey();
     update({ apiKey: '' });
@@ -109,6 +128,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
 
   return (
     <div className="app-main" style={{ maxWidth: 720, margin: '0 auto' }}>
+      <div className="settings-card animate-in">
       <h1 className="card-title" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-xs)' }}>
         {t('settings.title')}
       </h1>
@@ -153,12 +173,9 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
               type="text"
               className="form-input"
               placeholder={t('settings.ollamaUrlPlaceholder')}
-              value={settings.ollamaBaseUrl ?? 'http://localhost:11434/v1'}
+              value={settings.ollamaBaseUrl ?? ''}
               onChange={(e) => update({ ollamaBaseUrl: e.target.value })}
             />
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
-              {t('settings.ollamaUrlHelp')}
-            </p>
           </div>
         )}
 
@@ -171,7 +188,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={handleFetchModels}
-                disabled={isFetchingModels}
+                disabled={isFetchingModels || !settings.ollamaBaseUrl?.trim()}
                 style={{ fontSize: 'var(--text-xs)', padding: '3px 10px', height: 'auto', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 {isFetchingModels ? (
@@ -313,10 +330,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
           <button
             className="btn btn-secondary"
             onClick={handleTestConnection}
-            disabled={
-              (settings.aiProvider !== 'ollama' && !settings.apiKey) ||
-              connStatus === 'testing'
-            }
+            disabled={!hasAISetup(settings) || connStatus === 'testing'}
           >
             {connStatus === 'testing' ? (
               <><Loader2 size={14} className="spinner" style={{ border: 'none', animation: 'spin 0.8s linear infinite' }} /> {t('settings.testing')}</>
@@ -344,12 +358,36 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         </div>
       </div>
 
-      {/* Save */}
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+      {/* Remove AI settings: a row between dividers (user-picked design), then Save in the middle */}
+      <button
+        className="settings-remove-row"
+        onClick={() => setConfirmRemove(true)}
+        disabled={!settings.apiKey && !settings.ollamaBaseUrl?.trim() && settings.aiProvider === DEFAULT_SETTINGS.aiProvider}
+      >
+        <Trash2 size={24} className="settings-remove-icon" />
+        <span className="settings-remove-text">
+          <span className="settings-remove-title">{t('settings.removeAI')}</span>
+          <span className="settings-remove-help">{t('settings.removeAIHelp')}</span>
+        </span>
+        <ChevronRight size={20} className="settings-remove-chevron" />
+      </button>
+
+      <div className="settings-actions">
         <button className="btn btn-primary btn-lg" onClick={handleSave}>
           {t('settings.save')}
         </button>
       </div>
+      </div>
+
+      {confirmRemove && (
+        <ConfirmDialog
+          title={t('settings.removeAITitle')}
+          text={t('settings.removeAIText')}
+          confirmLabel={t('settings.removeAI')}
+          onCancel={() => setConfirmRemove(false)}
+          onConfirm={handleRemoveAI}
+        />
+      )}
     </div>
   );
 }

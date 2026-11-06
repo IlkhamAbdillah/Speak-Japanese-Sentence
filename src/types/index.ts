@@ -345,6 +345,16 @@ export const AI_PROVIDER_MODELS: Record<AIProvider, string[]> = {
   anthropic: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'],
 };
 
+/**
+ * An AI is set up: a cloud provider with an API key, or a Custom URL with a URL
+ * (an empty URL used to fall back to localhost, so it looked set up when it wasn't).
+ */
+export function hasAISetup(settings: { aiProvider: AIProvider; apiKey: string; ollamaBaseUrl?: string }): boolean {
+  return settings.aiProvider === 'ollama'
+    ? !!settings.ollamaBaseUrl?.trim()
+    : settings.apiKey.trim().length > 0;
+}
+
 // ─── User Settings ──────────────────────────────────────
 export interface UserSettings {
   aiProvider: AIProvider;
@@ -410,7 +420,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   aiProvider: 'google',
   aiModel: 'gemini-3.8-flash',
   apiKey: '',
-  ollamaBaseUrl: 'http://localhost:11434/v1',
+  // No default: a Custom URL counts as set up only once one is typed
+  ollamaBaseUrl: '',
   appMode: 'practice',
   exerciseMode: 'translation',
   jlptSection: 'kanji',

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, BookOpen, ChevronRight, Settings } from 'lucide-react';
 import type { UserSettings, MicPermission, AppMode } from '../types';
-import { isConversationMode } from '../types';
+import { isConversationMode, hasAISetup } from '../types';
 import { useI18n } from '../i18n';
 import ModePicker from '../components/ModePicker';
 import SessionSetupDialog from '../components/SessionSetupDialog';
@@ -51,7 +51,7 @@ export default function ModePage({
     onMicPermissionChange(perm);
   };
 
-  const hasValidAuth = settings.aiProvider === 'ollama' || settings.apiKey.trim().length > 0;
+  const hasValidAuth = hasAISetup(settings);
   const blockedReason = !hasValidAuth
     ? t('home.apiKeyMissing')
     : !isSpeechRecognitionSupported()
