@@ -23,6 +23,8 @@ const KanjiPage = lazy(() => import('./pages/KanjiPage'));
 const GrammarPage = lazy(() => import('./pages/GrammarPage'));
 // The particle list and practice (shares the grammar data module)
 const ParticlesPage = lazy(() => import('./pages/ParticlesPage'));
+// How the app works (not linked from the menus)
+const DocsPage = lazy(() => import('./pages/DocsPage'));
 
 function AppInner() {
   const navigate = useNavigate();
@@ -273,6 +275,14 @@ function AppInner() {
           <Route
             path="/mistakes"
             element={<MistakesPage onPractice={handlePracticeMistakes} />}
+          />
+          <Route
+            path="/docs"
+            element={
+              <Suspense fallback={null}>
+                <DocsPage />
+              </Suspense>
+            }
           />
           {/* The old History page became Mistakes */}
           <Route path="/history" element={<Navigate to="/mistakes" replace />} />

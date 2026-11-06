@@ -222,7 +222,7 @@ export default function GrammarPage({ settings, onSettingsChange }: GrammarPageP
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', marginTop: 'var(--space-lg)' }}>
             <button className="btn btn-secondary" onClick={() => setGenerationError(null)}>
-              {t('grammar.practice.back')}
+              {t('common.back')}
             </button>
             <SettingsButton onClick={openSettings} large />
             <button className="btn btn-primary" onClick={() => startPractice(generationError.point)}>

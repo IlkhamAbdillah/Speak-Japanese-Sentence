@@ -1,139 +1,228 @@
-# 🇯🇵 Speak Japanese Sentence
+# 話 SpeakJP
 
-> **AI-Powered Japanese Speaking Practice Web App**  
-> Practice speaking Japanese one sentence at a time, receive instant AI evaluation and actionable feedback, and track your learning progress.
+**Learn Japanese words, kanji and grammar, then practise them out loud.**
 
----
+SpeakJP is a browser-only Japanese study app. You answer in Japanese by **speaking**
+(Web Speech API, `ja-JP`) or **typing**. An AI of your choice writes the exercises and
+grades the free answers, and everything else (word lists, quizzes, progress) works
+locally in the browser. There is no backend and no account: settings, progress and
+history stay in your browser's `localStorage`.
 
-## 🖼️ Preview
+The interface is available in **English** and **Indonesian**.
 
-![Application Preview](images/image.png)
-
----
-
-## ✨ Features
-
-- **🎙️ Voice Speech Recognition (ja-JP)**: Practice speaking naturally using your microphone via the browser Web Speech API (`ja-JP`), with a manual text input fallback when a microphone is unavailable.
-- **🤖 Multi-Provider AI Evaluation**:
-  - **Ollama**: Supports local instances (`http://localhost:11434/v1`), local LAN IPs, or remote URLs (`https://example.com/api/v1`), featuring an automatic **Fetch Models** button to discover installed models and optional Bearer auth tokens.
-  - **Google Gemini**: Support for `gemini-2.0-flash`, `gemini-2.5-flash`, and `gemini-2.5-pro`.
-  - **OpenAI**: Support for `gpt-4o-mini`, `gpt-4o`, `gpt-4.1-mini`, etc.
-  - **Anthropic Claude**: Support for Claude 3.5 / 4 Sonnet and Haiku models.
-- **🎯 3 Exercise Modes**:
-  - **Translation**: Translate target sentences from Indonesian or English into natural Japanese.
-  - **Scenario / Prompt Response**: Respond to contextual daily conversational situations.
-  - **Free Speaking**: Answer open-ended Japanese conversation prompts.
-- **📊 JLPT Levels (N5 - N1)**: Configurable difficulty tailored to vocabulary and grammar standards from beginner (N5) to advanced (N1).
-- **💡 Real-Time AI Feedback & Hints**:
-  - Instant sentence correctness evaluation.
-  - In-depth **Grammar Notes** and **Vocabulary Notes**.
-  - Adaptive **Hints** if your response needs refinement.
-- **🔁 Retry Flow & Auto-Advance**: Configurable maximum attempts per question and optional auto-advance upon correct answers.
-- **📈 Session Recap & History**:
-  - Comprehensive performance summary: accuracy percentage, elapsed time, and per-question reviews with recorded transcripts.
-  - Complete session history stored locally in your browser (*LocalStorage*).
-- **🌐 Bilingual UI & Instructions**: Full interface and instructional prompt support in both **English** and **Indonesian**.
+![SpeakJP preview](images/HomePage.png)
 
 ---
 
-## 📁 Project Structure
+## Contents
 
-```text
-Speak-Japanese-Sentence/
-├── public/                        # Static public assets
-├── src/
-│   ├── assets/                    # Media & styling assets
-│   ├── components/
-│   │   └── Header.tsx             # Navigation header & microphone permission status
-│   ├── hooks/
-│   │   └── useSession.ts          # State machine for practice sessions, AI evaluation, and timer
-│   ├── pages/
-│   │   ├── HomePage.tsx           # Dashboard & quick practice session launcher
-│   │   ├── PracticePage.tsx       # Core gameplay (speech recognition, feedback, retry flow)
-│   │   ├── RecapPage.tsx          # Practice session performance summary
-│   │   ├── HistoryPage.tsx        # Past session logs and statistics
-│   │   └── SettingsPage.tsx       # AI Provider, Model, URL, and practice options
-│   ├── services/
-│   │   ├── ai.ts                  # AI API integrations (Ollama, Gemini, OpenAI, Claude) & model fetching
-│   │   ├── speech.ts              # Web Speech API wrapper (SpeechRecognition & SpeechSynthesis)
-│   │   └── storage.ts             # LocalStorage abstraction for settings & session history
-│   ├── types/
-│   │   └── index.ts               # Domain types, interfaces, and JLPT/mode constants
-│   ├── App.tsx                    # Root component & route definitions
-│   ├── index.css                  # Design system (Dark-theme UI, CSS tokens, micro-animations)
-│   └── main.tsx                   # Application entry point
-├── index.html                     # HTML5 template
-├── package.json                   # Project metadata & dependencies
-├── tsconfig.json                  # TypeScript compiler configuration
-├── vite.config.ts                 # Vite configuration & dev-server proxy for Ollama CORS
-└── README.md                      # Project documentation
-```
+- [Features](#features)
+- [AI providers](#ai-providers)
+- [Getting started](#getting-started)
+- [Deployment](#deployment)
+- [Project structure](#project-structure)
+- [Data and credits](#data-and-credits)
+- [Privacy](#privacy)
+- [Browser support](#browser-support)
 
 ---
 
-## 🛠️ Tech Stack
+## Features
 
-- **Frontend Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Bundler & Build Tool**: [Vite 8](https://vite.dev/)
-- **Routing**: [React Router DOM v7](https://reactrouter.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Speech Technologies**:
-  - Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition`)
-  - Web Speech Synthesis API (`speechSynthesis`)
-- **Styling**: Pure Modern CSS (CSS Custom Properties, Flexbox/Grid, Glassmorphism, Responsive & Dark Theme)
-- **Data Persistence**: Browser LocalStorage API
+The header groups the app into **Learn** (the reference lists) and **Practice** (AI
+sessions), plus **Mistakes** and **Settings**. On phones everything sits behind the ☰
+menu.
+
+### Learn
+
+| Section | What's in it | Quiz / practice |
+|---|---|---|
+| **語 Kotoba List** (`/words`) | Verbs, adjectives, adverbs, conjunctions and onomatopoeia, by JLPT level (N5 → N1 → Non-JLPT), with how common each word is, its verb group or い/な type, and audio | Quiz: word → meaning, meaning → word, or say/type the word. No AI needed |
+| **字 Kanji List** (`/kanji`) | Every JLPT kanji as a tile grid, with meanings, on'yomi / kun'yomi, example words, and a radical / parts filter (聞 is listed under 耳 and 門) | **Practice readings**: say or type the kanji's reading in 5 real words. Progress is tracked with spaced reviews (new → learning → mastered). Quiz: readings or look-alike kanji (時 / 持 / 待 / 特) |
+| **文 Bunpou List** (`/grammar`) | 415 grammar points, N5 → N1, each with its meaning, how it attaches (V-dict + ことができる) and example sentences | **Practice this grammar** (AI): 5 sentences in your language to say or type in Japanese with that grammar point, graded by the AI. Progress is tracked like kanji. Quiz: fill the blank / meaning → pattern |
+| **が Particle List** (`/particles`) | 53 uses of 24 particles (に for time, place, a person…) with examples | Quiz: fill the particles into sentences from a keypad or by typing romaji. Sentences are new from the AI or taken from the list. **Mine works too?** asks the AI whether your other particle also fits |
+
+All lists can be searched in kana, kanji, romaji (`tabemasu`, `tame ni`) or by meaning.
+
+### Practice (AI)
+
+| Mode | How it works |
+|---|---|
+| **Speaking Practice: Translation** | Translate a story sentence by sentence (pick its topic, tense and length), or quick unrelated sentences |
+| **Speaking Practice: Situation** | Say what you would say in an everyday situation |
+| **Speaking Practice: Conversation** | Free chat in a messaging-app layout. Each reply comes with a translation and a correction of your message |
+| **JLPT Mock Test: Kanji** | The app picks the target kanji of your level and the AI writes a word for each. You say or type the reading, and it is checked locally |
+| **JLPT Mock Test: Reading** | A reading passage with 3 multiple-choice questions in the style of the real test |
+
+Each session can set the JLPT level (N5–N1), the number of questions, the attempts per
+question (1 = exam style) and hints. The AI answers with a verdict (natural / slightly
+unnatural / grammar errors / partial / incorrect), short feedback, a nudge before the
+answer is shown, and after it a corrected version of your sentence and other ways to
+say it.
+
+### Also
+
+- **Voice input**: on laptops, click the mic and the answer is sent after 3 s of
+  silence (single words are sent right away). On phones, hold the mic to talk and
+  slide away to cancel.
+- **Mistakes** (`/mistakes`): every question whose latest answer was wrong, grouped by
+  mode, with *Practice* to redo them. A question leaves the list once you get it right.
+- **Recap and Retry wrong answers** after every session.
+- **Continue last session**: closing the tab or reloading keeps the session. Home and
+  the mode page offer to continue it or discard it.
+- **Keyboard friendly**: Enter submits, 1–4 picks a choice, R tries again, Esc asks
+  before ending a session, ←/→ steps through cards.
 
 ---
 
-## 🚀 How to Run Locally
+## AI providers
 
-### 1. Prerequisites
+Choose the AI in **⚙ Settings**. The API key is stored only in your browser and is sent
+directly from your browser to the provider.
 
-Make sure you have installed:
-- [Node.js](https://nodejs.org/) (version 18 or later)
-- Package Manager (`npm`, `pnpm`, or `yarn`)
-- *(Optional)* [Ollama](https://ollama.ai/) if you wish to run free local LLMs without external API keys.
+| Provider | What you need |
+|---|---|
+| **Google Gemini** (default) | An API key from Google AI Studio |
+| **OpenAI** | An OpenAI API key |
+| **Anthropic Claude** | An Anthropic API key (the app uses direct browser access) |
+| **Custom URL** | Any **OpenAI-compatible** server: a model running on your computer (e.g. `http://localhost:11434/v1`) or a remote URL (`https://example.com/api/v1`). The `/v1/chat/completions` suffix is added automatically. **Fetch Models** lists the server's models, and a Bearer token is optional |
 
-### 2. Clone & Install Dependencies
+**Test Connection** checks the settings, and **Remove AI Settings** clears the provider,
+key and URL. When no AI is set up, the AI features say so and link to Settings. When a
+request fails, the error shows a Settings button.
+
+The Words, Kanji and Particle-list quizzes, the kanji reading practice and the JLPT
+kanji answer check work **without** an AI.
+
+---
+
+## Getting started
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) 20.19 or later (required by Vite 8), and npm
+- Chrome or Edge for voice input (see [Browser support](#browser-support))
+- An AI provider key, or an OpenAI-compatible server for the AI features
+
+### Install and run
 
 ```bash
-# Clone this repository
 git clone https://github.com/IlkhamAbdillah/Speak-Japanese-Sentence.git
-
-# Navigate to the project directory
 cd Speak-Japanese-Sentence
-
-# Install dependencies
 npm install
-```
-
-### 3. Run Development Server
-
-```bash
 npm run dev
 ```
 
-Open your browser and navigate to `http://localhost:5173`.
+Open <http://localhost:5173>, go to **⚙ Settings**, pick a provider, enter the key (or
+the URL), press **Test Connection** and then **Save Changes**.
 
-### 4. Configure AI Provider (Settings Page)
+> **Local model on `localhost:11434`?** The dev server proxies `/ollama-api` to
+> `http://localhost:11434` (see `vite.config.ts`), which avoids CORS problems while
+> developing.
 
-1. Open the **⚙️ Settings** page in the application.
-2. Select your preferred AI Provider:
-   - **Ollama**:
-     - Enter your Ollama URL (default: `http://localhost:11434/v1` or your custom remote URL).
-     - Click **Fetch Models** to automatically load all models available on your instance (e.g., `llama3.1`, `qwen2.5`, `mistral`).
-     - Enter an Auth Token if your tunnel/proxy is secured with Bearer authentication.
-   - **Google Gemini / OpenAI / Anthropic Claude**:
-     - Enter your API key and choose your desired model.
-3. Click **Test Connection** to verify connectivity.
-4. Click **Save Settings** — you will be redirected to the home page ready to practice!
+### Scripts
 
-### 5. Build for Production
+| Command | What it does |
+|---|---|
+| `npm run dev` | Vite dev server with hot reload |
+| `npm run build` | Type-check (`tsc -b`) and build into `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Lint with oxlint |
 
-```bash
-# Build production bundle
-npm run build
+---
 
-# Preview production build locally
-npm run preview
+## Deployment
+
+The app is a static site and is deployed on **Vercel**. `vercel.json` rewrites every
+path to `/index.html`, so refreshing on `/kanji` or `/recap/…` works with the
+client-side router. Any static host with an SPA fallback works the same way: build with
+`npm run build` and serve `dist/`.
+
+---
+
+## Project structure
+
+```text
+src/
+├── App.tsx                 Routes, the active practice session, Continue / Retry flows
+├── navigation.ts           Header groups and Home cards (Learn / Practice)
+├── index.css               Plain CSS with design tokens (dark theme only)
+├── i18n/                   Translations: locales/en.json, locales/id.json (type-checked keys)
+├── types/index.ts          Domain types, settings, mode helpers, AI model lists
+├── pages/                  One file per route (Home, Words, Kanji, Grammar, Particles,
+│                           Mode, Practice, Conversation, Recap, Mistakes, Settings)
+├── components/             Dialogs, quizzes, cards, the header…
+├── hooks/                  useSession (practice state machine), useConversation,
+│                           usePushToTalk, useEscapeKey
+├── services/
+│   ├── ai.ts               One client for OpenAI, Gemini, Claude and Custom URL; prompts,
+│   │                       question generation and answer evaluation
+│   ├── grammarPractice.ts  Grammar practice: AI exercises and grading
+│   ├── particleAI.ts       Particle sentences and "Mine works too?" from the AI
+│   ├── speech.ts           Web Speech API: recognition (ja-JP) and speech synthesis
+│   ├── storage.ts          localStorage: settings (with migrations), sessions, progress
+│   ├── review.ts           Spaced review shared by the kanji and grammar progress
+│   ├── romaji.ts           Kana ↔ romaji for search
+│   └── …                   Kanji, vocab, grammar and particle list logic
+└── data/
+    ├── vocab/              Word lists (words.json, verbs.json)
+    ├── kanji/              JLPT kanji, KANJIDIC details, practice words, look-alikes
+    └── grammar/            Grammar points (n5.txt … n1.txt) and particles.txt
 ```
+
+Each `src/data/*` folder has its own `README.md` describing the format and how the data
+was made.
+
+### Adding a language
+
+Copy `src/i18n/locales/en.json` to `<code>.json`, translate it, and add it to
+`LANGUAGES` in `src/i18n/index.ts`. A missing key fails the type-check, so no string can
+be forgotten. AI prompts use the locale's `meta.promptName`, so feedback comes in that
+language too.
+
+---
+
+## Data and credits
+
+| Data | Source | License |
+|---|---|---|
+| JLPT kanji levels | Jonathan Waller's JLPT lists, [tanos.co.uk](http://www.tanos.co.uk/jlpt/) | CC BY |
+| Kanji meanings, readings, frequency | [KANJIDIC](http://www.edrdg.org/wiki/index.php/KANJIDIC_Project) (EDRDG), via [kanji-data](https://github.com/davidluzgouveia/kanji-data) | CC BY-SA 4.0 |
+| Kanji parts | [KRADFILE](https://www.edrdg.org/krad/kradinf.html) (EDRDG) | CC BY-SA 4.0 |
+| Larger kanji parts | [KanjiVG](https://kanjivg.tagaini.net) (Ulrich Apel) | CC BY-SA 3.0 |
+| Look-alike kanji | Lars Yencken's kanji similarity data | CC BY 3.0 |
+| JLPT vocabulary levels | [open-anki-jlpt-decks](https://github.com/jamsinclair/open-anki-jlpt-decks) (based on the Waller lists) | MIT |
+| Word classes | [JMdict](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project) (EDRDG), via jmdict-simplified | CC BY-SA 4.0 |
+| Word frequency | [wordfreq](https://github.com/rspeer/wordfreq) | CC BY-SA 4.0 (data) |
+| Verb list | [Japanese Verb Conjugator](https://www.japaneseverbconjugator.com/JVerbList.asp) | — |
+| Adjectives | Picked for the app, plus [JLPT Sensei](https://jlptsensei.com) adjective lists | — |
+| Onomatopoeia, adverbs, conjunctions | *kotoba onomatope* PDF ([Scribd](https://www.scribd.com/document/485472399/kotoba-onomatope)) | — |
+| Grammar points, particles, example sentences | Written for this app | — |
+
+The JLPT publishes no official kanji, vocabulary or grammar lists, so all levels follow
+the commonly used unofficial lists. Some items may sit one level higher or lower
+elsewhere.
+
+---
+
+## Privacy
+
+- No server and no analytics. Everything is stored in your browser's `localStorage`
+  (`sjp_settings`, `sjp_sessions`, `sjp_kanji_progress`, `sjp_grammar_progress`, …).
+- Your API key goes only to the provider you chose.
+- Speech recognition is done by the browser. Chrome sends the audio to Google's speech
+  service.
+- What you say or type is sent to your AI provider only for the AI features, and it is
+  marked as untrusted input in the prompts.
+
+---
+
+## Browser support
+
+| | Voice input | Everything else |
+|---|---|---|
+| Chrome / Edge (desktop and Android) | ✅ | ✅ |
+| Safari (macOS / iOS) | Partial (Web Speech support varies) | ✅ |
+| Firefox | ❌ (no Web Speech recognition), use typing | ✅ |
+
+Allow microphone access when the browser asks. Typing always works as a fallback.

@@ -617,5 +617,9 @@
     "review": "Sentences to review",
     "newPractice": "New practice",
     "countLabel": "Sentences"
+  },
+  "docs": {
+    "title": "How SpeakJP works",
+    "onThisPage": "On this page"
   }
 }

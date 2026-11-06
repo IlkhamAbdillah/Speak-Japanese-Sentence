@@ -617,5 +617,9 @@
     "review": "Kalimat yang perlu diulang",
     "newPractice": "Latihan baru",
     "countLabel": "Jumlah kalimat"
+  },
+  "docs": {
+    "title": "Cara kerja SpeakJP",
+    "onThisPage": "Di halaman ini"
   }
 }
