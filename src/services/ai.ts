@@ -249,7 +249,7 @@ export async function fetchOllamaModels(
           .filter(Boolean);
       }
     } else {
-      lastError = `Ollama /api/tags returned status ${res.status}`;
+      lastError = `The server's /api/tags returned status ${res.status}`;
     }
   } catch (err) {
     lastError = err instanceof Error ? err.message : String(err);
@@ -266,13 +266,13 @@ export async function fetchOllamaModels(
           .filter(Boolean);
       }
     } else {
-      lastError = `Ollama /v1/models returned status ${res.status}`;
+      lastError = `The server's /v1/models returned status ${res.status}`;
     }
   } catch (err) {
     lastError = err instanceof Error ? err.message : String(err);
   }
 
-  throw new Error(lastError || 'No models returned from Ollama server.');
+  throw new Error(lastError || 'The server returned no models.');
 }
 
 async function callOllama(
@@ -324,7 +324,7 @@ async function callOllama(
   if (!res.ok) {
     const rawBody = await res.text();
     const cleanErr = rawBody.length > 200 ? `${rawBody.slice(0, 200)}...` : rawBody;
-    throw new Error(`Ollama API error (${res.status}): ${cleanErr}`);
+    throw new Error(`AI server error (${res.status}): ${cleanErr}`);
   }
 
   // Servers that ignore `stream` answer with a plain JSON body.

@@ -22,7 +22,7 @@ interface GrammarDetailDialogProps {
   /** Grammar list: the point's practice progress, and its Practice button */
   practice?: {
     progress?: GrammarProgress;
-    /** Missing without an AI set up: the button opens AI Setup instead */
+    /** Missing without an AI set up: the button then shows a notice linking to Settings */
     onStart?: () => void;
     onAISetup: () => void;
   };
@@ -65,6 +65,8 @@ export default function GrammarDetailDialog({ point, position, direction, onPrev
 
   const progress = practice?.progress;
   const status = reviewStatus(progress);
+  // Practice pressed without an AI set up: show where to set one up
+  const [needsAI, setNeedsAI] = useState(false);
   // Fixed while the card is open (it's opened again after a practice)
   const [now] = useState(() => Date.now());
   const progressText = !progress
@@ -122,16 +124,24 @@ export default function GrammarDetailDialog({ point, position, direction, onPrev
             <dd className="grammar-formation" lang="ja">{point.formation}</dd>
           </dl>
 
-          {/* The practice (AI): the only thing that moves the progress shown above */}
-          {practice && (practice.onStart ? (
-            <button className="btn btn-primary btn-sm kanji-practice-button" onClick={practice.onStart}>
+          {/* The practice (AI): the only thing that moves the progress shown above. Without an
+              AI the button explains where to set one up */}
+          {practice && (
+            <button
+              className="btn btn-primary btn-sm kanji-practice-button"
+              onClick={practice.onStart ?? (() => setNeedsAI(true))}
+            >
               <Sparkles size={14} /> {t('grammar.practice.button')}
             </button>
-          ) : (
-            <button className="btn btn-secondary btn-sm kanji-practice-button" onClick={practice.onAISetup} title={t('home.apiKeyMissing')}>
-              <Settings size={14} /> {t('grammar.practice.needsAI')}
-            </button>
-          ))}
+          )}
+          {practice && needsAI && !practice.onStart && (
+            <div className="alert alert-warning setup-dialog-alert grammar-needs-ai">
+              <span style={{ flex: 1 }}>{t('home.apiKeyMissing')}</span>
+              <button className="btn btn-secondary btn-sm" onClick={practice.onAISetup}>
+                <Settings size={14} /> {t('header.settings')}
+              </button>
+            </div>
+          )}
 
           <div className="grammar-examples">
             <div className="grammar-examples-title">{t('grammar.examples')}</div>

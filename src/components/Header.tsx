@@ -180,21 +180,24 @@ export default function Header({ micPermission, onLanguageChange }: HeaderProps)
                 </div>
               </section>
             ))}
-            <section className="mobile-nav-group mobile-nav-grid">
-              <button
-                className={`mobile-nav-item ${path === '/mistakes' ? 'active' : ''}`}
-                onClick={() => go('/mistakes')}
-              >
-                <span className="nav-item-glyph"><ListX size={18} /></span>
-                <span>{t('header.mistakes')}</span>
-              </button>
-              <button
-                className={`mobile-nav-item ${path === '/settings' ? 'active' : ''}`}
-                onClick={() => go('/settings')}
-              >
-                <span className="nav-item-glyph"><Settings size={18} /></span>
-                <span>{t('header.settings')}</span>
-              </button>
+            <section className="mobile-nav-group">
+              <h2 className="mobile-nav-title">{t('header.more')}</h2>
+              <div className="mobile-nav-grid">
+                <button
+                  className={`mobile-nav-item ${path === '/mistakes' ? 'active' : ''}`}
+                  onClick={() => go('/mistakes')}
+                >
+                  <span className="nav-item-glyph"><ListX size={18} /></span>
+                  <span>{t('header.mistakes')}</span>
+                </button>
+                <button
+                  className={`mobile-nav-item ${path === '/settings' ? 'active' : ''}`}
+                  onClick={() => go('/settings')}
+                >
+                  <span className="nav-item-glyph"><Settings size={18} /></span>
+                  <span>{t('header.settings')}</span>
+                </button>
+              </div>
             </section>
             <section className="mobile-nav-group">
               <h2 className="mobile-nav-title">{t('header.language')}</h2>

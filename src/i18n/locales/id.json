@@ -22,6 +22,7 @@
     "home": "Beranda"
   },
   "header": {
+    "more": "Lainnya",
     "settings": "Pengaturan",
     "learn": "Belajar",
     "practice": "Latihan",
@@ -120,10 +121,10 @@
     "subtitle": "Pilih AI yang membuat soal dan memeriksa jawaban Anda.",
     "aiProvider": "Provider AI",
     "provider": "Provider",
-    "noModelsFound": "Tidak ada model ditemukan. Pastikan Anda sudah pull model (misal: ollama pull llama3.1).",
+    "noModelsFound": "Tidak ada model ditemukan. Pastikan server memiliki setidaknya satu model.",
     "modelsFound": "Ditemukan {count} model!",
     "connectionFailed": "Koneksi gagal",
-    "ollamaInfo": "Server apa pun yang kompatibel dengan OpenAI: Ollama lokal (http://localhost:11434/v1) atau URL remote (https://example.com/api/v1). Pastikan model tersedia di server tersebut.",
+    "ollamaInfo": "Server apa pun yang kompatibel dengan OpenAI: model yang berjalan di komputer Anda (misal http://localhost:11434/v1) atau URL remote (https://example.com/api/v1). Pastikan model tersedia di server tersebut.",
     "ollamaUrl": "URL Kustom",
     "ollamaUrlPlaceholder": "http://localhost:11434/v1 atau https://tunnel.example.com",
     "ollamaUrlHelp": "Bisa berupa http://localhost:11434/v1, IP LAN, atau URL (https://example.com/api/v1). Akhiran /v1 akan disesuaikan otomatis.",
@@ -541,7 +542,6 @@
     "review": "Tata bahasa yang perlu diulang",
     "practice": {
       "button": "Latih tata bahasa ini",
-      "needsAI": "Atur AI untuk berlatih",
       "notPractised": "Belum dilatih",
       "back": "Kembali ke pola tata bahasa",
       "next": "Berikutnya: {pattern}",

@@ -4344,3 +4344,7 @@ button.kanji-reading:hover {
   border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
+
+.grammar-needs-ai {
+  margin: var(--space-sm) 0 0;
+}
