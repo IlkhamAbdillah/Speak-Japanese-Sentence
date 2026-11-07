@@ -27,6 +27,8 @@ export interface GrammarPracticeQuestion {
   /** Hint: key words with their reading and meaning */
   words: string[];
   explanation: string;
+  /** Daily Learning mixes points: the point this sentence practises */
+  point?: GrammarPoint;
 }
 
 const langNameOf = (lang: InstructionLanguage) => languageMeta(lang).promptName;

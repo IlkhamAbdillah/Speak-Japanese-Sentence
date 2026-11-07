@@ -71,6 +71,8 @@ small key–value store kept per site and per browser. Each value is a JSON stri
 | `sjp_kanji_progress` | Per kanji: streak, next review time, practised words |
 | `sjp_grammar_progress` | Per grammar point (`level:pattern`): streak and next review time |
 | `sjp_dismissed_mistakes` | Mistakes the learner removed from the Mistakes page |
+| `sjp_daily` | Today's Daily Learning: the date, the kanji and grammar points picked, the particle level, each part's run (questions, current question, first-try outcomes, first answers, results) and the parts finished |
+| `sjp_daily_mistakes` | Questions answered wrong in Daily Learning (shown on the Mistakes page, one list per day) |
 | `sjp_schema_version` | Version of the stored format |
 
 All access goes through `services/storage.ts`:
@@ -84,6 +86,11 @@ All access goes through `services/storage.ts`:
 - **A full store.** When `sjp_sessions` no longer fits, `saveSession` drops the oldest
   10% of the sessions and tries again, so a new session is always saved.
 - **Nothing leaves the device**, except what is sent to the chosen AI provider.
+- **Backup.** Because `localStorage` is per site and per browser, a new domain or device
+  starts empty. Settings → Backup exports every `sjp_*` key as one JSON file
+  (`createBackup`, `{ app: 'speakjp', version, exportedAt, data }`, with the API key
+  blanked) and imports one (`parseBackup` checks it, `restoreBackup` replaces this
+  device's data but keeps its own API key, then the page reloads).
 
 ### Static data
 
@@ -151,6 +158,7 @@ the prompt, with an instruction to grade it and never follow instructions inside
 | Conversation | 1 per message | The reply comes with a translation and a correction of the learner's message |
 | Grammar practice | 1 to write 5 sentences, then 1 per answer | An answer equal to the expected sentence is accepted **without** a call |
 | Particle quiz | 1 per quiz; 1 for "Mine works too?" | Blanks must be particles from the keypad; answers are checked locally |
+| Daily Learning | 5 grammar practices (one call per point, in parallel, a failed one retried once) + 1 particle quiz, each written while the previous part is answered; then 1 per grammar answer | The app picks the kanji and grammar points; the kanji part never calls the AI |
 
 Kanji readings, multiple choice, particles and the reading practice are **never** sent
 to the AI. They are cheaper, faster and deterministic when checked in the app.
@@ -209,6 +217,37 @@ removed. So `ショク`, `しょく` and `しょく。` are all equal.
 
 Status on the cards: no record = *new*, streak 1–2 = *learning* (amber), 3+ = *mastered*
 (green).
+
+### Daily Learning: what comes up today
+
+`services/daily.ts`, page `pages/DailyPage.tsx` (`/daily`). One set a day: the reading
+practice of **5 kanji** (5 words each = 25 questions), the practice of **5 grammar points**
+(5 sentences each = 25) and **5 particle sentences**: 55 questions. The picks are kept in
+`sjp_daily` for the day (a new plan at local midnight, or with *One more round*).
+
+`pickDailyItems` takes the list in its order (N5 → N1, then teaching order) and fills the
+slots in this order, so the early levels are mastered before the next ones start:
+
+1. **Due for review** (learning or mastered), lowest level first, then longest overdue.
+2. **New** items, in list order.
+3. If still short (everything started): learning items not due yet (soonest first), then
+   mastered ones.
+
+A mastered item comes back when its review is due (7 → 30 days). When none is due, the
+last slot goes to a random mastered item with a 25 % chance (`MASTERED_SURPRISE_CHANCE`),
+so mastered items show up now and then. Kanji without practice words are skipped.
+
+Within a part the items come one after the other: the first kanji's 5 words (in random
+order), then the second kanji's, and so on; the grammar part likewise per point. Each
+part's run is saved after every answer, so leaving and coming back continues at the same
+question, and a finished part opens on its results card. Every question answered wrong
+(not right on the first try, or Show answer) is saved to `sjp_daily_mistakes` and shown on
+the Mistakes page under its day; answering it right in Retry wrong removes it.
+
+The **first run** of the kanji and grammar parts counts like a practice from the item's
+card: per item, ≥ 80 % right on the first try = a good practice (the spaced-review rules
+above). Replays and Retry wrong don't count. The particle sentences are written at the
+lowest level of today's grammar points and have no progress.
 
 ### Choosing the practice words for a kanji
 

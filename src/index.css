@@ -3481,17 +3481,6 @@ button.kanji-reading:hover {
 }
 
 /* Practice readings: the R / Enter tips, one per line */
-.kanji-practice-keys {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 2px;
-}
-
-.kanji-practice-keys p {
-  margin: 0;
-}
-
 /* Laptops: exactly the screen under the header; the question sits in the middle */
 @media (min-width: 768px) {
   .kanji-quiz {
@@ -4347,7 +4336,7 @@ button.kanji-reading:hover {
   margin: var(--space-sm) 0 0;
 }
 
-/* Settings (user-picked design): one card, the section title with an accent bar,
+/* Settings (user-picked design): one card, plain section titles (the accent bar was removed, user-requested),
    Remove AI Settings as a row between dividers, Save in the middle */
 .settings-card {
   background: var(--bg-card);
@@ -4366,14 +4355,6 @@ button.kanji-reading:hover {
   gap: var(--space-md);
   padding-bottom: 0;
   border-bottom: none;
-}
-
-.settings-card .settings-section-title::before {
-  content: '';
-  width: 4px;
-  height: 1.4em;
-  border-radius: 2px;
-  background: var(--accent-primary);
 }
 
 .settings-remove-row {
@@ -4876,4 +4857,265 @@ button.kanji-reading:hover {
 .action-row-tight {
   gap: var(--space-sm);
   margin-top: var(--space-lg);
+}
+
+/* Settings: Backup card (export / import every saved key as a file) */
+.settings-backup-card {
+  margin-top: var(--space-lg);
+}
+
+.settings-backup-help {
+  margin: var(--space-sm) 0 var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.settings-backup-actions {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
+.settings-backup-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-md);
+  font-size: var(--text-sm);
+}
+
+.settings-backup-status.success {
+  color: var(--accent-teal);
+}
+
+.settings-backup-status.error {
+  color: var(--accent-red);
+}
+
+/* ─── Daily Learning (/daily, and its card on Home) ──── */
+
+.home-daily {
+  max-width: 640px;
+  margin: 0 auto var(--space-md);
+}
+
+.home-daily-card {
+  width: 100%;
+  border-color: var(--accent-primary-muted);
+}
+
+.home-daily-card.done .home-menu-glyph {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.daily-page {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.daily-head {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.daily-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+.daily-date {
+  margin-top: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.daily-ai-notice {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.daily-ai-notice > span {
+  flex: 1;
+  min-width: 200px;
+}
+
+.daily-parts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.daily-part {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-lg);
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.daily-part:not(:disabled):hover {
+  border-color: var(--accent-primary);
+}
+
+.daily-part.next {
+  border-color: var(--accent-primary-muted);
+}
+
+.daily-part:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.daily-part-step {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-primary-muted);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.daily-part.done .daily-part-step {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.daily-part-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.daily-part-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: 36px;
+  align-items: center;
+}
+
+.daily-part-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.daily-part-meta {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.daily-part.done .daily-part-meta {
+  color: var(--color-success);
+}
+
+.daily-part-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* An item of today's set: plain = new, amber = learning, green = mastered (like the kanji tiles) */
+.daily-item {
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-jp);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.daily-item-glyph {
+  font-size: var(--text-lg);
+  padding: 2px 8px;
+}
+
+.daily-item-learning { border-bottom-color: var(--kanji-learning); }
+.daily-item-known { border-bottom-color: var(--kanji-known); }
+
+.daily-done {
+  margin-top: var(--space-lg);
+  text-align: center;
+  color: var(--color-success);
+}
+
+.daily-actions {
+  margin-top: var(--space-xl);
+}
+
+/* The results card: what the part did to each item's progress */
+.daily-result-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  text-align: left;
+}
+
+.daily-result-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.daily-result-label {
+  flex-shrink: 0;
+  min-width: 2.5em;
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.daily-result-line.failed .daily-result-label {
+  color: var(--color-warning);
+}
+
+/* A wrong answer with the AI's feedback (grammar practice, particle quiz): the buttons
+   go under the text, so it gets the full width (user-requested: it was squeezed) */
+.kanji-sheet.kanji-sheet-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-md);
+}
+
+.kanji-sheet-stacked .kanji-sheet-main {
+  width: 100%;
+}
+
+.kanji-sheet-stacked .kanji-sheet-actions {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Laptops: the buttons stay on one row */
+@media (min-width: 768px) {
+  .kanji-sheet-stacked .kanji-sheet-actions {
+    flex-wrap: nowrap;
+  }
+
+  .kanji-sheet-stacked .kanji-sheet-actions .btn {
+    flex-shrink: 0;
+  }
+}
+
+
+/* Mistakes: a Daily Learning particle sentence shows its blanks */
+.mistake-blank {
+  color: var(--accent-primary);
+  font-weight: 600;
 }

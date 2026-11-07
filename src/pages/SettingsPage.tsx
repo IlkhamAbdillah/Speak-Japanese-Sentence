@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Eye,
@@ -10,13 +10,27 @@ import {
   Trash2,
   RefreshCw,
   ChevronRight,
+  Download,
+  Upload,
 } from 'lucide-react';
 import type { UserSettings, AIProvider } from '../types';
 import { AI_PROVIDER_LABELS, AI_PROVIDER_MODELS, DEFAULT_SETTINGS, hasAISetup } from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { testConnection, fetchOllamaModels } from '../services/ai';
-import { saveSettings, clearApiKey } from '../services/storage';
-import { useI18n } from '../i18n';
+import { saveSettings, clearApiKey, createBackup, parseBackup, restoreBackup } from '../services/storage';
+import type { BackupFile } from '../services/storage';
+
+// Set before the reload that follows an import, so the page can say it worked
+const IMPORT_DONE_FLAG = 'sjp_import_done';
+
+function importJustDone(): boolean {
+  try {
+    return sessionStorage.getItem(IMPORT_DONE_FLAG) === '1';
+  } catch {
+    return false;
+  }
+}
+import { useI18n, languageMeta } from '../i18n';
 
 interface SettingsPageProps {
   settings: UserSettings;
@@ -34,7 +48,7 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
   const [fetchStatus, setFetchStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [manualModelInput, setManualModelInput] = useState(false);
 
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const update = (partial: Partial<UserSettings>) => {
     const next = { ...settings, ...partial };
@@ -118,6 +132,56 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
     setFetchedModels([]);
     setFetchStatus(null);
     setManualModelInput(false);
+  };
+
+  // Backup: download every saved key as a file / restore one (the API key stays on this device)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingImport, setPendingImport] = useState<BackupFile | null>(null);
+  const [backupStatus, setBackupStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(() =>
+    importJustDone() ? { type: 'success', message: t('settings.backupImported') } : null
+  );
+  useEffect(() => {
+    try { sessionStorage.removeItem(IMPORT_DONE_FLAG); } catch { /* ignore */ }
+  }, []);
+
+  const handleExport = () => {
+    const backup = createBackup();
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `speakjp-backup-${backup.exportedAt.slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBackupStatus({ type: 'success', message: t('settings.backupExported') });
+  };
+
+  const handleFilePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const backup = parseBackup(await file.text());
+    if (!backup) {
+      setBackupStatus({ type: 'error', message: t('settings.backupInvalid') });
+      return;
+    }
+    setBackupStatus(null);
+    setPendingImport(backup);
+  };
+
+  const handleConfirmImport = () => {
+    if (!pendingImport) return;
+    const ok = restoreBackup(pendingImport);
+    setPendingImport(null);
+    if (!ok) {
+      setBackupStatus({ type: 'error', message: t('settings.backupFailed') });
+      return;
+    }
+    // Reload so every page reads the restored data
+    try { sessionStorage.setItem(IMPORT_DONE_FLAG, '1'); } catch { /* ignore */ }
+    window.location.reload();
   };
 
   const handleClearKey = () => {
@@ -378,6 +442,45 @@ export default function SettingsPage({ settings, onSettingsChange }: SettingsPag
         </button>
       </div>
       </div>
+
+      {/* Backup: localStorage is per site and per device, so this carries progress to a new one */}
+      <div className="settings-card settings-backup-card animate-in">
+        <h2 className="settings-section-title">{t('settings.backupTitle')}</h2>
+        <p className="settings-backup-help">{t('settings.backupHelp')}</p>
+        <div className="action-row settings-backup-actions">
+          <button className="btn btn-secondary" onClick={() => fileInputRef.current?.click()}>
+            <Upload size={16} /> {t('settings.backupImport')}
+          </button>
+          <button className="btn btn-secondary" onClick={handleExport}>
+            <Download size={16} /> {t('settings.backupExport')}
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={handleFilePicked}
+        />
+        {backupStatus && (
+          <p className={`settings-backup-status ${backupStatus.type}`}>
+            {backupStatus.type === 'success' ? <Check size={14} /> : <AlertCircle size={14} />}
+            {backupStatus.message}
+          </p>
+        )}
+      </div>
+
+      {pendingImport && (
+        <ConfirmDialog
+          title={t('settings.backupImportTitle')}
+          text={t('settings.backupImportText', {
+            date: new Date(pendingImport.exportedAt).toLocaleString(languageMeta(lang).locale, { dateStyle: 'medium', timeStyle: 'short' }),
+          })}
+          confirmLabel={t('settings.backupImport')}
+          onCancel={() => setPendingImport(null)}
+          onConfirm={handleConfirmImport}
+        />
+      )}
 
       {confirmRemove && (
         <ConfirmDialog

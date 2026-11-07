@@ -1,16 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Delete, Eye, Loader2, RotateCcw, SkipForward, Sparkles, Trophy, Volume2, X } from 'lucide-react';
 import type { ParticleQuestion } from '../services/particles';
+import type { QuizProgress } from '../types';
 import { blanksOf, isParticlePrefix, isParticleRight, PARTICLE_KEYS, particleFromRomaji } from '../services/particles';
 import type { ParticleVerdict } from '../services/particleAI';
 import { inLanguage, patternLabel } from '../services/grammar';
 import { isSpeechSynthesisSupported, prefersPushToTalk, speakJapanese } from '../services/speech';
 import ConfirmDialog from './ConfirmDialog';
+import { Kbd } from './Kbd';
 import SettingsButton from './SettingsButton';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 
 interface ParticleQuizProps {
+  /** Resume where a quiz was left (Daily Learning) */
+  initial?: QuizProgress;
+  /** Every time the question or an outcome changes (Daily Learning saves it to resume) */
+  onProgress?: (progress: QuizProgress) => void;
   questions: ParticleQuestion[];
   /** Ask these sentences again (Retry wrong) */
   onRetry: (wrong: ParticleQuestion[]) => void;
@@ -22,6 +28,13 @@ interface ParticleQuizProps {
   onOpenSettings?: () => void;
   /** The keypad / romaji tip under the keypad (off when the How to answer screen showed it) */
   showTypeTip?: boolean;
+  /** Once, when the last question is answered: right on the first try without Show answer, per question */
+  onFinish?: (outcomes: boolean[]) => void;
+  /** The results card's exit button (default: New practice) */
+  exitLabel?: string;
+  /** Carry on from the results card (also Enter) */
+  onNext?: () => void;
+  nextLabel?: string;
 }
 
 /** How long "Correct!" stays on screen before the next question, as in the other quizzes. */
@@ -37,11 +50,13 @@ type Phase = 'answering' | 'correct' | 'wrong' | 'revealed' | 'accepted';
  * again, shown, or (with an AI) checked by the AI when the learner thinks it works too.
  * Score = right on the first try without Show answer. Nothing is saved.
  */
-export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOpenSettings, showTypeTip = true }: ParticleQuizProps) {
+export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOpenSettings, showTypeTip = true, onFinish, exitLabel, onNext, nextLabel, initial, onProgress }: ParticleQuizProps) {
   const { t, lang } = useI18n();
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(initial?.index ?? 0);
   const [phase, setPhase] = useState<Phase>('answering');
-  const [outcomes, setOutcomes] = useState<boolean[]>([]);
+  const [outcomes, setOutcomes] = useState<boolean[]>(initial?.outcomes ?? []);
+  // The first answer to each question (for Daily Learning's mistakes)
+  const [firstAnswers, setFirstAnswers] = useState<string[]>(initial?.answers ?? []);
   const [answers, setAnswers] = useState<(string | undefined)[]>([]);
   const [active, setActive] = useState(0);
   const [typed, setTyped] = useState('');
@@ -55,13 +70,22 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
   const showRight = phase === 'revealed';
   const pushToTalk = prefersPushToTalk();
 
-  const record = (correct: boolean, override = false) => {
+  const record = (correct: boolean, override = false, answer?: string) => {
+    if (outcomes[index] !== undefined && !override) return;
     setOutcomes((prev) => {
       if (prev[index] !== undefined && !override) return prev;
       const next = [...prev];
       next[index] = correct;
       return next;
     });
+    if (answer !== undefined || firstAnswers[index] === undefined) {
+      setFirstAnswers((prev) => {
+        if (prev[index] !== undefined) return prev;
+        const next = [...prev];
+        next[index] = answer ?? '';
+        return next;
+      });
+    }
   };
 
   const goNext = () => {
@@ -77,7 +101,7 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
   const check = (filled: (string | undefined)[]) => {
     const correct = blanks.every((b, i) => isParticleRight(b, filled[i]));
     setAttempts((n) => n + 1);
-    record(correct);
+    record(correct, false, filled.map((a) => a ?? '').join(' / '));
     setPhase(correct ? 'correct' : 'wrong');
   };
 
@@ -204,6 +228,41 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
     return () => window.removeEventListener('keydown', onKey);
   }, [finished]);
 
+  // Report where the quiz stands (Daily Learning saves it to resume later)
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  });
+  useEffect(() => {
+    onProgressRef.current?.({ index, outcomes, answers: firstAnswers });
+  }, [index, outcomes, firstAnswers]);
+
+  // Report the outcome once
+  const reported = useRef(false);
+  const onFinishRef = useRef(onFinish);
+  const onNextRef = useRef(onNext);
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+    onNextRef.current = onNext;
+  });
+  useEffect(() => {
+    if (!finished || reported.current) return;
+    reported.current = true;
+    onFinishRef.current?.(questions.map((_, i) => !!outcomes[i]));
+  }, [finished, questions, outcomes]);
+  // Results: Enter carries on
+  const hasNext = finished && !!onNext;
+  useEffect(() => {
+    if (!hasNext) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.repeat || e.isComposing || e.target instanceof HTMLButtonElement) return;
+      e.preventDefault();
+      onNextRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [hasNext]);
+
   // ─── Results ──────────────────────────────────────────
   if (finished || !question) {
     const correctCount = outcomes.filter(Boolean).length;
@@ -218,11 +277,16 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
           <p className="question-context">{wrong.length === 0 ? t('words.perfect') : `${percent}%`}</p>
           <div className="start-card-actions">
             <button className="btn btn-secondary btn-lg" onClick={onExit}>
-              {t('particles.newPractice')}
+              {exitLabel ?? t('particles.newPractice')}
             </button>
             {wrong.length > 0 && (
-              <button className="btn btn-primary btn-lg" onClick={() => onRetry(wrong)}>
+              <button className={`btn ${onNext ? 'btn-secondary' : 'btn-primary'} btn-lg`} onClick={() => onRetry(wrong)}>
                 <RotateCcw size={18} /> {t('words.retryWrong', { count: wrong.length })}
+              </button>
+            )}
+            {onNext && (
+              <button className="btn btn-primary btn-lg" onClick={onNext}>
+                {nextLabel} <SkipForward size={18} />
               </button>
             )}
           </div>
@@ -268,7 +332,7 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
       <Check size={20} /> {t('words.correct')}
     </div>
   ) : phase === 'wrong' ? (
-    <div className="kanji-sheet kanji-sheet-wrong particle-sheet animate-in">
+    <div className="kanji-sheet kanji-sheet-wrong kanji-sheet-stacked particle-sheet animate-in">
       <div className="kanji-sheet-main">
         <div className="kanji-sheet-title">
           <RotateCcw size={18} /> {t('words.wrong')}
@@ -282,12 +346,6 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
             {onOpenSettings && <SettingsButton onClick={onOpenSettings} />}
           </p>
         )}
-        {!pushToTalk && (
-          <div className="vocab-tip kanji-practice-keys">
-            <p>{t('kanjiList.practice.tryAgainKey')}</p>
-            <p>{t('kanjiList.practice.showAnswerKey')}</p>
-          </div>
-        )}
         {/* The learner thinks their particle works too: the AI decides */}
         {onJudge && !verdict?.result && (
           <button className="btn btn-ghost btn-sm particle-ask" onClick={askAI} disabled={verdict?.loading}>
@@ -295,12 +353,13 @@ export default function ParticleQuiz({ questions, onRetry, onExit, onJudge, onOp
           </button>
         )}
       </div>
+      {/* Under the AI's text, so it gets the full width (the keys are on the buttons) */}
       <div className="kanji-sheet-actions">
         <button className="btn btn-secondary" onClick={reveal}>
-          <Eye size={16} /> {t('words.showAnswer')}
+          <Eye size={16} /> {t('words.showAnswer')} <Kbd k="Enter" />
         </button>
         <button className="btn btn-primary" onClick={tryAgain}>
-          <RotateCcw size={16} /> {t('words.tryAgain')}
+          <RotateCcw size={16} /> {t('words.tryAgain')} <Kbd k="R" />
         </button>
       </div>
     </div>

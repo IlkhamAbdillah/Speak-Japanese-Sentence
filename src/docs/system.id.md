@@ -71,6 +71,8 @@ penyimpanan key–value kecil per situs dan per browser. Setiap nilai berupa str
 | `sjp_kanji_progress` | Per kanji: streak, waktu review berikutnya, kata yang sudah dilatih |
 | `sjp_grammar_progress` | Per pola tata bahasa (`level:pola`): streak dan waktu review berikutnya |
 | `sjp_dismissed_mistakes` | Kesalahan yang dihapus pengguna dari halaman Kesalahan |
+| `sjp_daily` | Belajar Harian hari ini: tanggal, kanji dan pola tata bahasa yang dipilih, level partikel, putaran tiap bagian (soal, soal yang sedang dikerjakan, hasil percobaan pertama, jawaban pertama, hasil akhir) dan bagian yang sudah selesai |
+| `sjp_daily_mistakes` | Soal yang salah di Belajar Harian (tampil di halaman Kesalahan, satu daftar per hari) |
 | `sjp_schema_version` | Versi format penyimpanan |
 
 Semua akses lewat `services/storage.ts`:
@@ -85,6 +87,11 @@ Semua akses lewat `services/storage.ts`:
 - **Penyimpanan penuh.** Jika `sjp_sessions` sudah tidak muat, `saveSession` membuang 10%
   sesi tertua lalu mencoba lagi, jadi sesi baru selalu tersimpan.
 - **Tidak ada yang keluar dari perangkat**, kecuali yang dikirim ke penyedia AI pilihan.
+- **Cadangan.** Karena `localStorage` terpisah per situs dan per browser, domain atau
+  perangkat baru mulai kosong. Pengaturan → Cadangan mengekspor semua key `sjp_*` jadi
+  satu file JSON (`createBackup`, `{ app: 'speakjp', version, exportedAt, data }`, API key
+  dikosongkan) dan mengimpornya (`parseBackup` memeriksanya, `restoreBackup` mengganti
+  data perangkat ini tapi tetap memakai API key-nya sendiri, lalu halaman dimuat ulang).
 
 ### Data statis
 
@@ -155,6 +162,7 @@ instruksi di dalamnya.
 | Percakapan | 1 per pesan | Balasan disertai terjemahan dan koreksi pesan pengguna |
 | Latihan tata bahasa | 1 untuk menulis 5 kalimat, lalu 1 per jawaban | Jawaban yang sama dengan kalimat yang diharapkan diterima **tanpa** panggilan AI |
 | Kuis partikel | 1 per kuis; 1 untuk "Jawabanku juga benar?" | Bagian kosong harus partikel dari keypad; jawaban dicek secara lokal |
+| Belajar Harian | 5 latihan tata bahasa (satu panggilan per pola, paralel, yang gagal diulang sekali) + 1 kuis partikel, masing-masing ditulis selagi bagian sebelumnya dikerjakan; lalu 1 per jawaban tata bahasa | Aplikasi yang memilih kanji dan pola tata bahasanya; bagian kanji tidak pernah memanggil AI |
 
 Bacaan kanji, pilihan ganda, partikel, dan latihan bacaan **tidak pernah** dikirim ke AI.
 Mengeceknya di aplikasi lebih murah, lebih cepat, dan hasilnya selalu sama.
@@ -215,6 +223,42 @@ Jadi `ショク`, `しょく`, dan `しょく。` dianggap sama.
 
 Status di kartu: belum ada catatan = *baru*, streak 1–2 = *sedang dipelajari* (kuning),
 3+ = *dikuasai* (hijau).
+
+### Belajar Harian: apa yang muncul hari ini
+
+`services/daily.ts`, halaman `pages/DailyPage.tsx` (`/daily`). Satu set per hari: latihan
+bacaan **5 kanji** (masing-masing 5 kata = 25 soal), latihan **5 pola tata bahasa**
+(masing-masing 5 kalimat = 25) dan **5 kalimat partikel**: 55 soal. Pilihannya disimpan di
+`sjp_daily` untuk hari itu (rencana baru setiap tengah malam waktu lokal, atau lewat
+*Satu ronde lagi*).
+
+`pickDailyItems` mengambil daftar sesuai urutannya (N5 → N1, lalu urutan belajar) dan
+mengisi slot dengan urutan ini, supaya level awal dikuasai dulu sebelum level berikutnya
+dimulai:
+
+1. **Jatuh tempo untuk review** (sedang dipelajari atau dikuasai), level terendah dulu,
+   lalu yang paling lama terlewat.
+2. Item **baru**, sesuai urutan daftar.
+3. Kalau masih kurang (semua sudah dimulai): item yang sedang dipelajari tapi belum jatuh
+   tempo (yang paling dekat dulu), lalu yang sudah dikuasai.
+
+Item yang dikuasai kembali muncul saat review-nya jatuh tempo (7 → 30 hari). Kalau tidak
+ada yang jatuh tempo, slot terakhir diisi item dikuasai secara acak dengan peluang 25%
+(`MASTERED_SURPRISE_CHANCE`), jadi item yang dikuasai tetap sesekali muncul. Kanji tanpa
+kata latihan dilewati.
+
+Di dalam satu bagian, item muncul berurutan: 5 kata kanji pertama (urutan acak), lalu
+kanji kedua, dan seterusnya; bagian tata bahasa juga per pola. Putaran tiap bagian
+disimpan setelah setiap jawaban, jadi kalau keluar lalu kembali, latihan lanjut dari soal
+yang sama, dan bagian yang sudah selesai langsung membuka kartu hasilnya. Setiap soal yang
+salah (tidak benar di percobaan pertama, atau Lihat jawaban) disimpan ke
+`sjp_daily_mistakes` dan tampil di halaman Kesalahan di bawah harinya; menjawabnya dengan
+benar di Ulangi yang salah menghapusnya.
+
+**Putaran pertama** bagian kanji dan tata bahasa dihitung seperti latihan dari kartu
+itemnya: per item, ≥ 80% benar pada percobaan pertama = latihan yang baik (aturan review
+berjarak di atas). Mengulang dan Ulangi yang salah tidak dihitung. Kalimat partikel
+ditulis di level terendah dari pola tata bahasa hari itu dan tidak punya progres.
 
 ### Memilih kata latihan untuk sebuah kanji
 

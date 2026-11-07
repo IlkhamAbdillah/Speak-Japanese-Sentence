@@ -1,7 +1,7 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import type { UserSettings, MicPermission, Session, AppMode, Question, StoryInfo } from './types';
-import { isConversationMode } from './types';
+import { isConversationMode, hasAISetup } from './types';
 import type { PresetQuestions } from './hooks/useSession';
 import type { MistakeGroup, MistakePracticeMode } from './services/mistakes';
 import { practiceQuestions } from './services/mistakes';
@@ -25,6 +25,7 @@ const GrammarPage = lazy(() => import('./pages/GrammarPage'));
 const ParticlesPage = lazy(() => import('./pages/ParticlesPage'));
 // How the app works (not linked from the menus)
 const DocsPage = lazy(() => import('./pages/DocsPage'));
+const DailyPage = lazy(() => import('./pages/DailyPage'));
 
 function AppInner() {
   const navigate = useNavigate();
@@ -192,7 +193,7 @@ function AppInner() {
           onLanguageChange={(lang) => handleSettingsChange({ ...settings, instructionLanguage: lang })}
         />
         <Routes>
-          <Route path="/" element={<HomePage savedSession={continueCard()} />} />
+          <Route path="/" element={<HomePage savedSession={continueCard()} aiReady={hasAISetup(settings)} />} />
           <Route
             path="/practice"
             element={
@@ -269,6 +270,14 @@ function AppInner() {
                   settings={settings}
                   onSettingsChange={handleSettingsChange}
                 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/daily"
+            element={
+              <Suspense fallback={null}>
+                <DailyPage settings={settings} />
               </Suspense>
             }
           />

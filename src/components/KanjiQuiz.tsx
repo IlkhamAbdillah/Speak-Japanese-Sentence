@@ -5,6 +5,7 @@ import { splitKun, toKatakana } from '../services/kanjiList';
 import type { KanjiPracticeQuestion } from '../services/kanjiPractice';
 import { isPracticeAnswerCorrect } from '../services/kanjiPractice';
 import type { KanjiQuestion } from '../services/kanjiQuiz';
+import type { QuizProgress } from '../types';
 import { spellWith } from '../services/kanjiQuiz';
 import { isIncompleteKanjiAnswer } from '../services/ai';
 import {
@@ -24,6 +25,10 @@ import { useEscapeKey } from '../hooks/useEscapeKey';
 import { useI18n } from '../i18n';
 
 interface KanjiQuizProps {
+  /** Resume where a quiz was left (Daily Learning) */
+  initial?: QuizProgress;
+  /** Every time the question or an outcome changes (Daily Learning saves it to resume) */
+  onProgress?: (progress: QuizProgress) => void;
   questions: KanjiQuestion[];
   /** Start another quiz with these questions (Retry wrong) */
   onRetry: (wrong: KanjiQuestion[]) => void;
@@ -41,6 +46,10 @@ interface KanjiQuizProps {
   onNext?: () => void;
   /** Its button label */
   nextLabel?: string;
+  /** The line under it (default: Enter for the next kanji) */
+  nextTip?: string;
+  /** The exit dialog's text (default: it won't count for this kanji) */
+  exitText?: string;
 }
 
 /** A reading practice word with the kanji's part of the reading highlighted: 食[しょく]じ. */
@@ -87,12 +96,14 @@ type Phase = 'answering' | 'correct' | 'wrong' | 'revealed';
  * say or type the kanji's reading in a word, or pick the word's spelling among
  * look-alike kanji. Checked locally; only a practice is saved (by the Kanji page).
  */
-export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, resultNote, exitLabel, isPractice, onNext, nextLabel }: KanjiQuizProps) {
+export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, resultNote, exitLabel, isPractice, onNext, nextLabel, nextTip, exitText, initial, onProgress }: KanjiQuizProps) {
   const { t } = useI18n();
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(initial?.index ?? 0);
   const [phase, setPhase] = useState<Phase>('answering');
   // Right on the first try without Show answer, per question
-  const [outcomes, setOutcomes] = useState<boolean[]>([]);
+  const [outcomes, setOutcomes] = useState<boolean[]>(initial?.outcomes ?? []);
+  // The first answer to each question (for Daily Learning's mistakes)
+  const [firstAnswers, setFirstAnswers] = useState<string[]>(initial?.answers ?? []);
   const [chosen, setChosen] = useState<number | null>(null);
   const [typed, setTyped] = useState('');
   const [lastAnswer, setLastAnswer] = useState('');
@@ -109,11 +120,17 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
   const entry = question?.entry;
   const correctChoice = question?.choices?.findIndex((c) => c.kanji === entry?.kanji) ?? -1;
 
-  const record = (correct: boolean) => {
+  const record = (correct: boolean, answer = '') => {
+    if (outcomes[index] !== undefined) return;
     setOutcomes((prev) => {
       if (prev[index] !== undefined) return prev;
       const next = [...prev];
       next[index] = correct;
+      return next;
+    });
+    setFirstAnswers((prev) => {
+      const next = [...prev];
+      next[index] = answer;
       return next;
     });
   };
@@ -136,7 +153,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
     if (phase !== 'answering' || !question?.choices) return;
     const correct = i === correctChoice;
     setChosen(i);
-    record(correct);
+    record(correct, question.choices[i] ? spellWith(question.practice, question.choices[i]) : '');
     setPhase(correct ? 'correct' : 'wrong');
   };
 
@@ -144,7 +161,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
     if (phase !== 'answering' || !entry || !text.trim()) return;
     const correct = !!question && isPracticeAnswerCorrect(question.practice, text, spoken);
     setLastAnswer(text.trim());
-    record(correct);
+    record(correct, text.trim());
     setPhase(correct ? 'correct' : 'wrong');
   };
 
@@ -159,6 +176,15 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
     setTyped('');
     setPhase('answering');
   };
+
+  // Report where the quiz stands (Daily Learning saves it to resume later)
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  });
+  useEffect(() => {
+    onProgressRef.current?.({ index, outcomes, answers: firstAnswers });
+  }, [index, outcomes, firstAnswers]);
 
   // Speech recognition delivers its result later: read the latest submit through a ref
   const submitRef = useRef(submitAnswer);
@@ -343,7 +369,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
               </button>
             )}
           </div>
-          {onNext && !pushToTalk && <p className="vocab-tip">{t('kanjiList.practice.nextTip')}</p>}
+          {onNext && !pushToTalk && <p className="vocab-tip">{nextTip ?? t('kanjiList.practice.nextTip')}</p>}
         </div>
         {wrong.length > 0 && (
           <section className="vocab-review">
@@ -389,12 +415,6 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
         <div className="kanji-sheet-title">
           <RotateCcw size={18} /> {t('words.wrong')}
         </div>
-        {!pushToTalk && (
-          <div className="vocab-tip kanji-practice-keys">
-            <p>{t('kanjiList.practice.tryAgainKey')}</p>
-            <p>{t('kanjiList.practice.showAnswerKey')}</p>
-          </div>
-        )}
       </div>
       <div className="kanji-sheet-actions">
         <button className="btn btn-secondary" onClick={reveal}>
@@ -456,7 +476,7 @@ export default function KanjiQuiz({ questions, onRetry, onExit, onFinish, result
       {confirmExit && (
         <ConfirmDialog
           title={t(isPractice ? 'kanjiList.practice.exitTitle' : 'words.exitTitle')}
-          text={t(isPractice ? 'kanjiList.practice.exitText' : 'words.exitText')}
+          text={exitText ?? t(isPractice ? 'kanjiList.practice.exitText' : 'words.exitText')}
           confirmLabel={t(isPractice ? 'kanjiList.practice.exit' : 'words.exit')}
           onCancel={() => setConfirmExit(false)}
           onConfirm={onExit}

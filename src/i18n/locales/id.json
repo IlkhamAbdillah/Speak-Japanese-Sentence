@@ -95,7 +95,8 @@
       "grammar": "Daftar Bunpou",
       "particles": "Daftar Partikel",
       "practice": "Latihan Berbicara",
-      "jlpt": "Simulasi JLPT"
+      "jlpt": "Simulasi JLPT",
+      "daily": "Belajar Harian"
     },
     "pickPractice": "Pilih jenis latihan, lalu tekan Pilih untuk mengaturnya.",
     "pickSection": "Pilih bagian tes, lalu tekan Pilih untuk mengaturnya."
@@ -150,7 +151,17 @@
     "testConnection": "Test Koneksi",
     "clearKey": "Hapus Key",
     "connected": "Terhubung",
-    "save": "Simpan Perubahan"
+    "save": "Simpan Perubahan",
+    "backupTitle": "Cadangan",
+    "backupHelp": "Progresmu hanya tersimpan di browser ini, di perangkat ini. Ekspor file cadangan untuk memindahkannya ke perangkat lain atau alamat situs baru, lalu impor di sana. API key tidak ikut disimpan.",
+    "backupExport": "Ekspor",
+    "backupImport": "Impor",
+    "backupExported": "File cadangan sudah diunduh.",
+    "backupImported": "Cadangan berhasil diimpor.",
+    "backupInvalid": "File ini bukan cadangan SpeakJP.",
+    "backupFailed": "Cadangan tidak bisa disimpan: penyimpanan browser penuh atau diblokir.",
+    "backupImportTitle": "Impor cadangan ini?",
+    "backupImportText": "Progres, kesalahan, riwayat, dan pilihanmu di perangkat ini diganti dengan cadangan dari {date}. API key tetap seperti sekarang."
   },
   "practice": {
     "readyTitle": "Soalnya sudah siap",
@@ -333,7 +344,8 @@
     "youWrote": "Anda menulis",
     "gaveUp": "Jawaban dilihat",
     "openSession": "Buka sesi",
-    "dismiss": "Saya sudah paham (hapus)"
+    "dismiss": "Saya sudah paham (hapus)",
+    "dailyTitle": "Belajar Harian · {date}"
   },
   "words": {
     "exitTitle": "Akhiri kuis ini?",
@@ -519,8 +531,6 @@
       "back": "Kembali ke kanji",
       "wrongWords": "Kata yang perlu diulang",
       "alsoRead": "juga dibaca {readings}",
-      "tryAgainKey": "Tekan R untuk mencoba lagi",
-      "showAnswerKey": "Tekan Enter untuk melihat jawaban",
       "counted": "Latihan bagus! {streak}/{known} menuju dikuasai · diulang {date}",
       "mastered": "Latihan bagus! {kanji} sudah dikuasai · diulang {date}",
       "early": "Latihan bagus! {kanji} belum waktunya diulang, jadi progresnya tetap · diulang {date}",
@@ -642,5 +652,33 @@
     "tests": "Tes latihan",
     "materials": "Materi belajar",
     "title": "Sumber JLPT gratis lainnya"
+  },
+  "daily": {
+    "title": "Belajar Harian",
+    "needsAI": "Bagian Bunpou dan Partikel butuh AI. Atur dulu di Pengaturan.",
+    "part": {
+      "kanji": "Kanji",
+      "grammar": "Bunpou",
+      "particles": "Partikel"
+    },
+    "questions": "{count} soal",
+    "score": "{correct}/{total} benar",
+    "start": "Mulai",
+    "continue": "Lanjut: {part}",
+    "nextPart": "Berikutnya: {part}",
+    "finish": "Selesai",
+    "nextTip": "Tekan Enter untuk lanjut",
+    "back": "Kembali ke Belajar Harian",
+    "exitText": "Progresmu tersimpan: kamu bisa lanjut dari soal ini nanti.",
+    "allDone": "Selesai untuk hari ini! Kembali besok, atau kerjakan satu ronde lagi.",
+    "newRound": "Satu ronde lagi",
+    "result": {
+      "counted": "{streak}/{known} menuju dikuasai · ulasan berikutnya {date}",
+      "mastered": "Dikuasai · ulasan berikutnya {date}",
+      "early": "Belum waktunya diulas, progres tetap · ulasan berikutnya {date}",
+      "notCounted": "{right}/{total} benar di percobaan pertama, mulai lagi · ulasan berikutnya {date}"
+    },
+    "exitRetryText": "Pengulangan ini tidak disimpan.",
+    "inProgress": "Soal {current} dari {total}"
   }
 }

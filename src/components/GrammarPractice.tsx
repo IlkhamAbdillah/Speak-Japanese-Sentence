@@ -5,6 +5,7 @@ import type { GrammarPoint } from '../services/grammar';
 import { patternLabel } from '../services/grammar';
 import type { GrammarEvaluation, GrammarPracticeQuestion } from '../services/grammarPractice';
 import { isExpectedAnswer } from '../services/grammarPractice';
+import type { QuizProgress } from '../types';
 import {
   finishRecognition,
   isSpeechRecognitionSupported,
@@ -26,7 +27,12 @@ import { GrammarSentence } from './GrammarRow';
 import { useI18n } from '../i18n';
 
 interface GrammarPracticeProps {
-  point: GrammarPoint;
+  /** Resume where a quiz was left (Daily Learning) */
+  initial?: QuizProgress;
+  /** Every time the question or an outcome changes (Daily Learning saves it to resume) */
+  onProgress?: (progress: QuizProgress) => void;
+  /** The point practised (Daily Learning: each question has its own `point`) */
+  point?: GrammarPoint;
   questions: GrammarPracticeQuestion[];
   /** Grades a said / typed answer (the AI) */
   evaluate: (q: GrammarPracticeQuestion, answer: string, spoken: boolean, previous: string[]) => Promise<GrammarEvaluation>;
@@ -43,6 +49,12 @@ interface GrammarPracticeProps {
   /** The next point's practice from the results card (also Enter) */
   onNext?: () => void;
   nextLabel?: string;
+  /** The line under it (default: Enter for the next grammar point) */
+  nextTip?: string;
+  /** The results card's exit button (default: back to the grammar point) */
+  exitLabel?: string;
+  /** The exit dialog's text (default: it won't count for this point) */
+  exitText?: string;
 }
 
 /** How long "Correct!" stays on screen before the next question, as in practice. */
@@ -77,11 +89,13 @@ function AnswerSentence({ q }: { q: GrammarPracticeQuestion }) {
  * answer can be tried again (R) or the answer shown (Enter), like the kanji reading
  * practice.
  */
-export default function GrammarPractice({ point, questions, evaluate, onRetry, onExit, onFinish, onOpenSettings, resultNote, onNext, nextLabel }: GrammarPracticeProps) {
+export default function GrammarPractice({ point, questions, evaluate, onRetry, onExit, onFinish, onOpenSettings, resultNote, onNext, nextLabel, nextTip, exitLabel, exitText, initial, onProgress }: GrammarPracticeProps) {
   const { t } = useI18n();
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(initial?.index ?? 0);
   const [phase, setPhase] = useState<Phase>('answering');
-  const [outcomes, setOutcomes] = useState<boolean[]>([]);
+  const [outcomes, setOutcomes] = useState<boolean[]>(initial?.outcomes ?? []);
+  // The first answer to each question (for Daily Learning's mistakes)
+  const [firstAnswers, setFirstAnswers] = useState<string[]>(initial?.answers ?? []);
   const [typed, setTyped] = useState('');
   const [lastAnswer, setLastAnswer] = useState('');
   // Wrong answers to the current question so far (sent to the AI for a better hint)
@@ -100,11 +114,17 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
   const finished = index >= questions.length;
   const question = questions[index] as GrammarPracticeQuestion | undefined;
 
-  const record = (correct: boolean) => {
+  const record = (correct: boolean, answer = '') => {
+    if (outcomes[index] !== undefined) return;
     setOutcomes((prev) => {
       if (prev[index] !== undefined) return prev;
       const next = [...prev];
       next[index] = correct;
+      return next;
+    });
+    setFirstAnswers((prev) => {
+      const next = [...prev];
+      next[index] = answer;
       return next;
     });
   };
@@ -132,7 +152,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
     setLastAnswer(answer);
     setCheckError(null);
     if (isExpectedAnswer(question, answer)) {
-      record(true);
+      record(true, answer);
       setPhase('correct');
       return;
     }
@@ -142,7 +162,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
       const result = await evaluate(question, answer, spoken, previous);
       if (id !== checkId.current) return;
       setEvaluation(result);
-      record(result.correct);
+      record(result.correct, answer);
       if (!result.correct) setPrevious((p) => [...p, answer]);
       setPhase(result.correct ? 'correct' : 'wrong');
     } catch (err) {
@@ -169,6 +189,15 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
 
   const submitRef = useRef(submitAnswer);
   const goNextRef = useRef(goNext);
+  // Report where the quiz stands (Daily Learning saves it to resume later)
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  });
+  useEffect(() => {
+    onProgressRef.current?.({ index, outcomes, answers: firstAnswers });
+  }, [index, outcomes, firstAnswers]);
+
   const tryAgainRef = useRef(tryAgain);
   const revealRef = useRef(reveal);
   useEffect(() => {
@@ -324,13 +353,13 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
         <div className="question-card vocab-result">
           <Trophy size={36} style={{ color: 'var(--accent-primary)' }} />
           <h2 className="card-title">{t('words.resultTitle')}</h2>
-          <p className="grammar-practice-pattern jp-text" lang="ja">{point.pattern}</p>
+          {point && <p className="grammar-practice-pattern jp-text" lang="ja">{point.pattern}</p>}
           <p className="vocab-score">{t('words.score', { correct: correctCount, total: questions.length })}</p>
           <p className="question-context">{wrong.length === 0 ? t('words.perfect') : `${percent}%`}</p>
           {resultNote && <p className="kanji-practice-note">{resultNote}</p>}
           <div className="start-card-actions">
             <button className="btn btn-secondary btn-lg" onClick={onExit}>
-              {t('grammar.practice.back')}
+              {exitLabel ?? t('grammar.practice.back')}
             </button>
             {wrong.length > 0 && (
               <button className={`btn ${onNext ? 'btn-secondary' : 'btn-primary'} btn-lg`} onClick={() => onRetry(wrong)}>
@@ -343,7 +372,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
               </button>
             )}
           </div>
-          {onNext && !pushToTalk && <p className="vocab-tip">{t('grammar.practice.nextTip')}</p>}
+          {onNext && !pushToTalk && <p className="vocab-tip">{nextTip ?? t('grammar.practice.nextTip')}</p>}
         </div>
         {wrong.length > 0 && (
           <section className="vocab-review">
@@ -395,20 +424,15 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
     </div>
   ) : phase === 'wrong' ? (
     // A wrong sentence can be tried again (with the AI's nudge) before the answer is shown
-    <div className="kanji-sheet kanji-sheet-wrong animate-in">
+    <div className="kanji-sheet kanji-sheet-wrong kanji-sheet-stacked animate-in">
       <div className="kanji-sheet-main">
         <div className="kanji-sheet-title">
           <RotateCcw size={18} /> {t('words.wrong')}
         </div>
         {evaluation?.feedback && <p className="grammar-practice-feedback">{evaluation.feedback}</p>}
         {evaluation?.hint && <p className="grammar-practice-hint"><Lightbulb size={14} /> {evaluation.hint}</p>}
-        {!pushToTalk && (
-          <div className="vocab-tip kanji-practice-keys">
-            <p>{t('kanjiList.practice.tryAgainKey')}</p>
-            <p>{t('kanjiList.practice.showAnswerKey')}</p>
-          </div>
-        )}
       </div>
+      {/* Under the AI's text, so it gets the full width (the keys are on the buttons) */}
       <div className="kanji-sheet-actions">
         <button className="btn btn-secondary" onClick={reveal}>
           <Eye size={16} /> {t('words.showAnswer')} <Kbd k="Enter" />
@@ -462,7 +486,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
       {confirmExit && (
         <ConfirmDialog
           title={t('kanjiList.practice.exitTitle')}
-          text={t('grammar.practice.exitText')}
+          text={exitText ?? t('grammar.practice.exitText')}
           confirmLabel={t('kanjiList.practice.exit')}
           onCancel={() => setConfirmExit(false)}
           onConfirm={onExit}
@@ -472,7 +496,7 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
       <div className="kanji-quiz-stage animate-in" key={index}>
         <div className="question-card grammar-quiz-card">
           <p className="question-context">
-            {t('grammar.practice.instructionSay', { pattern: patternLabel(point) })}
+            {t('grammar.practice.instructionSay', { pattern: patternLabel((question.point ?? point)!) })}
           </p>
               <p className="question-prompt grammar-practice-prompt">{question.prompt}</p>
               {/* Key words: a hint that doesn't change the score (the grammar is what's practised) */}
@@ -516,7 +540,8 @@ export default function GrammarPractice({ point, questions, evaluate, onRetry, o
                 {lastAnswer || t('common.noAnswer')}
               </div>
             )}
-            {phase !== 'revealed' && <div className="game-controls">
+            {/* Hidden once answered wrong too: the AI's text needs the room (Try again brings it back) */}
+            {phase !== 'revealed' && phase !== 'wrong' && <div className="game-controls">
               {isSpeechRecognitionSupported() ? (
                 <button
                   className={`mic-button ${pushToTalk ? 'push-to-talk' : ''} ${listening ? 'listening' : ''} ${ptt.cancelArmed ? 'cancel-armed' : ''} ${phase === 'correct' ? 'correct' : ''}`}

@@ -95,7 +95,8 @@
       "grammar": "Bunpou List",
       "particles": "Particle List",
       "practice": "Speaking Practice",
-      "jlpt": "JLPT Mock Test"
+      "jlpt": "JLPT Mock Test",
+      "daily": "Daily Learning"
     },
     "pickPractice": "Pick a practice type, then press Select to set it up.",
     "pickSection": "Pick a test section, then press Select to set it up."
@@ -150,7 +151,17 @@
     "testConnection": "Test Connection",
     "clearKey": "Clear Key",
     "connected": "Connected",
-    "save": "Save Changes"
+    "save": "Save Changes",
+    "backupTitle": "Backup",
+    "backupHelp": "Your progress is saved only in this browser on this device. Export a backup file to move it to another device or a new site address, then import it there. Your API key is not included.",
+    "backupExport": "Export",
+    "backupImport": "Import",
+    "backupExported": "Backup file downloaded.",
+    "backupImported": "Backup imported.",
+    "backupInvalid": "This file is not a SpeakJP backup.",
+    "backupFailed": "The backup could not be saved: the browser storage is full or blocked.",
+    "backupImportTitle": "Import this backup?",
+    "backupImportText": "Your progress, mistakes, history and options on this device are replaced with the backup from {date}. Your API key stays as it is."
   },
   "practice": {
     "readyTitle": "Your questions are ready",
@@ -333,7 +344,8 @@
     "youWrote": "You wrote",
     "gaveUp": "Answer shown",
     "openSession": "Open the session",
-    "dismiss": "I know this now (remove)"
+    "dismiss": "I know this now (remove)",
+    "dailyTitle": "Daily Learning · {date}"
   },
   "words": {
     "exitTitle": "End this quiz?",
@@ -519,8 +531,6 @@
       "back": "Back to the kanji",
       "wrongWords": "Words to review",
       "alsoRead": "also read {readings}",
-      "tryAgainKey": "Press R to try again",
-      "showAnswerKey": "Press Enter to show the answer",
       "counted": "Good practice! {streak}/{known} towards mastered · next review {date}",
       "mastered": "Good practice! {kanji} is mastered · next review {date}",
       "early": "Good practice! {kanji} isn't due for review yet, so its progress stays the same · next review {date}",
@@ -642,5 +652,33 @@
     "tests": "Practice tests",
     "materials": "Study material",
     "title": "More free JLPT resources"
+  },
+  "daily": {
+    "title": "Daily Learning",
+    "needsAI": "The Bunpou and Particle parts need an AI. Set one up in Settings.",
+    "part": {
+      "kanji": "Kanji",
+      "grammar": "Bunpou",
+      "particles": "Particles"
+    },
+    "questions": "{count} questions",
+    "score": "{correct}/{total} right",
+    "start": "Start",
+    "continue": "Continue: {part}",
+    "nextPart": "Next: {part}",
+    "finish": "Finish",
+    "nextTip": "Press Enter to carry on",
+    "back": "Back to Daily Learning",
+    "exitText": "Your progress is saved: you can continue from this question later.",
+    "allDone": "Done for today! Come back tomorrow, or do one more round.",
+    "newRound": "One more round",
+    "result": {
+      "counted": "{streak}/{known} towards mastered · next review {date}",
+      "mastered": "Mastered · next review {date}",
+      "early": "Not due yet, progress stays · next review {date}",
+      "notCounted": "{right}/{total} right on the first try, starts again · next review {date}"
+    },
+    "exitRetryText": "This retry isn't saved.",
+    "inProgress": "Question {current} of {total}"
   }
 }

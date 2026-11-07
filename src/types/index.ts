@@ -466,6 +466,74 @@ export const DEFAULT_SETTINGS: UserSettings = {
 
 // ─── Kanji progress ─────────────────────────────────────
 /** What the learner has done with one kanji: its reading practices on the Kanji page (and old mock-test sessions). */
+// ─── Daily Learning ─────────────────────────────────────
+
+export const DAILY_PARTS = ['kanji', 'grammar', 'particles'] as const;
+export type DailyPart = (typeof DAILY_PARTS)[number];
+
+/** Today's Daily Learning (localStorage.sjp_daily): what it asks, and the parts finished */
+export interface DailyPlan {
+  /** Local date, YYYY-MM-DD */
+  date: string;
+  /** The kanji practised today (their reading practice) */
+  kanji: string[];
+  /** The grammar points practised today, as `level:pattern` (grammarKey) */
+  grammar: string[];
+  /** Level of the particle sentences */
+  particleLevel: JLPTLevel;
+  /** Finished parts (their first run) with the score */
+  done: Partial<Record<DailyPart, { correct: number; total: number }>>;
+  /** The first (counted) run of each part started today, so it resumes where it was left */
+  runs?: Partial<Record<DailyPart, DailyRun>>;
+}
+
+/** Where a part's quiz stands: shared by the quiz components to resume (Daily Learning) */
+export interface QuizProgress {
+  /** The question on screen (= questions.length when finished) */
+  index: number;
+  /** Right on the first try without Show answer, per answered question */
+  outcomes: boolean[];
+  /** The first answer given to each question ('' = none, e.g. Show answer straight away) */
+  answers: string[];
+}
+
+export interface DailyRun extends QuizProgress {
+  /** The questions as saved (see DailyPage: kanji as kanji + word, grammar with the point's key) */
+  questions: unknown[];
+  /** Set once finished: what it did to each item's progress (the results card) */
+  results?: { items: DailyItemResult[]; at: number };
+}
+
+/** What a finished part did to one kanji's / grammar point's progress */
+export interface DailyItemResult {
+  label: string;
+  right: number;
+  total: number;
+  passed: boolean;
+  /** Good, but done before it was due: nothing changed */
+  early: boolean;
+  after: { streak: number; dueAt: number };
+}
+
+/** A question answered wrong in Daily Learning (localStorage.sjp_daily_mistakes; the Mistakes page groups them by day) */
+export interface DailyMistake {
+  /** date:part:question */
+  key: string;
+  /** The plan's date, YYYY-MM-DD */
+  date: string;
+  part: DailyPart;
+  at: number;
+  level?: JLPTLevel;
+  /** Kanji: the word; grammar: the sentence to say; particles: the sentence with its particles in [ ] */
+  prompt: string;
+  /** What was answered first ('' = none) */
+  answer: string;
+  /** Kanji: the reading; grammar: the expected Japanese; particles: the right particles */
+  correct: string;
+  /** Kanji: the meaning; grammar: the pattern; particles: the translation */
+  detail?: string;
+}
+
 export interface KanjiProgress {
   /** Curriculum level the kanji was practised at */
   level: JLPTLevel;

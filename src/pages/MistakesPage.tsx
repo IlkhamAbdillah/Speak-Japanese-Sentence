@@ -6,7 +6,9 @@ import type { MessageKey } from '../i18n';
 import { languageMeta, useI18n } from '../i18n';
 import type { ConversationMistake, MistakeGroup, MistakeKind, QuestionMistake } from '../services/mistakes';
 import { collectMistakes, practiceQuestions, MISTAKE_PRACTICE_LIMIT } from '../services/mistakes';
-import { loadDismissedMistakes, loadSessions, saveDismissedMistakes } from '../services/storage';
+import { loadDailyMistakes, loadDismissedMistakes, loadSessions, saveDailyMistakes, saveDismissedMistakes } from '../services/storage';
+import type { DailyMistake, DailyPart } from '../types';
+import { DAILY_PARTS } from '../types';
 
 interface MistakesPageProps {
   /** Practise a group's questions again (no AI generation call) */
@@ -34,13 +36,32 @@ export default function MistakesPage({ onPractice }: MistakesPageProps) {
   const [sessions] = useState(loadSessions);
   const { groups, conversation } = useMemo(() => collectMistakes(sessions, dismissed), [sessions, dismissed]);
 
+  // Daily Learning: one list per day, newest first (user-requested: there may be many)
+  const [dailyMistakes, setDailyMistakes] = useState(loadDailyMistakes);
+  const dailyDays = useMemo(() => {
+    const days = new Map<string, DailyMistake[]>();
+    for (const m of dailyMistakes) days.set(m.date, [...(days.get(m.date) ?? []), m]);
+    return [...days.entries()]
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, items]) => ({
+        date,
+        items: items.sort((a, b) => DAILY_PARTS.indexOf(a.part) - DAILY_PARTS.indexOf(b.part) || a.at - b.at),
+      }));
+  }, [dailyMistakes]);
+  const dismissDaily = (key: string) => {
+    const next = loadDailyMistakes().filter((m) => m.key !== key);
+    saveDailyMistakes(next);
+    setDailyMistakes(next);
+  };
+  const formatDay = useFormatDay();
+
   const dismiss = (key: string) => {
     const next = new Set(dismissed).add(key);
     saveDismissedMistakes(next);
     setDismissed(next);
   };
 
-  const empty = groups.length === 0 && conversation.length === 0;
+  const empty = groups.length === 0 && conversation.length === 0 && dailyDays.length === 0;
 
   return (
     <div className="app-main mistakes-page">
@@ -58,6 +79,17 @@ export default function MistakesPage({ onPractice }: MistakesPageProps) {
         </div>
       ) : (
         <>
+          {dailyDays.map((day) => (
+            <MistakeSection
+              key={day.date}
+              title={t('mistakes.dailyTitle', { date: formatDay(day.date) })}
+              count={day.items.length}
+              rows={day.items.map((item) => (
+                <DailyMistakeRow key={item.key} item={item} onDismiss={() => dismissDaily(item.key)} />
+              ))}
+            />
+          ))}
+
           {groups.map((group) => (
             <MistakeSection
               key={group.id}
@@ -131,6 +163,60 @@ function useFormatDate() {
   const { lang } = useI18n();
   return (ts: number) =>
     new Date(ts).toLocaleDateString(languageMeta(lang).locale, { month: 'short', day: 'numeric' });
+}
+
+/** A plan's date (YYYY-MM-DD) as "Sat, 7 Nov" */
+function useFormatDay() {
+  const { lang } = useI18n();
+  return (date: string) =>
+    new Date(`${date}T00:00`).toLocaleDateString(languageMeta(lang).locale, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+const DAILY_PART_LABEL: Record<DailyPart, MessageKey> = {
+  kanji: 'daily.part.kanji',
+  grammar: 'daily.part.grammar',
+  particles: 'daily.part.particles',
+};
+
+/** A Daily Learning mistake: no session to open, only remove (✓) */
+function DailyMistakeRow({ item, onDismiss }: { item: DailyMistake; onDismiss: () => void }) {
+  const { t } = useI18n();
+  const japanesePrompt = item.part !== 'grammar';
+  return (
+    <div className="mistake-row">
+      <div className="mistake-main">
+        <div className={`mistake-prompt ${japanesePrompt ? 'jp-text' : ''}`} lang={japanesePrompt ? 'ja' : undefined}>
+          {item.part === 'particles'
+            ? item.prompt.split(/(\[[^\]]*\])/).map((piece, i) =>
+              piece.startsWith('[') ? <span key={i} className="mistake-blank">（　）</span> : piece)
+            : item.prompt}
+        </div>
+        <dl className="mistake-answers">
+          <dt>{t('recap.yourAnswer')}</dt>
+          <dd className="mistake-wrong jp-text">{item.answer || t('common.noAnswer')}</dd>
+          <dt>{t('mistakes.correct')}</dt>
+          <dd className="mistake-right jp-text">
+            {item.correct}
+            {item.detail && <span className="mistake-meaning"> · {item.detail}</span>}
+          </dd>
+        </dl>
+        <div className="mistake-meta">
+          {item.level && <span className="badge badge-accent">{item.level}</span>}
+          <span>{t(DAILY_PART_LABEL[item.part])}</span>
+        </div>
+      </div>
+      <div className="mistake-actions">
+        <button
+          className="btn btn-ghost btn-sm btn-icon"
+          onClick={onDismiss}
+          title={t('mistakes.dismiss')}
+          aria-label={t('mistakes.dismiss')}
+        >
+          <Check size={16} />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function RowActions({ sessionId, onDismiss }: { sessionId: string; onDismiss: () => void }) {

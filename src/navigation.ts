@@ -30,6 +30,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'practice',
     label: 'header.practice',
     items: [
+      { path: '/daily', glyph: '日', label: 'home.menu.daily' },
       { path: '/practice', glyph: '話', label: 'home.menu.practice' },
       { path: '/jlpt', glyph: '試', label: 'home.menu.jlpt' },
     ],
@@ -37,3 +38,6 @@ export const NAV_GROUPS: NavGroup[] = [
 ];
 
 export const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
+
+/** Daily Learning: a wide card above the others on Home */
+export const DAILY_ITEM = NAV_ITEMS.find((item) => item.path === '/daily')!;
